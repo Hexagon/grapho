@@ -367,7 +367,7 @@
 		 * @param {Array} dataset The data datasets
 		 */
 		function RenderLineArea (graph, dataset) {
-			var i, point, skip_i, lstart, lstop,
+			var i, point, skip_i, lstart, lstop, comp,
 				
 				data	= dataset.data,
 				margin 	= dataset.lineWidth / 2,
@@ -383,12 +383,12 @@
 				inner_height 	= graph.h - margin,
 				inner_width 	= graph.w - margin,
 
-				px, py, cy, npx, npy, fpx,
+				px, py, cy, npx, npy, fpx, x, y, cpx, cpy, nx, ny, ncpx, ncpy,
 
 				// Shortcuts
 				ctx = graph.ctx;	
 
-			if (dataset.type === 'area' || dataset.type === 'line') ctx.beginPath();
+			ctx.beginPath();
 
 			if (xAxis.continous) {
 				lstart = xAxis.minVal;
@@ -405,26 +405,41 @@
 
 				// We might need to skip some points that are not in the dataset
 				if( point !== undefined && (point[0] === comp)) {
-					point = point[1];
 
-					px = round(margin + (i * (inner_width / (x_stops))) + (inner_width/x_stops/2));	// Pixel x
-					py = round(margin + inner_height - (point - min) / (max - min) * inner_height); // Pixel y
-					npx = ( data[skip_i + 1] ) ? round(margin + (i + data[skip_i+1][0]-data[skip_i][0]) * (inner_width / (x_stops)) + (inner_width/x_stops/2)) : 0; // Next pixel x
-					npy = ( data[skip_i + 1] ) ? round(margin + inner_height - (data[skip_i + 1][1] - min) / (max - min) * inner_height) : 0; // Next pixel y
+					if (data.continous){
+						x = point[0]; 
+						nx = data.continous ? (data[skip_i+1] ? data[skip_i+1][0] : 0) : i; 
+						cpx = x / lstop; // Current pixel percentage x
+						cnpx = nx / lstop ; 
+					} else {
+						x = i; 
+						nx = i+1;
+						cpx = x/lstop; // Current pixel percentage x
+						cnpx = nx/lstop; 
+					}
+
+					y = point[1];
+					ny = data[skip_i+1] ? data[skip_i+1][1] : 0;
+					cpy = (y - min) / (max - min);	// Current pixel percentage y
+					cnpy = (ny - min) / (max - min);	// Current pixel percentage y
+
+					px = round(margin + cpx * inner_width + (inner_width/x_stops/2));	// Pixel x
+					py = round(margin + inner_height - cpy * inner_height); // Pixel y
+
+					npx = ( data[skip_i + 1] ) ? round(margin + cnpx * inner_width + (inner_width/x_stops/2)) : 0; // Next pixel x
+					npy = ( data[skip_i + 1] ) ? round(margin + inner_height - cnpy * inner_height) : 0; // Next pixel y
 
 					// Keep track of first pixel, for later use by area charts
-					if( dataset.type !== 'scatter') {
-						if ( skip_i === 0 ) fpx = px;
-						if (skip_i === 0) {
-							ctx.moveTo(px, py);
-						} else if (skip_i < data.length - 2 && dataset.lineSmooth) {
-							ctx.quadraticCurveTo(px, py, (px + npx) / 2, (py + npy) / 2);
-							//ctx.quadraticCurveTo(px, py, npx, npy);
-						} else if (skip_i < data.length - 1 && dataset.lineSmooth) {
-							ctx.quadraticCurveTo(px, py, npx, npy);
-						} else {
-							ctx.lineTo(px, py);
-						}
+					if ( skip_i === 0 ) fpx = px;
+					if (skip_i === 0) {
+						ctx.moveTo(px, py);
+					} else if (skip_i < data.length - 2 && dataset.lineSmooth) {
+						ctx.quadraticCurveTo(px, py, (px + npx) / 2, (py + npy) / 2);
+						//ctx.quadraticCurveTo(px, py, npx, npy);
+					} else if (skip_i < data.length - 1 && dataset.lineSmooth) {
+						ctx.quadraticCurveTo(px, py, npx, npy);
+					} else {
+						ctx.lineTo(px, py);
 					}
 
 					skip_i++;
@@ -461,7 +476,7 @@
 		 * @param {Array} dataset The data datasets
 		 */
 		function RenderScatter (graph, dataset) {
-			var i, point, skip_i, lstart, lstop,
+			var i, point, skip_i, lstart, lstop, comp,
 				
 				data	= dataset.data,
 				margin 	= dataset.lineWidth / 2,
@@ -477,7 +492,7 @@
 				inner_height 	= graph.h - margin,
 				inner_width 	= graph.w - margin,
 
-				px, py, cy, npx, npy, fpx,
+				x, y, px, py, cy, cpx, cpy,
 
 				// Shortcuts
 				ctx = graph.ctx;	
@@ -491,26 +506,35 @@
 			}
 			
 			skip_i = xAxis.minVal;
-			for(i=lstart;i<lstop;i++) {
+			for(i=lstart;i<lstop;i=i+(xAxis.continous?xAxis.step:1)) {
+
 				point = data[skip_i];
 				comp = (xAxis.continous) ? i : xAxis.values[i];
 
 				// We might need to skip some points that are not in the dataset
-				if( point !== undefined && (point[0] === comp)) {
-					point = point[1];
+				if( point !== undefined && ((point[0] === comp) || xAxis.continous)) {
 
-					px = round(margin + (i * (inner_width / (x_stops))) + (inner_width/x_stops/2));	// Pixel x
-					py = round(margin + inner_height - (point - min) / (max - min) * inner_height); // Pixel y
+					if (data.continous){
+						x = point[0]; 
+						cpx = (x - xAxis.minVal)/ (xAxis.maxVal - xAxis.minVal); // Current pixel percentage x
+					} else {
+						x = i; 
+						cpx = x/lstop; // Current pixel percentage x
+					}
+
+					y = point[1];
+					cpy = (y - min) / (max - min);	// Current pixel percentage y
+
+					px = round(margin + cpx * inner_width + (inner_width/x_stops/2));	// Pixel x
+					py = round(margin + inner_height - cpy * inner_height); // Pixel y
 
 					ctx.beginPath();
 			     	ctx.arc(px, py, dataset.dotWidth, 0, 2 * Math.PI, false);
 			     	ctx.fillStyle = dataset.strokeStyle;
 			     	ctx.fill();
 
-					skip_i++;
-
-				}
-
+			     	skip_i++;
+			    }
 			}
 
 		}
@@ -536,11 +560,12 @@
 				x_stops	= xAxis.continous ? Math.ceil((xAxis.maxVal - xAxis.minVal) / xAxis.step + 1) : xAxis.values.length,
 				
 				inner_height 	= graph.h - margin,
-				base_width 		= ((graph.w - margin) / (x_stops)), // This should be divided with the minimum distance between steps
+				inner_width 	= (graph.w - margin),
+				base_width 		= (inner_width / (x_stops)), // This should be divided with the minimum distance between steps
 				bar_spacing 	= base_width - (base_width * dataset.barWidthPrc / 100),
 				bar_width	 	= base_width - bar_spacing,
 
-				px, bt, bb, py, bh;
+				px, bt, bb, py, bh, x, y;
 
 			graph.ctx.fillStyle = dataset.fillStyle;
 
@@ -551,7 +576,7 @@
 				lstart = 0;
 				lstop = xAxis.values.length;
 			}
-			
+
 			skip_i = xAxis.minVal;
 			for(i=lstart;i<lstop;i++) {
 				point = data[skip_i];
@@ -559,11 +584,12 @@
 
 				// We might need to skip some points that are not in the dataset
 				if( point !== undefined && (point[0] === comp)) {
-					point = point[1];
+					y = point[1];
+					x = point[0];
 
-					px = round(margin + bar_spacing / 2 + (base_width * i));
-					bt = (point <= center) ? center : point; // Bar top
-					bb = (point > center) ? center : point; // Bar bottom
+					px = round(margin + bar_spacing / 2 + (inner_width * (x/xAxis.maxVal)));
+					bt = (y <= center) ? center : y; // Bar top
+					bb = (y > center) ? center : y; // Bar bottom
 					py = round(margin + inner_height - (bt - min) / (max - min) * inner_height);
 					bh = round(margin + inner_height - (bb - min) / (max - min) * inner_height) - py;
 
