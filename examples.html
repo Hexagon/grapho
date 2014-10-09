@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>Grapho Examples</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <!-- Example styles -->
+        <style>
+            html, body          { background-color: #252420; color:#CACACA; font-size: 12px; font-family: 'Droid Sans'; padding:0px; margin: 0px; }
+            body                { max-width: 1280px; margin-left: auto; margin-right: auto; background-color: #151410; padding-left:25px; padding-right: 25px; }
+            #header             { width: 100%; border-bottom: 1px dotted #666958; padding-top:15px; padding-bottom: 20px; margin-bottom:25px;}
+            #header_right       { float: right; margin-top:10px;}
+            .header             { font-size: 27px; }
+            section             { margin-bottom: 30px; }
+            article             { float:left; width:calc( 50% - 10px ); }
+            article:first-child { margin-right: 20px; }
+            a                   { text-decoration:none; }
+            a:hover             { text-decoration:underline; }
+            .primary, .primary a { color: #E6DB74; }
+            .secondary, .secondary a { color: #E6DBCA; }
+            .tertiary, .tertiary a { color: #CACACA; }
+            .bg-primary         { background-color: #766B5A; }
+            .bg-secondary       { background-color: #665B4A; }
+            .bg-tertiary        { background-color: #353430; }
+            .container          { float:left; padding:0px; margin:0px; margin-bottom: 30px; }
+            .box                { float:left; border-radius: 3px; padding:5px; margin:0px;}
+            .w-100              { width: 100%;}
+            .w-50               { width: 50%;}
+            .bw-100             { width: calc( 100% - 10px );} 
+            .bw-50              { width: calc( 50% - 20px );}
+            .h-1                { height: 300px; } 
+            .h-100              { height: 100%; }
+            .clear              { clear: both; }
+            code                { font-size: 12px;}
+        </style>
+
+        <!-- Only used for bling bling, not needed -->
+        <script src="http://cdnjs.cloudflare.com/ajax/libs/rainbow/1.2.0/js/rainbow.min.js"></script>
+        <script src="http://cdnjs.cloudflare.com/ajax/libs/rainbow/1.2.0/js/language/generic.js"></script>
+        <script src="http://cdnjs.cloudflare.com/ajax/libs/rainbow/1.2.0/js/language/javascript.js"></script>
+        <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/rainbow/1.2.0/themes/twilight.css">
+
+        <!-- Grapho include -->
+        <script src="grapho.js"></script>
+
+    </head>
+    <body>
+        <div id="header">
+            <span class="header primary">grapho</span>
+            <span class="header secondary">examples</span>
+            <div id="header_right">
+                <a href="https://www.github.com/hexagon/grapho" class="tertiary">github.com/hexagon/grapho</a>
+            </div>
+        </div>
+
+        <section>
+            <article>
+                <h3>
+                    <span class="secondary">Example 1 - </span>
+                    <span class="tertiary">The simplest of line charts</span>
+                </h3>
+                <div class="container w-100 h-1">
+
+                    <!-- Example 1 - Start -->
+                    <div id="example-1" class="box bw-100 h-100 bg-tertiary">
+
+                        <!-- Example-1 javascript -->
+                        <script>
+
+                            // Create grapho object, pass a parameter pointing to the destination element
+                            var graphoObj1 = new Grapho({ place: 'example-1' });
+
+                            // Add some data, a simple array of numbers is enough
+                            graphoObj1.addDataset([7, 6, 5, 4, 4, 4, 4, 7, 7, 7, 5, 5, 4, 3, 3, 4, 5, 6, 7, 7, 2, 8, 5, 5, 4, 2]);
+
+                        </script>
+
+                    </div>
+                    <!-- Example 1 - End -->
+                </div>
+            </article>
+            <article>
+                <h3><span class="tertiary">Source code</span></h3>
+
+                <pre><code data-language="javascript">// Create grapho object, pass a parameter pointing to the destination element
+var graphoObj = new Grapho({ place: 'example-1' });
+
+// Add some data, a simple array of numbers is enough
+graphoObj.addDataset(
+    [7, 6, 5, 4, 4, 4, 4, 7, 7, 7, 5, 5, 4, 3, 3, 4, 5, 6, 7, 7, 2, 8, 5, 5, 4, 2]
+);</code></pre>
+
+            </article>
+        </section>
+
+        <section>
+            <article>
+                <h3>
+                    <span class="secondary">Example 2 - </span>
+                    <span class="tertiary">Linechart without smoothing</span>
+                </h3>
+                <div class="container w-100 h-1">
+
+
+                    <!-- Example 2 - Start -->
+                    <div id="example-2" class="box bw-100 h-100 bg-tertiary">
+
+                        <!-- Example-2 javascript -->
+                        <script>
+
+                            // Create grapho object, pass a parameter pointing to the destination element
+                            var graphoObj2 = new Grapho( { place: 'example-2' } );
+
+                            // Lines are smoothed by default, to disable that, we need to pass an object 
+                            // with properties to addDataset.
+                            // While we're at it, we att some nice data-dots on the line
+                            graphoObj2.addDataset({
+                                lineSmooth: false,
+                                lineDots: true,
+                                data: [7, 6, 5, 4, 4, 4, 4, 7, 7, 7, 5, 5, 4, 3, 3, 4, 5, 6, 7, 7, 2, 8, 5, 5, 4, 2]
+                            });
+
+                        </script>
+
+                    </div>
+                    <!-- Example 2 - End -->
+                </div>
+            </article>
+            <article>
+                <h3><span class="tertiary">Source code</span></h3>
+                <pre><code data-language="javascript">var graphoObj = new Grapho( { place: 'example-2' } );
+
+// Lines are smoothed by default, to disable that, we need to pass an object 
+// with properties to addDataset.
+// While we're at it, we att some nice data-dots on the line
+graphoObj.addDataset({
+    lineSmooth: false,
+    lineDots: true,
+    data: [7, 6, 5, 4, 4, 4, 4, 7, 7, 7, 5, 5, 4, 3, 3, 4, 5, 6, 7, 7, 2]
+});</code></pre>
+            </article>
+        </section>
+
+       <section>
+            <article>
+                <h3>
+                    <span class="secondary">Example 3 - </span>
+                    <span class="tertiary">Areachart</span>
+                </h3>
+                <div class="container w-100 h-1">
+
+                    <!-- Example 3 - Start -->
+                    <div id="example-3" class="box bw-100 h-100 bg-tertiary">
+
+                        <!-- Example-3 javascript -->
+                        <script>
+
+                            // Create grapho object, pass a parameter pointing to the destination element
+                            var graphoObj3 = new Grapho( { place: 'example-3' } );
+
+                            // The default type is area, if you want to change that, you'll have to specify type, possible values are 
+                            //    line, scatter, area, bar
+                            graphoObj3.addDataset({
+                                type: 'area',
+                                data: [7, 6, 5, 4, 4, 4, 4, 7, 7, 7, 5, 5, 4, 3, 3, 4, 5, 6, 7, 7, 2, 8, 5, 5, 4, 2]
+                            });
+
+                        </script>
+
+                    </div>
+                    <!-- Example 3 - End -->
+                </div>
+            </article>
+            <article>
+                <h3><span class="tertiary">Source code</span></h3>
+                <pre><code data-language="javascript">// Create grapho object, pass a parameter pointing to the destination element
+var graphoObj = new Grapho( { place: 'example-3' } );
+
+// The default type is area, if you want to change that, 
+// you'll have to specify type, possible values are 
+// line, scatter, area, bar
+graphoObj.addDataset({
+    type: 'area',
+    data: [7, 6, 5, 4, 4, 4, 4, 7, 7, 7, 5, 5, 4, 3, 3, 4, 5, 6, 7, 7, 2, 8]
+});</code></pre>
+            </article>
+        </section>
+
+       <section>
+            <article>
+                <h3>
+                    <span class="secondary">Example 4 - </span>
+                    <span class="tertiary">Bar chart</span>
+                </h3>
+                <div class="container w-100 h-1">
+
+                    <!-- Example 4 - Start -->
+                    <div id="example-4" class="box bw-100 h-100 bg-tertiary">
+
+                        <!-- Example-4 javascript -->
+                        <script>
+
+                            // Create grapho object, pass a parameter pointing to the destination element
+                            var graphoObj4 = new Grapho( { place: 'example-4' } );
+
+                            // Now we'll introduce fillstyle
+                            // fillStyle takes either an string of hex color, ex. '#FF0000'
+                            // or a 'rgba(255,0,0,0.5)' where the first three parameters are
+                            // reg 0-255, green 0-255, blue 0-255, and finally alpha, 0.0-1.0
+                            graphoObj4.addDataset({
+                                type: 'bar',
+                                fillStyle: 'rgba(0,255,255,0.3)',
+                                data: [7, 6, 5, 4, 4, 4, 4, 7, 7, 7, 5, 5, 4, 3, 3, 4, 5, 6, 7, 7]
+                            });
+
+                        </script>
+
+                    </div>
+                    <!-- Example 4 - End -->
+                </div>
+            </article>
+            <article>
+                <h3><span class="tertiary">Source code</span></h3>
+                <pre><code data-language="javascript">// Create grapho object, pass a parameter pointing to the destination element
+var graphoObj = new Grapho( { place: 'example-4' } );
+
+// Now we'll introduce fillstyle
+// fillStyle takes either an string of hex color, ex. '#FF0000'
+// or a 'rgba(255,0,0,0.5)' where the first three parameters are
+// reg 0-255, green 0-255, blue 0-255, and finally alpha, 0.0-1.0
+graphoObj.addDataset({
+    type: 'bar',
+    fillStyle: 'rgba(0,255,0,0.1)',
+    data: [7, 6, 5, 4, 4, 4, 4, 7, 7, 7, 5, 5, 4, 3, 3, 4, 5, 6, 7, 7]
+});</code></pre>
+            </article>
+        </section>
+
+       <section>
+            <article>
+                <h3>
+                    <span class="secondary">Example 5 - </span>
+                    <span class="tertiary">Mixing chart types</span>
+                </h3>
+                <div class="container w-100 h-1">
+
+                    <!-- Example 5 - Start -->
+                    <div id="example-5" class="box bw-100 h-100 bg-tertiary">
+
+                        <!-- Example-5 javascript -->
+                        <script>
+
+                            // Create grapho object, pass a parameter pointing to the destination element
+                            var graphoObj5 = new Grapho( { place: 'example-5' } );
+
+                            // Lets reuse the area chart from a previous example as the first data source
+                            graphoObj5.addDataset({
+                                type: 'area',
+                                data: [7, 6, 5, 4, 4, 4, 4, 7, 7, 7, 5, 5, 4, 3, 3, 4, 5, 6, 7, 7, 2, 8, 5, 5, 4, 2]
+                            });
+
+                            // Then we add the bar chart from the previous example, as this is transparent, the bars
+                            // below will still be visible
+                            graphoObj5.addDataset({
+                                type: 'bar',
+                                fillStyle: 'rgba(0,255,255,0.3)',
+                                data: [7, 3, 5, 4, 6, 5, 4, 1, 4, 2, 3, 5, 1, 3, 3, 4, 5, 6, 7, 7]
+                            });
+
+                            // On top of all, we add a red smoothed line chart with custom dots
+                            graphoObj5.addDataset({
+                                type: 'line',
+                                strokeStyle: 'rgba(255,127,127,0.7)',
+                                lineSmooth: false,
+                                lineDots: true,
+                                dotSize: 5,
+                                data: [4,9,8,4,3,4,4,5,4,3,6,7,5,3,4,5,4,5,6,4,2,3,7,2,4]
+                            });
+                        </script>
+
+                    </div>
+                    <!-- Example 4 - End -->
+                </div>
+            </article>
+            <article>
+                <h3><span class="tertiary">Source code</span></h3>
+                <pre><code data-language="javascript">var graphoObj5 = new Grapho( { place: 'example-5' } );
+
+// Lets reuse the area chart from a previous example as the first data source
+graphoObj5.addDataset({
+    type: 'area',
+    data: [7, 6, 5, 4, 4, 4, 4, 7, 7, 7, 5, 5, 4, 3, 3, 4, 5, 6, 7, 7, 2, 8, 5, 5, 4, 2]
+});
+
+// Then we add the bar chart from the previous example. 
+// As this is transparent, the bars below will still be visible
+graphoObj5.addDataset({
+    type: 'bar',
+    fillStyle: 'rgba(0,255,255,0.3)',
+    data: [7, 3, 5, 4, 6, 5, 4, 1, 4, 2, 3, 5, 1, 3, 3, 4, 5, 6, 7, 7]
+});
+
+// On top of all, we add a red smoothed line chart with custom dots
+graphoObj5.addDataset({
+    type: 'line',
+    strokeStyle: 'rgba(255,127,127,0.7)',
+    lineSmooth: false,
+    lineDots: true,
+    dotSize: 5,
+    data: [4,9,8,4,3,4,4,5,4,3,6,7,5,3,4,5,4,5,6,4,2,3,7,2,4]
+});</code></pre>
+            </article>
+        </section>
+
+        <div class="clear"><!-- --></div>
+    </body>
+</html>
