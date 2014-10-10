@@ -1,4 +1,6 @@
 (function (self, factory) {
+	'use strict';
+
 	if (typeof define === 'function' && define.amd) {
 		// AMD. Register as an anonymous module.
 		define([], factory);
@@ -6,21 +8,23 @@
 		// Attaches to the current ctx.
 		self.Grapho = factory();
 	}
-}(this, function () {
+}(this, function () { 
+	'use strict';
+
 	// A collection of all instantiated Grapho's
 	var graphos = [],
 		undef,
 		round = Math.round,
 		toString = Object.prototype.toString,
 		isArray = Array.isArray || function (it) {
-			return toString.call(it) == '[object Array]';
+			return toString.call(it) === '[object Array]';
 		},
-		prot = Grapho.prototype;
+		prot;
 
 	function isUntypedObject (it) {
 		var key;
 
-		if (!it || it.nodeType || it == it.window || toString.call(it) !== '[object Object]') {
+		if (!it || it.nodeType || it === it.window || toString.call(it) !== '[object Object]') {
 			return false;
 		}
 
@@ -36,14 +40,14 @@
 		// Own properties are enumerated firstly, so to speed up, if last one is own, then all properties are own.
 		
 		// Why empty block? 
-		// for (key in it) {}
+		for (key in it) {}
 
-		return key === undef || it.hasOwnProperty(key);
+		return key === undef || it.hasOwnProperty(key); // jshint ignore:line
 	}
 
 	function unique (ain) {
 	   var u = {}, a = [];
-	   for(var i = 0, l = ain.length; i < l; ++i){
+	   for (var i = 0, l = ain.length; i < l; ++i) {
 	      if(u.hasOwnProperty(ain[i])) {
 	         continue;
 	      }
@@ -117,6 +121,8 @@
 		this.done = true;
 	}
 
+	prot  = Grapho.prototype;
+
 	/**
 	 * Check that y axis exists, if not, initiate it
 	 * @param  {Integer} index Axis index, starting from 1
@@ -145,7 +151,6 @@
 				this.yAxises[index] = defaults;
 
 			} else {
-
 				// Merge current with new settings, if passed
 				if (typeof props === 'object') {
 
@@ -156,7 +161,6 @@
 			}
 		}
 
-
 		// Chain
 		return this;
 	};
@@ -164,10 +168,9 @@
 	/**
 	 * Check that x axis exists, if not, initiate it
 	 * @param  {Integer} index Axis index, starting from 1
-	 * @return {Object}                `this`
+	 * @return {Object} `this`
 	 */
 	prot.initXAxis = function (props) {
-
 		var defaults = {
 				min: 'auto',
 				max: 'auto',
@@ -179,26 +182,16 @@
 			},
 			index = props.axis;
 
-		if (typeof index === 'number' && isFinite(index) && index % 1 ===0) {
-			if (this.xAxises[index] === undef) {
-
-				// Merge properties, if passed
-				if (typeof props === 'object') {
+		if (typeof index === 'number' && isFinite(index) && index % 1 === 0) {
+			if (typeof props === 'object') {
+				if (this.xAxises[index] === undef) {
 					defaults = merge(defaults, props);
-				}
-
-				this.xAxises[index] = defaults;
-
-			} else {
-
-				// Merge current with new settings, if passed
-				if (typeof props === 'object') {
-
+				} else {
 					defaults = merge(this.xAxises[index], props);
-					this.xAxises[index] = defaults;
-
 				}
 			}
+
+			this.xAxises[index] = defaults;
 		}
 		
 		// ToDo: Merge values
@@ -259,7 +252,9 @@
 		this.pushDataset(defaults);
 
 		// Redraw, but only if the object is fully initiated
-		if (this.done === true) this.redraw();
+		if (this.done === true) {
+			this.redraw();
+		}
 
 		// Chain
 		return this;
@@ -271,23 +266,23 @@
 	 * @return {Object}                `this`
 	 */
 	prot.pushDataset = function (dataset) {
-
 		var yAxis = this.yAxises[dataset.y.axis],
 			xAxis = this.xAxises[dataset.x.axis],
 			i,
-			data,
+			step,
+			datasetLen = dataset.data.length,
 			cleanDataY = [],
 			cleanDataX = [];
 
 		// If we got a single element dataset ( [4,3,2,...] , expand it into [ [0,4] , [1,3] , [2,2] , ]
-		if ( !isArray(dataset.data[0]) ) {
-			for(i=0;i<dataset.data.length;i++) {
+		if (!isArray(dataset.data[0])) {
+			for (i = 0; i < datasetLen; i++) {
 				cleanDataY[i] = dataset.data[i];
 				cleanDataX[i] = i;
-				dataset.data[i] = [i,dataset.data[i]];
+				dataset.data[i] = [i, dataset.data[i]];
 			}
 		} else {
-			for(i=0;i<dataset.data.length;i++) {
+			for (i = 0 ; i < datasetLen; i++) {
 				cleanDataY[i] = dataset.data[i][1];
 				cleanDataX[i] = dataset.data[i][0];
 			}
@@ -306,9 +301,10 @@
 		xAxis.values.sort(function(a, b){return a-b;});
 
 		// Recalculate smallest step
-		for(i=0;i<xAxis.values.length-1;i++) {
-			step = xAxis.values[i+1] - xAxis.values[i];
-			if( step < xAxis.step ) xAxis.step = step;
+		for (i = 0; i < xAxis.values.length - 1; i++) {
+			if (step < xAxis.step) {
+				xAxis.step = xAxis.values[i + 1] - xAxis.values[i];
+			}
 		}
 
 		this.datasets.push(dataset);
@@ -323,15 +319,13 @@
 	 * @return {Object}                `this`
 	 */
 	prot.place = function (newDestination) { 
+		var method;
 
-		// Did we get a string?
-		if ( typeof newDestination === 'string' ) {
+		if (typeof newDestination === 'string') {
 			newDestination = document.getElementById(newDestination);
 		}
 
-		var method = (newDestination && (newDestination.appendChild ? 'appendChild' : 'append'));
-
-		if (method) {
+		if ((method = (newDestination && (newDestination.appendChild ? 'appendChild' : 'append')))) {
 			this.dest = newDestination;
 			this.dest[method](this.canvas);
 			this.resize(this);
@@ -366,96 +360,52 @@
 		 * @param {Object} graph The Grapho object
 		 * @param {Array} dataset The data datasets
 		 */
-		function RenderLineArea (graph, dataset) {
-			var i, point, skip_i, lstart, lstop, comp,
+		function renderLineArea (graph, dataset, data, i, to, xAxis, yAxis, min, max, innerHeight, innerWidth, margin) {
+			var point,
 				
-				data	= dataset.data,
-				margin 	= dataset.lineWidth / 2,
+				next,
+				stop = innerWidth / (xAxis.continous ? Math.ceil((xAxis.maxVal - xAxis.minVal) / xAxis.step + 1) : xAxis.values.length),
 
-				yAxis 	= graph.yAxises[dataset.y.axis],
-				xAxis 	= graph.xAxises[dataset.x.axis],
-
-				min 	= yAxis.minVal,
-				max 	= yAxis.maxVal,
-
-				x_stops	= xAxis.continous ? Math.ceil((xAxis.maxVal - xAxis.minVal) / xAxis.step + 1) : xAxis.values.length,
-
-				inner_height 	= graph.h - margin,
-				inner_width 	= graph.w - margin,
-
-				px, py, cy, npx, npy, fpx, x, y, cpx, cpy, nx, ny, ncpx, ncpy,
+				px, // Current X-pixel
+				py, // Current Y-pixel
+				cy, // Center Y-pixel
+				fpx, // First X-pixel
 
 				// Shortcuts
-				ctx = graph.ctx;	
+				ctx = graph.ctx;
 
 			ctx.beginPath();
 
-			if (xAxis.continous) {
-				lstart = xAxis.minVal;
-				lstop = xAxis.maxVal+1;
-			} else {
-				lstart = 0;
-				lstop = xAxis.values.length;
-			}
-			
-			skip_i = xAxis.minVal;
-			for(i=lstart;i<lstop;i++) {
-				point = data[skip_i];
-				comp = (xAxis.continous) ? i : xAxis.values[i];
-
+			for ( ; i < to; i++) {
 				// We might need to skip some points that are not in the dataset
-				if( point !== undefined && (point[0] === comp)) {
+				if ((point = data[i]) && point[0] === (xAxis.continous ? i : xAxis.values[i])) {
+					px = round(margin + (i * stop) + stop / 2);
+					py = round(margin + innerHeight - (point[1] - min) / (max - min) * innerHeight);
 
-					if (data.continous){
-						x = point[0]; 
-						nx = data.continous ? (data[skip_i+1] ? data[skip_i+1][0] : 0) : i; 
-						cpx = x / lstop; // Current pixel percentage x
-						cnpx = nx / lstop ; 
-					} else {
-						x = i; 
-						nx = i+1;
-						cpx = x/lstop; // Current pixel percentage x
-						cnpx = nx/lstop; 
-					}
+					if (!i) {
+						// Keep track of first pixel, for later use by area charts
+						ctx.moveTo((fpx = px), py);
+					} else if (dataset.lineSmooth && i < data.length - 1) {
+						next = data[i + 1];
 
-					y = point[1];
-					ny = data[skip_i+1] ? data[skip_i+1][1] : 0;
-					cpy = (y - min) / (max - min);	// Current pixel percentage y
-					cnpy = (ny - min) / (max - min);	// Current pixel percentage y
-
-					px = round(margin + cpx * inner_width + (inner_width/x_stops/2));	// Pixel x
-					py = round(margin + inner_height - cpy * inner_height); // Pixel y
-
-					npx = ( data[skip_i + 1] ) ? round(margin + cnpx * inner_width + (inner_width/x_stops/2)) : 0; // Next pixel x
-					npy = ( data[skip_i + 1] ) ? round(margin + inner_height - cnpy * inner_height) : 0; // Next pixel y
-
-					// Keep track of first pixel, for later use by area charts
-					if ( skip_i === 0 ) fpx = px;
-					if (skip_i === 0) {
-						ctx.moveTo(px, py);
-					} else if (skip_i < data.length - 2 && dataset.lineSmooth) {
-						ctx.quadraticCurveTo(px, py, (px + npx) / 2, (py + npy) / 2);
-						//ctx.quadraticCurveTo(px, py, npx, npy);
-					} else if (skip_i < data.length - 1 && dataset.lineSmooth) {
-						ctx.quadraticCurveTo(px, py, npx, npy);
+						ctx.quadraticCurveTo(
+							px, // The x-coordinate of the Bézier control point
+							py, // The y-coordinate of the Bézier control point
+							(px + (!next ? 0 : round(margin + (i + next[0] - point[0]) * stop + stop / 2))) / 2, // The x-coordinate of the ending point
+							(py + (!next ? 0 : round(margin + innerHeight - (next[1] - min) / (max - min) * innerHeight))) / 2 // The y-coordinate of the ending point
+						);
 					} else {
 						ctx.lineTo(px, py);
 					}
-
-					skip_i++;
-
 				}
-
 			}
 
-			if (dataset.type === 'area' || dataset.type === 'line') {
-				ctx.lineWidth = dataset.lineWidth;
-				ctx.strokeStyle = dataset.strokeStyle;
-				ctx.stroke();
-			}
+			ctx.lineWidth = dataset.lineWidth;
+			ctx.strokeStyle = dataset.strokeStyle;
+			ctx.stroke();
 
 			if (dataset.type === 'area') {
-				cy = round(margin + inner_height - (yAxis.center - min) / (max - min) * inner_height); // Center pixel y
+				cy = round(margin + innerHeight - (yAxis.center - min) / (max - min) * innerHeight);
 
 				ctx.lineTo(px, cy); // Move to center at last col
 				ctx.lineTo(fpx, cy); // Move to center at first col
@@ -475,68 +425,30 @@
 		 * @param {Object} graph The Grapho object
 		 * @param {Array} dataset The data datasets
 		 */
-		function RenderScatter (graph, dataset) {
-			var i, point, skip_i, lstart, lstop, comp,
+		function renderScatter (graph, dataset, data, i, to, xAxis, yAxis, min, max, innerHeight, innerWidth, margin) {
+			var point,
 				
-				data	= dataset.data,
-				margin 	= dataset.lineWidth / 2,
-
-				yAxis 	= graph.yAxises[dataset.y.axis],
-				xAxis 	= graph.xAxises[dataset.x.axis],
-
-				min 	= yAxis.minVal,
-				max 	= yAxis.maxVal,
-
-				x_stops	= xAxis.continous ? Math.ceil((xAxis.maxVal - xAxis.minVal) / xAxis.step + 1) : xAxis.values.length,
-
-				inner_height 	= graph.h - margin,
-				inner_width 	= graph.w - margin,
-
-				x, y, px, py, cy, cpx, cpy,
+				stop = (innerWidth / (xAxis.continous ? Math.ceil((xAxis.maxVal - xAxis.minVal) / xAxis.step + 1) : xAxis.values.length) / 2),
+				step = xAxis.continous ? xAxis.step : 1,
 
 				// Shortcuts
-				ctx = graph.ctx;	
-
-			if (xAxis.continous) {
-				lstart = xAxis.minVal;
-				lstop = xAxis.maxVal+1;
-			} else {
-				lstart = 0;
-				lstop = xAxis.values.length;
-			}
+				ctx = graph.ctx;
 			
-			skip_i = xAxis.minVal;
-			for(i=lstart;i<lstop;i=i+(xAxis.continous?xAxis.step:1)) {
-
-				point = data[skip_i];
-				comp = (xAxis.continous) ? i : xAxis.values[i];
-
+			for ( ; i < to; i += step) {
 				// We might need to skip some points that are not in the dataset
-				if( point !== undefined && ((point[0] === comp) || xAxis.continous)) {
-
-					if (data.continous){
-						x = point[0]; 
-						cpx = (x - xAxis.minVal)/ (xAxis.maxVal - xAxis.minVal); // Current pixel percentage x
-					} else {
-						x = i; 
-						cpx = x/lstop; // Current pixel percentage x
-					}
-
-					y = point[1];
-					cpy = (y - min) / (max - min);	// Current pixel percentage y
-
-					px = round(margin + cpx * inner_width + (inner_width/x_stops/2));	// Pixel x
-					py = round(margin + inner_height - cpy * inner_height); // Pixel y
-
+				if ((point = data[i]) && (point[0] === (xAxis.continous ? i : xAxis.values[i]) || xAxis.continous)) {
 					ctx.beginPath();
-			     	ctx.arc(px, py, dataset.dotWidth, 0, 2 * Math.PI, false);
+			     	ctx.arc(
+			     		round(margin + (i / to) * innerWidth + stop), // The x-coordinate of the center of the circle
+			     		round(margin + innerHeight - ((point[1] - min) / (max - min)) * innerHeight), // The y-coordinate of the center of the circle
+			     		dataset.dotWidth, // The radius of the circle
+			     		0, // The starting angle, in radians (0 is at the 3 o'clock position of the arc's circle)
+			     		Math.PI * 2 // The ending angle, in radians
+			     	);
 			     	ctx.fillStyle = dataset.strokeStyle;
 			     	ctx.fill();
-
-			     	skip_i++;
 			    }
 			}
-
 		}
 
 		/**
@@ -544,62 +456,43 @@
 		 * @param {Object} graph The Grapho object
 		 * @param {Array} dataset The data datasets
 		 */
-		function RenderBarChart (graph, dataset) {
-			var i, point, skip_i, index, lstart, lstop,
+		function renderBarChart (graph, dataset, data, i, to, xAxis, yAxis, min, max, innerHeight, innerWidth, margin) {
+			var point,
 				
-				data	= dataset.data,
-				margin	= 1,
+				stop = xAxis.continous ? Math.ceil((xAxis.maxVal - xAxis.minVal) / xAxis.step + 1) : xAxis.values.length,
 
-				yAxis 	= graph.yAxises[dataset.y.axis],
-				xAxis 	= graph.xAxises[dataset.x.axis],
+				baseWidth 	= ((graph.w - margin) / stop), // This should be divided with the minimum distance between steps
+				barSpacing 	= baseWidth - (baseWidth * dataset.barWidthPrc / 100),
+				barWidth 	= baseWidth - barSpacing,
 
-				min		= yAxis.minVal,
-				max		= yAxis.maxVal,
-				center	= yAxis.center,
+				px,
+				py,
+				bt, // Bar top margin
+				bb, // Bar bottom margin
+				bh, // Bar height
 
-				x_stops	= xAxis.continous ? Math.ceil((xAxis.maxVal - xAxis.minVal) / xAxis.step + 1) : xAxis.values.length,
-				
-				inner_height 	= graph.h - margin,
-				inner_width 	= (graph.w - margin),
-				base_width 		= (inner_width / (x_stops)), // This should be divided with the minimum distance between steps
-				bar_spacing 	= base_width - (base_width * dataset.barWidthPrc / 100),
-				bar_width	 	= base_width - bar_spacing,
+				// Shortcuts
+				ctx = graph.ctx,
+				center = yAxis.center;
 
-				px, bt, bb, py, bh, x, y;
-
-			graph.ctx.fillStyle = dataset.fillStyle;
-
-			if (xAxis.continous) {
-				lstart = xAxis.minVal;
-				lstop = xAxis.maxVal+1;
-			} else {
-				lstart = 0;
-				lstop = xAxis.values.length;
-			}
-
-			skip_i = xAxis.minVal;
-			for(i=lstart;i<lstop;i++) {
-				point = data[skip_i];
-				comp = (xAxis.continous) ? i : xAxis.values[i];
+			ctx.fillStyle = dataset.fillStyle;
+			
+			for ( ; i < to; i++) {
+				point = data[i];
 
 				// We might need to skip some points that are not in the dataset
-				if( point !== undefined && (point[0] === comp)) {
-					y = point[1];
-					x = point[0];
+				if (point && (point[0] === ((xAxis.continous) ? i : xAxis.values[i]))) {
+					point = point[1];
 
-					px = round(margin + bar_spacing / 2 + (inner_width * (x/xAxis.maxVal)));
-					bt = (y <= center) ? center : y; // Bar top
-					bb = (y > center) ? center : y; // Bar bottom
-					py = round(margin + inner_height - (bt - min) / (max - min) * inner_height);
-					bh = round(margin + inner_height - (bb - min) / (max - min) * inner_height) - py;
+					bt = (point <= center) ? center : point;
+					bb = (point > center) ? center : point;
+					px = round(margin + barSpacing / 2 + (baseWidth * i));
+					py = round(margin + innerHeight - (bt - min) / (max - min) * innerHeight);
+					bh = round(margin + innerHeight - (bb - min) / (max - min) * innerHeight) - py;
 
-					graph.ctx.fillRect(px, py, bar_width, bh);
-
-					skip_i++;
+					ctx.fillRect(px, py, barWidth, bh);
 				}
-			
 			}
-
 		}
 
 		/**
@@ -609,23 +502,51 @@
 		 */
 		return function () {
 			var i,
-				dataset;
+				func,
+				dataset,
+				args = [],
+				xAxis,
+				yAxis,
+				margin;
 
 			// Clear canvas before drawing
 			this.ctx.clearRect(0, 0, this.w, this.h);
 
 			i = 0;
 			while ((dataset = this.datasets[i++])) {
+				yAxis = this.yAxises[dataset.y.axis];
+				xAxis = this.xAxises[dataset.x.axis];
+				margin = (dataset.type === 'bar' ? 1 : dataset.lineWidth / 2);
+
 				if (dataset.type === 'bar') {
-					RenderBarChart(this, dataset);
+					func = renderBarChart;
 				} else if (dataset.type === 'line' || dataset.type === 'area') {
-					RenderLineArea(this, dataset);
-					if(dataset.lineDots) {
-						RenderScatter(this, dataset);
-					}
-				} else if (dataset.type === 'scatter') {
-					RenderScatter(this, dataset);
-				} 
+					func = renderLineArea;
+				}
+
+				args = [
+					/* `graph` */	 	this,
+					/* `dataset` */ 	dataset,
+					/* `data` */	 	dataset.data,
+					/* `i` */ 			xAxis.continous ? xAxis.minVal : 0,
+					/* `to` */ 			xAxis.continous ? xAxis.maxVal + 1 : xAxis.values.length,
+					/* `xAxis` */ 		xAxis,
+					/* `yAxis` */ 		yAxis,
+					/* `min` */ 		yAxis.minVal,
+					/* `max` */ 		yAxis.maxVal,
+					/* `innerHeight` */ this.h - margin,
+					/* `innerWidth` */ 	this.w - margin,
+					/* `margin` */ 		margin
+				];
+
+				if (func) {
+					func.apply(this, args);
+				}
+
+				// This function call is annoying c:
+				if (dataset.lineDots) {
+					renderScatter.apply(this, args);
+				}
 			}
 
 			return this;
