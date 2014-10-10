@@ -302,8 +302,9 @@
 
 		// Recalculate smallest step
 		for (i = 0; i < xAxis.values.length - 1; i++) {
+			step = xAxis.values[i + 1] - xAxis.values[i];
 			if (step < xAxis.step) {
-				xAxis.step = xAxis.values[i + 1] - xAxis.values[i];
+				xAxis.step = step;
 			}
 		}
 
@@ -360,26 +361,25 @@
 		 * @param {Object} graph The Grapho object
 		 * @param {Array} dataset The data datasets
 		 */
-		function renderLineArea (graph, dataset, data, i, to, xAxis, yAxis, min, max, innerHeight, innerWidth, margin) {
+		function renderLineArea (ctx, dataset, data, i, to, stop, xAxis, yAxis, min, max, innerHeight, innerWidth, margin) {
 			var point,
 				
-				next,
-				stop = innerWidth / (xAxis.continous ? Math.ceil((xAxis.maxVal - xAxis.minVal) / xAxis.step + 1) : xAxis.values.length),
+				next, npxp,
 
 				px, // Current X-pixel
 				py, // Current Y-pixel
 				cy, // Center Y-pixel
 				fpx, // First X-pixel
-
-				// Shortcuts
-				ctx = graph.ctx;
+				pxp; // Pixel percentage
 
 			ctx.beginPath();
 
 			for ( ; i < to; i++) {
-				// We might need to skip some points that are not in the dataset
-				if ((point = data[i]) && point[0] === (xAxis.continous ? i : xAxis.values[i])) {
-					px = round(margin + (i * stop) + stop / 2);
+				if ((point = data[i])) {
+
+					pxp = xAxis.continous ? (point[0] - xAxis.minVal) / (xAxis.maxVal - xAxis.minVal) : xAxis.values.indexOf(parseFloat([point[0]])) / xAxis.values.length;
+
+					px = round(margin + ((innerWidth-stop) * pxp) + stop / 2);
 					py = round(margin + innerHeight - (point[1] - min) / (max - min) * innerHeight);
 
 					if (!i) {
@@ -387,12 +387,12 @@
 						ctx.moveTo((fpx = px), py);
 					} else if (dataset.lineSmooth && i < data.length - 1) {
 						next = data[i + 1];
-
+						npxp = xAxis.continous ? (next[0] - xAxis.minVal) / (xAxis.maxVal - xAxis.minVal) : xAxis.values.indexOf(parseFloat([next[0]])) / xAxis.values.length;
 						ctx.quadraticCurveTo(
 							px, // The x-coordinate of the Bézier control point
 							py, // The y-coordinate of the Bézier control point
-							(px + (!next ? 0 : round(margin + (i + next[0] - point[0]) * stop + stop / 2))) / 2, // The x-coordinate of the ending point
-							(py + (!next ? 0 : round(margin + innerHeight - (next[1] - min) / (max - min) * innerHeight))) / 2 // The y-coordinate of the ending point
+							(px+(!next ? 0 : round(margin + ((innerWidth-stop) * npxp) + stop / 2))) / 2, // The x-coordinate of the ending point
+							(py+(!next ? 0 : round(margin + innerHeight - (next[1] - min) / (max - min) * innerHeight))) / 2 // The y-coordinate of the ending point
 						);
 					} else {
 						ctx.lineTo(px, py);
@@ -425,21 +425,16 @@
 		 * @param {Object} graph The Grapho object
 		 * @param {Array} dataset The data datasets
 		 */
-		function renderScatter (graph, dataset, data, i, to, xAxis, yAxis, min, max, innerHeight, innerWidth, margin) {
-			var point,
+		function renderScatter (ctx, dataset, data, i, to, stop, xAxis, yAxis, min, max, innerHeight, innerWidth, margin) {
+			var point, pxp;
 				
-				stop = (innerWidth / (xAxis.continous ? Math.ceil((xAxis.maxVal - xAxis.minVal) / xAxis.step + 1) : xAxis.values.length) / 2),
-				step = xAxis.continous ? xAxis.step : 1,
-
-				// Shortcuts
-				ctx = graph.ctx;
-			
-			for ( ; i < to; i += step) {
+			for ( ; i < to; i++) {
 				// We might need to skip some points that are not in the dataset
-				if ((point = data[i]) && (point[0] === (xAxis.continous ? i : xAxis.values[i]) || xAxis.continous)) {
+				if ((point = data[i])) {
+					pxp = xAxis.continous ? (point[0] - xAxis.minVal) / (xAxis.maxVal - xAxis.minVal) : xAxis.values.indexOf(parseFloat([point[0]])) / xAxis.values.length;
 					ctx.beginPath();
 			     	ctx.arc(
-			     		round(margin + (i / to) * innerWidth + stop), // The x-coordinate of the center of the circle
+			     		round(margin + ((innerWidth-stop) * pxp) + stop/2), // The x-coordinate of the center of the circle
 			     		round(margin + innerHeight - ((point[1] - min) / (max - min)) * innerHeight), // The y-coordinate of the center of the circle
 			     		dataset.dotWidth, // The radius of the circle
 			     		0, // The starting angle, in radians (0 is at the 3 o'clock position of the arc's circle)
@@ -456,14 +451,11 @@
 		 * @param {Object} graph The Grapho object
 		 * @param {Array} dataset The data datasets
 		 */
-		function renderBarChart (graph, dataset, data, i, to, xAxis, yAxis, min, max, innerHeight, innerWidth, margin) {
-			var point,
-				
-				stop = xAxis.continous ? Math.ceil((xAxis.maxVal - xAxis.minVal) / xAxis.step + 1) : xAxis.values.length,
+		function renderBarChart (ctx, dataset, data, i, to, stop, xAxis, yAxis, min, max, innerHeight, innerWidth, margin) {
+			var point, pxp,
 
-				baseWidth 	= ((graph.w - margin) / stop), // This should be divided with the minimum distance between steps
-				barSpacing 	= baseWidth - (baseWidth * dataset.barWidthPrc / 100),
-				barWidth 	= baseWidth - barSpacing,
+				barSpacing 	= (innerWidth / stop)*(100-dataset.barWidthPrc)/100,
+				barWidth 	= (innerWidth / stop)-barSpacing,
 
 				px,
 				py,
@@ -471,22 +463,19 @@
 				bb, // Bar bottom margin
 				bh, // Bar height
 
-				// Shortcuts
-				ctx = graph.ctx,
 				center = yAxis.center;
 
 			ctx.fillStyle = dataset.fillStyle;
 			
 			for ( ; i < to; i++) {
-				point = data[i];
-
 				// We might need to skip some points that are not in the dataset
-				if (point && (point[0] === ((xAxis.continous) ? i : xAxis.values[i]))) {
-					point = point[1];
+				if ((point = data[i])) {
 
-					bt = (point <= center) ? center : point;
-					bb = (point > center) ? center : point;
-					px = round(margin + barSpacing / 2 + (baseWidth * i));
+					pxp = xAxis.continous ? (point[0] - xAxis.minVal) / (xAxis.maxVal - xAxis.minVal) : xAxis.values.indexOf(parseFloat([point[0]])) / xAxis.values.length;
+
+					bt = (point[1] <= center) ? center : point[1];
+					bb = (point[1] > center) ? center : point[1];
+					px = round(margin + barSpacing / 2 + (pxp * innerWidth));
 					py = round(margin + innerHeight - (bt - min) / (max - min) * innerHeight);
 					bh = round(margin + innerHeight - (bb - min) / (max - min) * innerHeight) - py;
 
@@ -522,14 +511,17 @@
 					func = renderBarChart;
 				} else if (dataset.type === 'line' || dataset.type === 'area') {
 					func = renderLineArea;
+				}else if (dataset.type === 'scatter') {
+					func = renderScatter;
 				}
 
 				args = [
-					/* `graph` */	 	this,
+					/* `ctx` */	 		this.ctx,
 					/* `dataset` */ 	dataset,
 					/* `data` */	 	dataset.data,
-					/* `i` */ 			xAxis.continous ? xAxis.minVal : 0,
-					/* `to` */ 			xAxis.continous ? xAxis.maxVal + 1 : xAxis.values.length,
+					/* `i` */ 			0,
+					/* `to` */ 			dataset.data.length,
+					/* `stop` */		xAxis.continous ? Math.ceil((xAxis.maxVal - xAxis.minVal) / xAxis.step + 1) : xAxis.values.length,
 					/* `xAxis` */ 		xAxis,
 					/* `yAxis` */ 		yAxis,
 					/* `min` */ 		yAxis.minVal,
