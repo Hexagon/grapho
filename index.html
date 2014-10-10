@@ -559,6 +559,66 @@ graphoObj8.addDataset({
             </article>
         </section>
 
+       <section>
+            <article>
+                <h3>
+                    <span class="secondary">Example 9 - </span>
+                    <span class="tertiary">Areachart with scales, ticks and stuff (Work in progress).</span>
+                </h3>
+                <div class="container w-100 h-1">
+
+                    <!-- Example 9 - Start -->
+                    <div id="example-9" class="box bw-100 h-100 bg-tertiary">
+
+                        <!-- Example-9 javascript -->
+                        <script>
+
+                            // Create grapho object, pass a parameter pointing to the destination element
+                            var graphoObj9 = new Grapho( { place: 'example-9' } );
+
+                            // The default type is area, if you want to change that, you'll have to specify type, possible values are 
+                            //    line, scatter, area, bar
+                            graphoObj9.addDataset({
+                                type: 'area',
+                                x: { scale: true, name: "Text on pri x axis"},
+                                y: { scale: true, name: "Text on pri y axis"},
+                                data: [7, 6, 5, 4, 4, 4, 4, 7, 7, 7, 5, 5, 4, 3, 3, 4, 5, 6, 7, 7, 2, 8, 5, 5, 4, 2]
+                            });
+
+                            graphoObj9.addDataset({
+                                type: 'area',
+                                x: { axis: 2, scale: true, name: "Text on sec x axis"},
+                                y: { axis: 2, scale: true, name: "Text on sec y axis"},
+                                data: [7, 6, 5, 4, 4, 4, 4, 7, 7, 7, 5, 5, 4, 3, 3, 4, 5, 6, 7, 7, 2, 8, 5, 5, 4, 2]
+                            });
+                        </script>
+
+                    </div>
+                    <!-- Example 9 - End -->
+                </div>
+            </article>
+            <article>
+                <h3><span class="tertiary">Source code</span></h3>
+                <pre><code data-language="javascript">var graphoObj9 = new Grapho( { place: 'example-9' } );
+
+// The default type is area, if you want to change that, you'll have to specify type, possible values are 
+//    line, scatter, area, bar
+graphoObj9.addDataset({
+    type: 'area',
+    x: { scale: true, name: "Text on pri x axis"},
+    y: { scale: true, name: "Text on pri y axis"},
+    data: [7, 6, 5, 4, 4, 4, 4, 7, 7, 7, 5, 5, 4, 3, 3, 4, 5, 6, 7, 7, 2, 8, 5, 5, 4, 2]
+});
+
+graphoObj9.addDataset({
+    type: 'area',
+    x: { axis: 2, scale: true, name: "Text on sec x axis"},
+    y: { axis: 2, scale: true, name: "Text on sec y axis"},
+    data: [7, 6, 5, 4, 4, 4, 4, 7, 7, 7, 5, 5, 4, 3, 3, 4, 5, 6, 7, 7, 2, 8, 5, 5, 4, 2]
+});</code></pre>
+            </article>
+        </section>
+
         <div class="clear"><!-- --></div>
     </body>
 </html>

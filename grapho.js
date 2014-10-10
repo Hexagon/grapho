@@ -133,6 +133,11 @@
 		var defaults = {
 				min: 'auto',
 				max: 'auto',
+				scale: false,
+				name: undefined,
+				font: '12px Droid Sans',
+				majorTickHeight: 3,
+				minorTickHeight: 2,
 				minVal: Infinity,
 				maxVal: -Infinity,
 				center: 0
@@ -174,6 +179,11 @@
 		var defaults = {
 				min: 'auto',
 				max: 'auto',
+				scale: false,
+				name: undefined,
+				font: '12px Droid Sans',
+				majorTickHeight: 3,
+				minorTickHeight: 2,
 				continous: false,
 				step: Infinity,
 				minVal: Infinity,
@@ -361,7 +371,7 @@
 		 * @param {Object} graph The Grapho object
 		 * @param {Array} dataset The data datasets
 		 */
-		function renderLineArea (ctx, dataset, data, i, to, stop, xAxis, yAxis, min, max, innerHeight, innerWidth, margin) {
+		function renderLineArea (ctx, dataset, data, i, to, stop, xAxis, yAxis, min, max, innerHeight, innerWidth, margin, padding) {
 			var point,
 				
 				next, npxp,
@@ -379,8 +389,8 @@
 
 					pxp = xAxis.continous ? (point[0] - xAxis.minVal) / (xAxis.maxVal - xAxis.minVal) : xAxis.values.indexOf(parseFloat([point[0]])) / xAxis.values.length;
 
-					px = round(margin + ((innerWidth-stop) * pxp) + stop / 2);
-					py = round(margin + innerHeight - (point[1] - min) / (max - min) * innerHeight);
+					px = round(padding[1] + margin + ((innerWidth-stop) * pxp) + stop / 2);
+					py = round(padding[0] + margin + innerHeight - (point[1] - min) / (max - min) * innerHeight);
 
 					if (!i) {
 						// Keep track of first pixel, for later use by area charts
@@ -391,8 +401,8 @@
 						ctx.quadraticCurveTo(
 							px, // The x-coordinate of the Bézier control point
 							py, // The y-coordinate of the Bézier control point
-							(px+(!next ? 0 : round(margin + ((innerWidth-stop) * npxp) + stop / 2))) / 2, // The x-coordinate of the ending point
-							(py+(!next ? 0 : round(margin + innerHeight - (next[1] - min) / (max - min) * innerHeight))) / 2 // The y-coordinate of the ending point
+							(px+(!next ? 0 : round(padding[1] + margin + ((innerWidth-stop) * npxp) + stop / 2))) / 2, // The x-coordinate of the ending point
+							(py+(!next ? 0 : round(padding[0] + margin + innerHeight - (next[1] - min) / (max - min) * innerHeight))) / 2 // The y-coordinate of the ending point
 						);
 					} else {
 						ctx.lineTo(px, py);
@@ -405,7 +415,8 @@
 			ctx.stroke();
 
 			if (dataset.type === 'area') {
-				cy = round(margin + innerHeight - (yAxis.center - min) / (max - min) * innerHeight);
+
+				cy = round(innerHeight - padding[0] - margin - ((yAxis.center < min ? min : yAxis.center) - min) / (max - min) * innerHeight);
 
 				ctx.lineTo(px, cy); // Move to center at last col
 				ctx.lineTo(fpx, cy); // Move to center at first col
@@ -425,7 +436,7 @@
 		 * @param {Object} graph The Grapho object
 		 * @param {Array} dataset The data datasets
 		 */
-		function renderScatter (ctx, dataset, data, i, to, stop, xAxis, yAxis, min, max, innerHeight, innerWidth, margin) {
+		function renderScatter (ctx, dataset, data, i, to, stop, xAxis, yAxis, min, max, innerHeight, innerWidth, margin, padding) {
 			var point, pxp;
 				
 			for ( ; i < to; i++) {
@@ -434,8 +445,8 @@
 					pxp = xAxis.continous ? (point[0] - xAxis.minVal) / (xAxis.maxVal - xAxis.minVal) : xAxis.values.indexOf(parseFloat([point[0]])) / xAxis.values.length;
 					ctx.beginPath();
 			     	ctx.arc(
-			     		round(margin + ((innerWidth-stop) * pxp) + stop/2), // The x-coordinate of the center of the circle
-			     		round(margin + innerHeight - ((point[1] - min) / (max - min)) * innerHeight), // The y-coordinate of the center of the circle
+			     		round(padding[1] + margin + ((innerWidth-stop) * pxp) + stop/2), // The x-coordinate of the center of the circle
+			     		round(padding[0] + margin + innerHeight - ((point[1] - min) / (max - min)) * innerHeight), // The y-coordinate of the center of the circle
 			     		dataset.dotWidth, // The radius of the circle
 			     		0, // The starting angle, in radians (0 is at the 3 o'clock position of the arc's circle)
 			     		Math.PI * 2 // The ending angle, in radians
@@ -451,7 +462,7 @@
 		 * @param {Object} graph The Grapho object
 		 * @param {Array} dataset The data datasets
 		 */
-		function renderBarChart (ctx, dataset, data, i, to, stop, xAxis, yAxis, min, max, innerHeight, innerWidth, margin) {
+		function renderBarChart (ctx, dataset, data, i, to, stop, xAxis, yAxis, min, max, innerHeight, innerWidth, margin, padding) {
 			var point, pxp,
 
 				barSpacing 	= (innerWidth / stop)*(100-dataset.barWidthPrc)/100,
@@ -475,8 +486,8 @@
 
 					bt = (point[1] <= center) ? center : point[1];
 					bb = (point[1] > center) ? center : point[1];
-					px = round(margin + barSpacing / 2 + (pxp * innerWidth));
-					py = round(margin + innerHeight - (bt - min) / (max - min) * innerHeight);
+					px = round(padding[1] + margin + barSpacing / 2 + (pxp * innerWidth));
+					py = round(padding[0] + margin + innerHeight - (bt - min) / (max - min) * innerHeight);
 					bh = round(margin + innerHeight - (bb - min) / (max - min) * innerHeight) - py;
 
 					ctx.fillRect(px, py, barWidth, bh);
@@ -496,15 +507,121 @@
 				args = [],
 				xAxis,
 				yAxis,
-				margin;
+				margin,
+				padding = [], 	// 0 = top, 1 = left, 2 = right, 3 = bottom
+				used = [],		// Temprorary storage for space used, same as above
+				temp,			// Temporary storage
+				text_dimensions;		
 
 			// Clear canvas before drawing
 			this.ctx.clearRect(0, 0, this.w, this.h);
 
+			padding[0] = padding[1] = padding[2] = padding[3] = used[0] = used[1] = used[2] = used[3] = 0;
+
+			// Measure axises, we need to do this first, to work out how much space they'll take
+			i = 0;
+			while ((dataset = this.datasets[i++])) {
+
+				yAxis = this.yAxises[dataset.y.axis];
+				xAxis = this.xAxises[dataset.x.axis];
+
+				if (xAxis.scale) {
+					temp = (xAxis.majorTickHeight > xAxis.minorTickHeight) ? xAxis.majorTickHeight : xAxis.minorTickHeight;
+					// Even or odd? Odd is placed at bottom, even at top
+					if (dataset.x.axis % 2) {
+						padding[3] += temp;
+					} else {
+						padding[0] += temp;
+					}
+				}
+
+				if (xAxis.name) {
+					temp = parseInt(this.ctx.font.split(' ')[0].replace('px', ''))+4;
+					if (dataset.x.axis % 2) {
+						padding[3] += temp;
+					} else {
+						padding[0] += temp;
+					}
+				}
+
+				if (yAxis.scale) {
+					// Even or odd? Even is placed at right, odd at left
+					temp = (yAxis.majorTickHeight > yAxis.minorTickHeight) ? yAxis.majorTickHeight : yAxis.minorTickHeight;
+					if (dataset.y.axis % 2) {
+						padding[1] += temp;
+					} else {
+						padding[2] += temp;
+					}
+				}
+
+				if (yAxis.name) {
+					temp = parseInt(this.ctx.font.split(' ')[0].replace('px', ''))+4;
+					if (dataset.y.axis % 2) {
+						padding[1] += temp;
+					} else {
+						padding[2] += temp;
+					}
+				}
+
+			}
+
+			// Now when we know accurately how much space each axis will take, we can begin drawing
 			i = 0;
 			while ((dataset = this.datasets[i++])) {
 				yAxis = this.yAxises[dataset.y.axis];
 				xAxis = this.xAxises[dataset.x.axis];
+
+				if (xAxis.name) {
+					this.ctx.font=xAxis.font;
+					temp = parseInt(this.ctx.font.split(' ')[0].replace('px', ''));
+					this.ctx.fillStyle='#FFFFFF';
+					if (dataset.x.axis % 2) {
+						this.ctx.fillText(xAxis.name,this.w/2-this.ctx.measureText(xAxis.name).width/2,this.h-temp/2-used[3]);
+					} else {
+						this.ctx.fillText(xAxis.name,this.w/2-this.ctx.measureText(xAxis.name).width/2,used[0]+temp);
+					}
+				}
+
+				if (xAxis.scale) {
+					if (dataset.x.axis % 2) {
+
+					} else {
+						
+					}
+				}
+
+				if (yAxis.name) {
+					this.ctx.font=yAxis.font;
+					temp = parseInt(this.ctx.font.split(' ')[0].replace('px', ''));
+					this.ctx.fillStyle='#FFFFFF';
+					if (dataset.x.axis % 2) {
+						this.ctx.save();
+						this.ctx.translate(used[1]+temp,this.h/2+this.ctx.measureText(yAxis.name).width/2);
+						this.ctx.rotate(-0.5*Math.PI);
+						this.ctx.fillText(yAxis.name,0,0);
+						this.ctx.restore();
+					} else {
+						this.ctx.save();
+						this.ctx.translate(this.w-temp/2-used[2],this.h/2+this.ctx.measureText(yAxis.name).width/2);
+						this.ctx.rotate(-0.5*Math.PI);
+						this.ctx.fillText(yAxis.name,0,0);
+						this.ctx.restore();
+					}
+				}
+
+				if (yAxis.scale) {
+
+				}
+
+			}
+
+			// Draw charts
+			i = 0;
+			while ((dataset = this.datasets[i++])) {
+
+				yAxis = this.yAxises[dataset.y.axis];
+				xAxis = this.xAxises[dataset.x.axis];
+
 				margin = (dataset.type === 'bar' ? 1 : dataset.lineWidth / 2);
 
 				if (dataset.type === 'bar') {
@@ -526,10 +643,13 @@
 					/* `yAxis` */ 		yAxis,
 					/* `min` */ 		yAxis.minVal,
 					/* `max` */ 		yAxis.maxVal,
-					/* `innerHeight` */ this.h - margin,
-					/* `innerWidth` */ 	this.w - margin,
-					/* `margin` */ 		margin
+					/* `innerHeight` */ this.h - margin - padding[0] - padding[3],
+					/* `innerWidth` */ 	this.w - margin - padding[2] - padding[2],
+					/* `margin` */ 		margin,
+					/* `padding` */		padding,
 				];
+
+				console.log(this.h);
 
 				if (func) {
 					func.apply(this, args);
