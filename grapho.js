@@ -135,12 +135,15 @@
 				max: 'auto',
 				scale: false,
 				name: undefined,
-				font: '12px Droid Sans',
+				font: '10px Droid Sans',
+				continous: true,
 				majorTickHeight: 3,
 				minorTickHeight: 2,
+				step: Infinity,
 				minVal: Infinity,
 				maxVal: -Infinity,
-				center: 0
+				center: 0,
+				values: []
 			},
 			index = props.axis;
 
@@ -181,7 +184,7 @@
 				max: 'auto',
 				scale: false,
 				name: undefined,
-				font: '12px Droid Sans',
+				font: '10px Droid Sans',
 				majorTickHeight: 3,
 				minorTickHeight: 2,
 				continous: false,
@@ -306,15 +309,25 @@
 
 		// Mege unique values of this and previous datasets
 		xAxis.values = unique(xAxis.values.concat(cleanDataX));
+		yAxis.values = unique(yAxis.values.concat(cleanDataY));
 
 		// Sort the unique values
 		xAxis.values.sort(function(a, b){return a-b;});
+		yAxis.values.sort(function(a, b){return a-b;});
 
 		// Recalculate smallest step
 		for (i = 0; i < xAxis.values.length - 1; i++) {
 			step = xAxis.values[i + 1] - xAxis.values[i];
 			if (step < xAxis.step) {
 				xAxis.step = step;
+			}
+		}
+
+		// Recalculate smallest step
+		for (i = 0; i < yAxis.values.length - 1; i++) {
+			step = yAxis.values[i + 1] - yAxis.values[i];
+			if (step < yAxis.step) {
+				yAxis.step = step;
 			}
 		}
 
@@ -416,7 +429,7 @@
 
 			if (dataset.type === 'area') {
 
-				cy = round(innerHeight - padding[0] - margin - ((yAxis.center < min ? min : yAxis.center) - min) / (max - min) * innerHeight);
+				cy = round(innerHeight + padding[0] + margin - ((yAxis.center < min ? min : yAxis.center) - min) / (max - min) * innerHeight)-1;
 
 				ctx.lineTo(px, cy); // Move to center at last col
 				ctx.lineTo(fpx, cy); // Move to center at first col
@@ -501,7 +514,8 @@
 		 * @return {Object} `this`
 		 */
 		return function () {
-			var i,
+			var i, j, x,
+				xSteps, ySteps,
 				func,
 				dataset,
 				args = [],
@@ -518,7 +532,11 @@
 
 			padding[0] = padding[1] = padding[2] = padding[3] = used[0] = used[1] = used[2] = used[3] = 0;
 
+
 			// Measure axises, we need to do this first, to work out how much space they'll take
+			// 
+			// Hmmm, derp...
+			//  
 			i = 0;
 			while ((dataset = this.datasets[i++])) {
 
@@ -526,7 +544,7 @@
 				xAxis = this.xAxises[dataset.x.axis];
 
 				if (xAxis.scale) {
-					temp = (xAxis.majorTickHeight > xAxis.minorTickHeight) ? xAxis.majorTickHeight : xAxis.minorTickHeight;
+					temp = (xAxis.majorTickHeight > xAxis.minorTickHeight) ? xAxis.majorTickHeight : xAxis.minorTickHeight + 2;
 					// Even or odd? Odd is placed at bottom, even at top
 					if (dataset.x.axis % 2) {
 						padding[3] += temp;
@@ -536,7 +554,7 @@
 				}
 
 				if (xAxis.name) {
-					temp = parseInt(this.ctx.font.split(' ')[0].replace('px', ''))+4;
+					temp = parseInt(yAxis.font.split(' ')[0].replace('px', ''))+2;
 					if (dataset.x.axis % 2) {
 						padding[3] += temp;
 					} else {
@@ -546,7 +564,7 @@
 
 				if (yAxis.scale) {
 					// Even or odd? Even is placed at right, odd at left
-					temp = (yAxis.majorTickHeight > yAxis.minorTickHeight) ? yAxis.majorTickHeight : yAxis.minorTickHeight;
+					temp = (yAxis.majorTickHeight > yAxis.minorTickHeight) ? yAxis.majorTickHeight : yAxis.minorTickHeight + 2;
 					if (dataset.y.axis % 2) {
 						padding[1] += temp;
 					} else {
@@ -555,7 +573,7 @@
 				}
 
 				if (yAxis.name) {
-					temp = parseInt(this.ctx.font.split(' ')[0].replace('px', ''))+4;
+					temp = parseInt(yAxis.font.split(' ')[0].replace('px', ''))+2;
 					if (dataset.y.axis % 2) {
 						padding[1] += temp;
 					} else {
@@ -566,52 +584,134 @@
 			}
 
 			// Now when we know accurately how much space each axis will take, we can begin drawing
+
+			// 
+			// DEEERP
+			//  
+
 			i = 0;
 			while ((dataset = this.datasets[i++])) {
 				yAxis = this.yAxises[dataset.y.axis];
 				xAxis = this.xAxises[dataset.x.axis];
 
+				xSteps = xAxis.continous ? Math.round((xAxis.maxVal - xAxis.minVal) / xAxis.step) : xAxis.values.length;
+				ySteps = yAxis.continous ? Math.round((yAxis.maxVal - yAxis.minVal) / yAxis.step) : yAxis.values.length;
+
 				if (xAxis.name) {
 					this.ctx.font=xAxis.font;
-					temp = parseInt(this.ctx.font.split(' ')[0].replace('px', ''));
+					temp = parseInt(this.ctx.font.split(' ')[0].replace('px', ''))+2;
 					this.ctx.fillStyle='#FFFFFF';
 					if (dataset.x.axis % 2) {
-						this.ctx.fillText(xAxis.name,this.w/2-this.ctx.measureText(xAxis.name).width/2,this.h-temp/2-used[3]);
+						this.ctx.fillText(xAxis.name,this.w/2-this.ctx.measureText(xAxis.name).width/2,this.h-temp/5-used[3]);
+						used[3]+=temp;
 					} else {
-						this.ctx.fillText(xAxis.name,this.w/2-this.ctx.measureText(xAxis.name).width/2,used[0]+temp);
+						this.ctx.fillText(xAxis.name,this.w/2-this.ctx.measureText(xAxis.name).width/2,used[0]+temp/3*2.1);
+						used[0]+=temp;
 					}
 				}
 
 				if (xAxis.scale) {
+					// Primary X
 					if (dataset.x.axis % 2) {
+						this.ctx.beginPath();
+						this.ctx.moveTo(padding[1],this.h-padding[3]-0.5); // +/-0.5 is for compensating that lines are drawn "in between" pixels by default
+						this.ctx.lineTo(this.w-padding[2],this.h-padding[3]+0.5);
+						this.ctx.lineWidth = 1;
+						this.ctx.strokeStyle = '#FFFFFF';
+						this.ctx.stroke();
 
+						for (j=0; j<=xSteps; j++) {
+							x = j/xSteps;
+							this.ctx.beginPath();
+							this.ctx.moveTo(Math.round(padding[1]+1+x*(this.w-padding[1]-padding[2]))+0.5,this.h-padding[3]+0.5);
+							this.ctx.lineTo(Math.round(padding[1]+1+x*(this.w-padding[1]-padding[2]))+0.5,this.h-padding[3]+0.5+xAxis.majorTickHeight);
+							this.ctx.lineWidth = 1;
+							this.ctx.strokeStyle = '#FFFFFF';
+							this.ctx.stroke();
+						}
+
+					// Secondary X
 					} else {
-						
+						this.ctx.beginPath();
+						this.ctx.moveTo(padding[1],padding[0]-0.5);
+						this.ctx.lineTo(this.w-padding[2],padding[0]+0.5);
+						this.ctx.lineWidth = 1;
+						this.ctx.strokeStyle = '#FFFFFF';
+						this.ctx.stroke();
+
+						for (j=0; j<=xSteps; j++) {
+							x = j/xSteps;
+							this.ctx.beginPath();
+							this.ctx.moveTo(Math.round(padding[1]+1+x*(this.w-padding[1]-padding[2]))+0.5,padding[0]-0.5);
+							this.ctx.lineTo(Math.round(padding[1]+1+x*(this.w-padding[1]-padding[2]))+0.5,padding[0]-0.5-xAxis.majorTickHeight);
+							this.ctx.lineWidth = 1;
+							this.ctx.strokeStyle = '#FFFFFF';
+							this.ctx.stroke();
+						}
 					}
 				}
 
 				if (yAxis.name) {
 					this.ctx.font=yAxis.font;
-					temp = parseInt(this.ctx.font.split(' ')[0].replace('px', ''));
+					temp = parseInt(this.ctx.font.split(' ')[0].replace('px', ''))+2;
 					this.ctx.fillStyle='#FFFFFF';
 					if (dataset.x.axis % 2) {
 						this.ctx.save();
-						this.ctx.translate(used[1]+temp,this.h/2+this.ctx.measureText(yAxis.name).width/2);
+						this.ctx.translate(used[1]+temp/3*2.1,this.h/2+this.ctx.measureText(yAxis.name).width/2);
 						this.ctx.rotate(-0.5*Math.PI);
 						this.ctx.fillText(yAxis.name,0,0);
 						this.ctx.restore();
+						used[1]+=temp;
 					} else {
 						this.ctx.save();
-						this.ctx.translate(this.w-temp/2-used[2],this.h/2+this.ctx.measureText(yAxis.name).width/2);
+						this.ctx.translate(this.w-temp/5-used[2],this.h/2+this.ctx.measureText(yAxis.name).width/2);
 						this.ctx.rotate(-0.5*Math.PI);
 						this.ctx.fillText(yAxis.name,0,0);
 						this.ctx.restore();
+						used[2]+=temp;
 					}
 				}
 
 				if (yAxis.scale) {
+					if (dataset.y.axis % 2) {
+						this.ctx.beginPath();
+						this.ctx.moveTo(padding[1]-0.5,padding[0]-0.5);
+						this.ctx.lineTo(padding[1]-0.5,this.h-padding[3]);
+						this.ctx.lineWidth = 1;
+						this.ctx.strokeStyle = '#FFFFFF';
+						this.ctx.stroke();
 
+						for (j=0; j<=ySteps; j++) {
+							x = j/ySteps;
+							this.ctx.beginPath();
+							this.ctx.moveTo(padding[1]-0.5-1,this.h-padding[3]-0.5-x*(this.h-padding[0]-padding[3]));
+							this.ctx.lineTo(padding[1]-0.5-1-yAxis.majorTickHeight,this.h-padding[3]-0.5-x*(this.h-padding[0]-padding[3]));
+							this.ctx.lineWidth = 1;
+							this.ctx.strokeStyle = '#FFFFFF';
+							this.ctx.stroke();
+						}
+
+					} else {
+						this.ctx.beginPath();
+						this.ctx.moveTo(this.w-padding[2]+0.5,padding[0]);
+						this.ctx.lineTo(this.w-padding[2]+0.5,this.h-padding[3]+0.5);
+						this.ctx.lineWidth = 1;
+						this.ctx.strokeStyle = '#FFFFFF';
+						this.ctx.stroke();
+
+						for (j=0; j<=ySteps; j++) {
+							x = j/ySteps;
+							this.ctx.beginPath();
+							this.ctx.moveTo(this.w-padding[2]+0.5+1,this.h-padding[3]-0.5-x*(this.h-padding[0]-padding[3]));
+							this.ctx.lineTo(this.w-padding[2]+0.5+1+yAxis.majorTickHeight,this.h-padding[3]-0.5-x*(this.h-padding[0]-padding[3]));
+							this.ctx.lineWidth = 1;
+							this.ctx.strokeStyle = '#FFFFFF';
+							this.ctx.stroke();
+						}
+
+					}
 				}
+
 
 			}
 
@@ -638,7 +738,7 @@
 					/* `data` */	 	dataset.data,
 					/* `i` */ 			0,
 					/* `to` */ 			dataset.data.length,
-					/* `stop` */		xAxis.continous ? Math.ceil((xAxis.maxVal - xAxis.minVal) / xAxis.step + 1) : xAxis.values.length,
+					/* `stop` */		xAxis.continous ? Math.ceil((xAxis.maxVal - xAxis.minVal) / xAxis.step) : xAxis.values.length,
 					/* `xAxis` */ 		xAxis,
 					/* `yAxis` */ 		yAxis,
 					/* `min` */ 		yAxis.minVal,
@@ -648,8 +748,6 @@
 					/* `margin` */ 		margin,
 					/* `padding` */		padding,
 				];
-
-				console.log(this.h);
 
 				if (func) {
 					func.apply(this, args);
