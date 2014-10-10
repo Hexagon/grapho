@@ -580,17 +580,20 @@ graphoObj8.addDataset({
                             //    line, scatter, area, bar
                             graphoObj9.addDataset({
                                 type: 'area',
-                                x: { scale: true, name: "Text on pri x axis"},
-                                y: { scale: true, name: "Text on pri y axis"},
+                                x: { scale: true, name: "Text on primary x axis"},
+                                y: { scale: true, name: "Text on primary y axis"},
                                 data: [7, 6, 5, 4, 4, 4, 4, 7, 7, 7, 5, 5, 4, 3, 3, 4, 5, 6, 7, 7, 2, 8, 5, 5, 4, 2]
                             });
 
                             graphoObj9.addDataset({
-                                type: 'area',
-                                x: { axis: 2, scale: true, name: "Text on sec x axis"},
-                                y: { axis: 2, scale: true, name: "Text on sec y axis"},
-                                data: [7, 6, 5, 4, 4, 4, 4, 7, 7, 7, 5, 5, 4, 3, 3, 4, 5, 6, 7, 7, 2, 8, 5, 5, 4, 2]
+                                type: 'line',
+                                lineDots: true,
+                                lineSmooth: false,
+                                x: { axis: 2, scale: false, name: "Text on secondary x axis", continous: true },
+                                y: { axis: 2, scale: true, name: "Text on secondary y axis" },
+                                data: [ [0.5,1] , [1.0,3] , [9.5,2] , [10.0,3.3] ]
                             });
+
                         </script>
 
                     </div>
@@ -605,15 +608,14 @@ graphoObj8.addDataset({
 //    line, scatter, area, bar
 graphoObj9.addDataset({
     type: 'area',
-    x: { scale: true, name: "Text on pri x axis"},
-    y: { scale: true, name: "Text on pri y axis"},
+    x: { scale: true, name: "Text on primary x axis"},
+    y: { scale: true, name: "Text on primary y axis"},
     data: [7, 6, 5, 4, 4, 4, 4, 7, 7, 7, 5, 5, 4, 3, 3, 4, 5, 6, 7, 7, 2, 8, 5, 5, 4, 2]
 });
-
 graphoObj9.addDataset({
     type: 'area',
-    x: { axis: 2, scale: true, name: "Text on sec x axis"},
-    y: { axis: 2, scale: true, name: "Text on sec y axis"},
+    x: { axis:2, scale: false, name: "Text on secondary x axis"},
+    y: { axis:2, scale: true, name: "Text on secondary y axis"},
     data: [7, 6, 5, 4, 4, 4, 4, 7, 7, 7, 5, 5, 4, 3, 3, 4, 5, 6, 7, 7, 2, 8, 5, 5, 4, 2]
 });</code></pre>
             </article>
