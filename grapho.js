@@ -21,30 +21,6 @@
 		},
 		prot;
 
-	function isUntypedObject (it) {
-		var key;
-
-		if (!it || it.nodeType || it === it.window || toString.call(it) !== '[object Object]') {
-			return false;
-		}
-
-		try {
-			// Not own constructor property must be Object
-			if (it.constructor && !it.hasOwnProperty('constructor') && !it.constructor.prototype.hasOwnProperty('isPrototypeOf')) {
-				return false;
-			}
-		} catch (e) {
-			return false;
-		}
-
-		// Own properties are enumerated firstly, so to speed up, if last one is own, then all properties are own.
-		
-		// Why empty block? 
-		for (key in it) {}
-
-		return key === undef || it.hasOwnProperty(key); // jshint ignore:line
-	}
-
 	function unique (ain) {
 	   var u = {}, a = [];
 	   for (var i = 0, l = ain.length; i < l; ++i) {
@@ -57,13 +33,20 @@
 	   return a;
 	}
 
-	function merge (target, source) {
-		var name;
+	function merge (target, source, recurse) {
+		// Added to always get a true deep copy
+		if(recurse === undefined) target = merge({},target,true);
 
+		var name;
+	
 		for (name in source) {
 			if (source[name] !== undef) {
-				if (target[name] && toString.call(target[name]) === '[object Object]' && isUntypedObject(source[name])) {
-					merge(target[name], source[name]);
+				if (target[name] && toString.call(target[name]) === '[object Object]') {
+					// Changed to get a true deep copy
+					// From:
+					//   merge(target[name], source[name])
+					// To: 
+					target[name] = merge(merge({},target[name]), source[name],true);
 				} else {
 					target[name] = source[name];
 				}
@@ -89,6 +72,45 @@
 		this.container = {
 			width: 'auto',
 			height: 'auto'
+		};
+
+		this.datasetDefaults = {
+
+			type: 'line', // line || scatter || area || bar
+
+			x: { axis: 1 },
+			y: { axis: 1 },
+
+			// type: 'line' or 'area'
+			lineWidth: 2,
+			lineSmooth: true,
+			strokeStyle: '#9494BA',
+			fillStyle: '#121612',
+			lineDots: false,
+
+			// type: scatter || lineDots: true
+			dotWidth: 4,
+
+			// type: 'bar'
+			barWidthPrc: 90
+
+		};
+
+		this.axisDefaults = {
+			min: 'auto',
+			max: 'auto',
+			scale: false,
+			name: undefined,
+			font: '10px Droid Sans',
+			continouos: true,
+			majorTickHeight: 3,
+			minorTickHeight: 2,
+			gridLines: false,
+			step: Infinity,
+			minVal: Infinity,
+			maxVal: -Infinity,
+			center: 0,
+			values: []
 		};
 
 		// If the user has defined a parent element in the settings object,
@@ -124,90 +146,35 @@
 	prot  = Grapho.prototype;
 
 	/**
-	 * Check that y axis exists, if not, initiate it
+	 * Check that axis exists, if not, initiate it
 	 * @param  {Integer} index Axis index, starting from 1
 	 * @return {Object}                `this`
 	 */
-	prot.initYAxis = function (props) {
-
-		var defaults = {
-				min: 'auto',
-				max: 'auto',
-				scale: false,
-				name: undefined,
-				font: '10px Droid Sans',
-				continous: true,
-				majorTickHeight: 3,
-				minorTickHeight: 2,
-				step: Infinity,
-				minVal: Infinity,
-				maxVal: -Infinity,
-				center: 0,
-				values: []
-			},
+	prot.initAxis = function (props,dest) {
+		var defaults = this.axisDefaults,
 			index = props.axis;
 
 		if (typeof index === 'number' && isFinite(index) && index % 1 ===0) {
 
-			if (this.yAxises[index] === undef) {
+			if (dest[index] === undef) {
 
 				// Merge properties, if passed
 				if (typeof props === 'object') {
 					defaults = merge(defaults, props);
 				}
 
-				this.yAxises[index] = defaults;
+				dest[index] = defaults;
 
 			} else {
 				// Merge current with new settings, if passed
 				if (typeof props === 'object') {
 
-					defaults = merge(this.yAxises[index], props);
-					this.yAxises[index] = defaults;
+					defaults = merge(dest[index], props);
+					dest[index] = defaults;
 
 				}
 			}
 		}
-
-		// Chain
-		return this;
-	};
-
-	/**
-	 * Check that x axis exists, if not, initiate it
-	 * @param  {Integer} index Axis index, starting from 1
-	 * @return {Object} `this`
-	 */
-	prot.initXAxis = function (props) {
-		var defaults = {
-				min: 'auto',
-				max: 'auto',
-				scale: false,
-				name: undefined,
-				font: '10px Droid Sans',
-				majorTickHeight: 3,
-				minorTickHeight: 2,
-				continous: false,
-				step: Infinity,
-				minVal: Infinity,
-				maxVal: -Infinity,
-				values: []
-			},
-			index = props.axis;
-
-		if (typeof index === 'number' && isFinite(index) && index % 1 === 0) {
-			if (typeof props === 'object') {
-				if (this.xAxises[index] === undef) {
-					defaults = merge(defaults, props);
-				} else {
-					defaults = merge(this.xAxises[index], props);
-				}
-			}
-
-			this.xAxises[index] = defaults;
-		}
-		
-		// ToDo: Merge values
 
 		// Chain
 		return this;
@@ -229,26 +196,7 @@
 		}
 
 		// Define some reasonable defaults for each dataset
-		var defaults = {
-
-			type: 'line', // line || scatter || area || bar
-
-			x: { axis: 1 },
-			y: { axis: 1 },
-
-			// type: 'line' or 'area'
-			lineWidth: 2,
-			lineSmooth: true,
-			strokeStyle: '#9494BA',
-			fillStyle: '#121612',
-			lineDots: false,
-
-			// type: scatter || lineDots: true
-			dotWidth: 4,
-
-			// type: 'bar'
-			barWidthPrc: 90 
-		};
+		var defaults = this.datasetDefaults;
 
 		// `dataset` can be either an array or an object.
 		if (datasetIsArray) {
@@ -258,8 +206,8 @@
 		}
 
 		// Make sure the axis exists
-		this.initYAxis(defaults.y);
-		this.initXAxis(defaults.x);
+		this.initAxis(defaults.y,this.yAxises);
+		this.initAxis(defaults.x,this.xAxises);
 
 		// Push dataset to axis
 		this.pushDataset(defaults);
@@ -400,7 +348,7 @@
 			for ( ; i < to; i++) {
 				if ((point = data[i])) {
 
-					pxp = xAxis.continous ? (point[0] - xAxis.minVal) / (xAxis.maxVal - xAxis.minVal) : xAxis.values.indexOf(parseFloat([point[0]])) / xAxis.values.length;
+					pxp = xAxis.continouos ? (point[0] - xAxis.minVal) / (xAxis.maxVal - xAxis.minVal) : xAxis.values.indexOf(parseFloat([point[0]])) / xAxis.values.length;
 
 					px = round(padding[1] + margin + ((innerWidth-stop) * pxp) + stop / 2);
 					py = round(padding[0] + margin + innerHeight - (point[1] - min) / (max - min) * innerHeight);
@@ -410,7 +358,7 @@
 						ctx.moveTo((fpx = px), py);
 					} else if (dataset.lineSmooth && i < data.length - 1) {
 						next = data[i + 1];
-						npxp = xAxis.continous ? (next[0] - xAxis.minVal) / (xAxis.maxVal - xAxis.minVal) : xAxis.values.indexOf(parseFloat([next[0]])) / xAxis.values.length;
+						npxp = xAxis.continouos ? (next[0] - xAxis.minVal) / (xAxis.maxVal - xAxis.minVal) : xAxis.values.indexOf(parseFloat([next[0]])) / xAxis.values.length;
 						ctx.quadraticCurveTo(
 							px, // The x-coordinate of the Bézier control point
 							py, // The y-coordinate of the Bézier control point
@@ -451,11 +399,11 @@
 		 */
 		function renderScatter (ctx, dataset, data, i, to, stop, xAxis, yAxis, min, max, innerHeight, innerWidth, margin, padding) {
 			var point, pxp;
-				
+
 			for ( ; i < to; i++) {
 				// We might need to skip some points that are not in the dataset
 				if ((point = data[i])) {
-					pxp = xAxis.continous ? (point[0] - xAxis.minVal) / (xAxis.maxVal - xAxis.minVal) : xAxis.values.indexOf(parseFloat([point[0]])) / xAxis.values.length;
+					pxp = xAxis.continouos ? (point[0] - xAxis.minVal) / (xAxis.maxVal - xAxis.minVal) : xAxis.values.indexOf(parseFloat([point[0]])) / xAxis.values.length;
 					ctx.beginPath();
 			     	ctx.arc(
 			     		round(padding[1] + margin + ((innerWidth-stop) * pxp) + stop/2), // The x-coordinate of the center of the circle
@@ -495,7 +443,7 @@
 				// We might need to skip some points that are not in the dataset
 				if ((point = data[i])) {
 
-					pxp = xAxis.continous ? (point[0] - xAxis.minVal) / (xAxis.maxVal - xAxis.minVal) : xAxis.values.indexOf(parseFloat([point[0]])) / xAxis.values.length;
+					pxp = xAxis.continouos ? (point[0] - xAxis.minVal) / (xAxis.maxVal - xAxis.minVal) : xAxis.values.indexOf(parseFloat([point[0]])) / xAxis.values.length;
 
 					bt = (point[1] <= center) ? center : point[1];
 					bb = (point[1] > center) ? center : point[1];
@@ -521,6 +469,8 @@
 				args = [],
 				xAxis,
 				yAxis,
+				axis,
+				axises,
 				margin,
 				padding = [], 	// 0 = top, 1 = left, 2 = right, 3 = bottom
 				used = [],		// Temprorary storage for space used, same as above
@@ -532,52 +482,25 @@
 
 			padding[0] = padding[1] = padding[2] = padding[3] = used[0] = used[1] = used[2] = used[3] = 0;
 
-
-			// Measure axises, we need to do this first, to work out how much space they'll take
-			// 
-			// Hmmm, derp...
-			//  
+			// Measure space usage on axises, we need to do this before drawing anything
 			i = 0;
 			while ((dataset = this.datasets[i++])) {
-
-				yAxis = this.yAxises[dataset.y.axis];
-				xAxis = this.xAxises[dataset.x.axis];
-
-				if (xAxis.scale) {
-					temp = (xAxis.majorTickHeight > xAxis.minorTickHeight) ? xAxis.majorTickHeight : xAxis.minorTickHeight + 2;
-					// Even or odd? Odd is placed at bottom, even at top
-					if (dataset.x.axis % 2) {
-						padding[3] += temp;
-					} else {
-						padding[0] += temp;
+				axises = [[this.yAxises[dataset.y.axis],1,2],[this.xAxises[dataset.x.axis],3,0]];
+				for (axis in axises) {
+					axis = axises[axis];
+					if (axis[0].scale) {
+						temp = (axis[0].majorTickHeight > axis[0].minorTickHeight) ? axis[0].majorTickHeight : axis[0].minorTickHeight + 2;
+						if (axis[0].axis % 2) 
+							padding[axis[1]] += temp;
+						else 
+							padding[axis[2]] += temp;
 					}
-				}
-
-				if (xAxis.name) {
-					temp = parseInt(yAxis.font.split(' ')[0].replace('px', ''))+2;
-					if (dataset.x.axis % 2) {
-						padding[3] += temp;
-					} else {
-						padding[0] += temp;
-					}
-				}
-
-				if (yAxis.scale) {
-					// Even or odd? Even is placed at right, odd at left
-					temp = (yAxis.majorTickHeight > yAxis.minorTickHeight) ? yAxis.majorTickHeight : yAxis.minorTickHeight + 2;
-					if (dataset.y.axis % 2) {
-						padding[1] += temp;
-					} else {
-						padding[2] += temp;
-					}
-				}
-
-				if (yAxis.name) {
-					temp = parseInt(yAxis.font.split(' ')[0].replace('px', ''))+2;
-					if (dataset.y.axis % 2) {
-						padding[1] += temp;
-					} else {
-						padding[2] += temp;
+					if (axis[0].name) {
+						temp = parseInt(axis[0].font.split(' ')[0].replace('px', ''))+2;
+						if (axis[0].axis % 2)
+							padding[axis[1]] += temp;
+						else
+							padding[axis[2]] += temp;
 					}
 				}
 
@@ -585,29 +508,45 @@
 
 			// Now when we know accurately how much space each axis will take, we can begin drawing
 
-			// 
-			// DEEERP
-			//  
-
+			// vvvv DEEERP, experimental, this needs to be refactored vvvv
 			i = 0;
 			while ((dataset = this.datasets[i++])) {
 				yAxis = this.yAxises[dataset.y.axis];
 				xAxis = this.xAxises[dataset.x.axis];
 
-				xSteps = xAxis.continous ? Math.round((xAxis.maxVal - xAxis.minVal) / xAxis.step) : xAxis.values.length;
-				ySteps = yAxis.continous ? Math.round((yAxis.maxVal - yAxis.minVal) / yAxis.step) : yAxis.values.length;
+				xSteps = xAxis.continouos ? Math.round((xAxis.maxVal - xAxis.minVal) / xAxis.step) : xAxis.values.length;
+				ySteps = yAxis.continouos ? Math.round((yAxis.maxVal - yAxis.minVal) / yAxis.step) : yAxis.values.length;
 
+				// Names
 				if (xAxis.name) {
 					this.ctx.font=xAxis.font;
 					temp = parseInt(this.ctx.font.split(' ')[0].replace('px', ''))+2;
 					this.ctx.fillStyle='#FFFFFF';
 					if (dataset.x.axis % 2) {
-						this.ctx.fillText(xAxis.name,this.w/2-this.ctx.measureText(xAxis.name).width/2,this.h-temp/5-used[3]);
+						temp = this.h-temp/5-used[3];
 						used[3]+=temp;
 					} else {
-						this.ctx.fillText(xAxis.name,this.w/2-this.ctx.measureText(xAxis.name).width/2,used[0]+temp/3*2.1);
+						temp = used[0]+temp/3*2.1;
 						used[0]+=temp;
 					}
+					this.ctx.fillText(xAxis.name,this.w/2-this.ctx.measureText(xAxis.name).width/2,temp);
+				}
+				if (yAxis.name) {
+					this.ctx.font=yAxis.font;
+					temp = parseInt(this.ctx.font.split(' ')[0].replace('px', ''))+2;
+					this.ctx.fillStyle='#FFFFFF';
+					if (dataset.y.axis % 2) {
+						temp = used[1]+temp/3*2.1;
+						used[1]+=temp;
+					} else {
+						temp = this.w-temp/5-used[2];
+						used[2]+=temp;
+					}
+					this.ctx.save();
+					this.ctx.translate(temp,this.h/2+this.ctx.measureText(yAxis.name).width/2);
+					this.ctx.rotate(-0.5*Math.PI);
+					this.ctx.fillText(yAxis.name,0,0);
+					this.ctx.restore();
 				}
 
 				if (xAxis.scale) {
@@ -619,14 +558,11 @@
 						this.ctx.lineWidth = 1;
 						this.ctx.strokeStyle = '#FFFFFF';
 						this.ctx.stroke();
-
 						for (j=0; j<=xSteps; j++) {
 							x = j/xSteps;
 							this.ctx.beginPath();
 							this.ctx.moveTo(Math.round(padding[1]+1+x*(this.w-padding[1]-padding[2]))+0.5,this.h-padding[3]+0.5);
 							this.ctx.lineTo(Math.round(padding[1]+1+x*(this.w-padding[1]-padding[2]))+0.5,this.h-padding[3]+0.5+xAxis.majorTickHeight);
-							this.ctx.lineWidth = 1;
-							this.ctx.strokeStyle = '#FFFFFF';
 							this.ctx.stroke();
 						}
 
@@ -638,37 +574,27 @@
 						this.ctx.lineWidth = 1;
 						this.ctx.strokeStyle = '#FFFFFF';
 						this.ctx.stroke();
-
 						for (j=0; j<=xSteps; j++) {
 							x = j/xSteps;
 							this.ctx.beginPath();
 							this.ctx.moveTo(Math.round(padding[1]+1+x*(this.w-padding[1]-padding[2]))+0.5,padding[0]-0.5);
 							this.ctx.lineTo(Math.round(padding[1]+1+x*(this.w-padding[1]-padding[2]))+0.5,padding[0]-0.5-xAxis.majorTickHeight);
-							this.ctx.lineWidth = 1;
-							this.ctx.strokeStyle = '#FFFFFF';
 							this.ctx.stroke();
 						}
 					}
 				}
 
-				if (yAxis.name) {
-					this.ctx.font=yAxis.font;
-					temp = parseInt(this.ctx.font.split(' ')[0].replace('px', ''))+2;
-					this.ctx.fillStyle='#FFFFFF';
-					if (dataset.x.axis % 2) {
-						this.ctx.save();
-						this.ctx.translate(used[1]+temp/3*2.1,this.h/2+this.ctx.measureText(yAxis.name).width/2);
-						this.ctx.rotate(-0.5*Math.PI);
-						this.ctx.fillText(yAxis.name,0,0);
-						this.ctx.restore();
-						used[1]+=temp;
-					} else {
-						this.ctx.save();
-						this.ctx.translate(this.w-temp/5-used[2],this.h/2+this.ctx.measureText(yAxis.name).width/2);
-						this.ctx.rotate(-0.5*Math.PI);
-						this.ctx.fillText(yAxis.name,0,0);
-						this.ctx.restore();
-						used[2]+=temp;
+				if (xAxis.gridLines) {
+					this.ctx.lineWidth = 1;
+					this.ctx.strokeStyle = '#666666';
+					for (j=0; j<=xSteps; j++) {
+						x = j/xSteps;
+						if (xAxis.scale) {
+							this.ctx.beginPath();
+							this.ctx.moveTo(Math.round(padding[1]+1+x*(this.w-padding[1]-padding[2]))+0.5,padding[0]+0.5);
+							this.ctx.lineTo(Math.round(padding[1]+1+x*(this.w-padding[1]-padding[2]))+0.5,this.h-padding[3]-0.5);
+							this.ctx.stroke();
+						}
 					}
 				}
 
@@ -680,17 +606,15 @@
 						this.ctx.lineWidth = 1;
 						this.ctx.strokeStyle = '#FFFFFF';
 						this.ctx.stroke();
-
 						for (j=0; j<=ySteps; j++) {
 							x = j/ySteps;
-							this.ctx.beginPath();
-							this.ctx.moveTo(padding[1]-0.5-1,this.h-padding[3]-0.5-x*(this.h-padding[0]-padding[3]));
-							this.ctx.lineTo(padding[1]-0.5-1-yAxis.majorTickHeight,this.h-padding[3]-0.5-x*(this.h-padding[0]-padding[3]));
-							this.ctx.lineWidth = 1;
-							this.ctx.strokeStyle = '#FFFFFF';
-							this.ctx.stroke();
+							if (yAxis.scale) {
+								this.ctx.beginPath();
+								this.ctx.moveTo(padding[1]-0.5-1,this.h-padding[3]-0.5-x*(this.h-padding[0]-padding[3]));
+								this.ctx.lineTo(padding[1]-0.5-1-yAxis.majorTickHeight,this.h-padding[3]-0.5-x*(this.h-padding[0]-padding[3]));
+								this.ctx.stroke();
+							}
 						}
-
 					} else {
 						this.ctx.beginPath();
 						this.ctx.moveTo(this.w-padding[2]+0.5,padding[0]);
@@ -698,21 +622,30 @@
 						this.ctx.lineWidth = 1;
 						this.ctx.strokeStyle = '#FFFFFF';
 						this.ctx.stroke();
-
 						for (j=0; j<=ySteps; j++) {
 							x = j/ySteps;
 							this.ctx.beginPath();
 							this.ctx.moveTo(this.w-padding[2]+0.5+1,this.h-padding[3]-0.5-x*(this.h-padding[0]-padding[3]));
 							this.ctx.lineTo(this.w-padding[2]+0.5+1+yAxis.majorTickHeight,this.h-padding[3]-0.5-x*(this.h-padding[0]-padding[3]));
-							this.ctx.lineWidth = 1;
-							this.ctx.strokeStyle = '#FFFFFF';
 							this.ctx.stroke();
 						}
 
 					}
 				}
 
-
+				if (yAxis.gridLines) {
+					this.ctx.lineWidth = 1;
+					this.ctx.strokeStyle = '#666666';
+					for (j=0; j<=ySteps; j++) {
+						x = j/ySteps;
+						if (yAxis.scale) {
+							this.ctx.beginPath();
+							this.ctx.moveTo(padding[1]+0.5,Math.floor(this.h-padding[3]-x*(this.h-padding[0]-padding[3]))+0.5);
+							this.ctx.lineTo(this.w-padding[2]+0.5,Math.floor(this.h-padding[3]-x*(this.h-padding[0]-padding[3]))+0.5);
+							this.ctx.stroke();
+						}
+					}
+				}
 			}
 
 			// Draw charts
@@ -738,7 +671,7 @@
 					/* `data` */	 	dataset.data,
 					/* `i` */ 			0,
 					/* `to` */ 			dataset.data.length,
-					/* `stop` */		xAxis.continous ? Math.ceil((xAxis.maxVal - xAxis.minVal) / xAxis.step) : xAxis.values.length,
+					/* `stop` */		xAxis.continouos ? Math.ceil((xAxis.maxVal - xAxis.minVal) / xAxis.step) : xAxis.values.length,
 					/* `xAxis` */ 		xAxis,
 					/* `yAxis` */ 		yAxis,
 					/* `min` */ 		yAxis.minVal,

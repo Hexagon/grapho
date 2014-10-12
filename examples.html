@@ -340,7 +340,7 @@ graphoObj5.addDataset({
                                 type: 'line',
                                 lineDots: true,
                                 lineSmooth: false,
-                                x: { continous: false }, // Default value, just added for clarification
+                                x: { continouos: false }, // Default value, just added for clarification
                                 data: [ [0.5,1] , [1.0,3] , [1.5,2.5] , [2.0,1] ]
                             });
 
@@ -352,7 +352,7 @@ graphoObj5.addDataset({
                                 data: [ [5,-1] , [5.5,-3] , [6,-2] , [6.5,-3] ]
                             });
 
-                            // The default setting of x axises is to be non-continous
+                            // The default setting of x axises is to be non-continouos
                             // So the gap won't be shown.
 
                         </script>
@@ -370,7 +370,7 @@ graphoObj.addDataset({
     type: 'line',
     lineDots: true,
     lineSmooth: false,
-    x: { continous: false },
+    x: { continouos: false },
     data: [ [0.5,1] , [1.0,3] , [1.5,2.5] , [2.0,1] ]
 });
 
@@ -382,7 +382,7 @@ graphoObj.addDataset({
     data: [ [5,-1] , [5.5,-3] , [6,-2] , [6.5,-3] ]
 });
 
-// The default setting of x axises is to be non-continous
+// The default setting of x axises is to be non-continouos
 // So the gap won't be shown.</code></pre>
             </article>
         </section>
@@ -409,12 +409,13 @@ graphoObj.addDataset({
                                 type: 'line',
                                 lineDots: true,
                                 lineSmooth: false,
-                                x: { continous: true }, // true here!
+                                x: { continouos: true }, // true here!
                                 data: [ [0.5,1] , [1.0,3] , [1.5,2.5] , [2.0,1] ]
                             });
 
                             graphoObj7.addDataset({
                                 type: 'line',
+                                strokeStyle: '#F0F066',
                                 lineDots: true,
                                 lineSmooth: false,
                                 data: [ [5,-1] , [5.5,-3] , [6,-2] , [6.5,-3] ]
@@ -437,12 +438,13 @@ graphoObj.addDataset({
     type: 'line',
     lineDots: true,
     lineSmooth: false,
-    x: { continous: true }, // true here!
+    x: { continouos: true }, // true here!
     data: [ [0.5,1] , [1.0,3] , [1.5,2.5] , [2.0,1] ]
 });
 
-graphoObj.addDataset({
+graphoObj7.addDataset({
     type: 'line',
+    strokeStyle: '#F0F066',
     lineDots: true,
     lineSmooth: false,
     data: [ [5,-1] , [5.5,-3] , [6,-2] , [6.5,-3] ]
@@ -469,28 +471,11 @@ graphoObj.addDataset({
                             // Create grapho object, pass a parameter pointing to the destination element
                             var graphoObj8 = new Grapho( { place: 'example-8' } );
 
-                            // Ok, now we crate a scatter chart in default mode, which is generally wrong
+                            // Ok, now we crate a red scatter chart in non continouos mode, which is generally wrong
                             graphoObj8.addDataset({
                                 type: 'scatter',
-                                data: [ 
-                                    [0.5,0.1] , [1.2,1] , [0.5,1.5] , [2.3,3] ,
-                                    [0.6,3.2] , [1.4,2] , [1.5,3.5] , [2.4,4] ,
-                                    [0.7,2.3] , [1.6,3] , [2.5,2.5] , [2.5,5] ,
-                                    [0.8,3.4] , [1.8,1] , [3.5,4.5] , [2.6,2] ,
-                                    [0.9,2.5] , [2.0,2] , [4.5,2.5] , [2.7,3] ,
-                                    [0.0,3.6] , [2.2,3] , [5.5,3.5] , [2.8,4] ,
-                                    [0.1,2.7] , [2.4,1] , [6.5,1.5] , [2.9,2] ,
-                                    [0.2,3.8] , [2.6,2] , [7.5,3.5] , [2.0,3] ,
-                                    [0.3,2.9] , [2.8,3] , [8.5,2.5] , [2.1,4] ,
-                                    [0.4,3.0] , [3.0,1] , [9.5,1.5] , [2.2,2]
-                                ]
-                            });
-
-                            // .. and now the correct way, with a second, continouos x axis in red, notice the difference
-                            graphoObj8.addDataset({
-                                type: 'scatter',
-                                x: { axis: 2, continous: true },
                                 strokeStyle: '#FF6666',
+                                x: { continouos: false },
                                 data: [ 
                                     [0.5,0.1] , [1.2,1] , [0.5,1.5] , [2.3,3] ,
                                     [0.6,3.2] , [1.4,2] , [1.5,3.5] , [2.4,4] ,
@@ -505,8 +490,27 @@ graphoObj.addDataset({
                                 ]
                             });
 
-                            // The blue dots are printed with even spaces regardless of the actual distance in x,
-                            // whilst the red dots are printed on an continous axis with their actual distance
+                            // .. and now the correct way, with a second, x axis in yellow, notice the difference
+                            graphoObj8.addDataset({
+                                type: 'scatter',
+                                x: { axis: 2},
+                                strokeStyle: '#F0F666',
+                                data: [ 
+                                    [0.5,0.1] , [1.2,1] , [0.5,1.5] , [2.3,3] ,
+                                    [0.6,3.2] , [1.4,2] , [1.5,3.5] , [2.4,4] ,
+                                    [0.7,2.3] , [1.6,3] , [2.5,2.5] , [2.5,5] ,
+                                    [0.8,3.4] , [1.8,1] , [3.5,4.5] , [2.6,2] ,
+                                    [0.9,2.5] , [2.0,2] , [4.5,2.5] , [2.7,3] ,
+                                    [0.0,3.6] , [2.2,3] , [5.5,3.5] , [2.8,4] ,
+                                    [0.1,2.7] , [2.4,1] , [6.5,1.5] , [2.9,2] ,
+                                    [0.2,3.8] , [2.6,2] , [7.5,3.5] , [2.0,3] ,
+                                    [0.3,2.9] , [2.8,3] , [8.5,2.5] , [2.1,4] ,
+                                    [0.4,3.0] , [3.0,1] , [9.5,1.5] , [2.2,2]
+                                ]
+                            });
+
+                            // The red dots are printed with even spaces regardless of the actual distance in x,
+                            // whilst the yellow dots are printed on an continouos axis with their actual distance
 
                         </script>
 
@@ -516,30 +520,13 @@ graphoObj.addDataset({
             </article>
             <article>
                 <h3><span class="tertiary">Source code</span></h3>
-                <pre><code data-language="javascript">var graphoObj8 = new Grapho( { place: 'example-8' } );
+                <pre><code data-language="javascript">var graphoObj = new Grapho( { place: 'example-8' } );
 
-// Ok, now we crate a scatter chart in default mode, which is generally wrong
-graphoObj8.addDataset({
+// Ok, now we crate a red scatter chart in non continouos mode, which is generally wrong
+graphoObj.addDataset({
     type: 'scatter',
-    data: [ 
-        [0.5,0.1] , [1.2,1] , [0.5,1.5] , [2.3,3] ,
-        [0.6,3.2] , [1.4,2] , [1.5,3.5] , [2.4,4] ,
-        [0.7,2.3] , [1.6,3] , [2.5,2.5] , [2.5,5] ,
-        [0.8,3.4] , [1.8,1] , [3.5,4.5] , [2.6,2] ,
-        [0.9,2.5] , [2.0,2] , [4.5,2.5] , [2.7,3] ,
-        [0.0,3.6] , [2.2,3] , [5.5,3.5] , [2.8,4] ,
-        [0.1,2.7] , [2.4,1] , [6.5,1.5] , [2.9,2] ,
-        [0.2,3.8] , [2.6,2] , [7.5,3.5] , [2.0,3] ,
-        [0.3,2.9] , [2.8,3] , [8.5,2.5] , [2.1,4] ,
-        [0.4,3.0] , [3.0,1] , [9.5,1.5] , [2.2,2]
-    ]
-});
-
-// .. and now the correct way, with a second, continouos x axis in red, notice the difference
-graphoObj8.addDataset({
-    type: 'scatter',
-    x: { axis: 2, continous: true },
     strokeStyle: '#FF6666',
+    x: { continouos: false },
     data: [ 
         [0.5,0.1] , [1.2,1] , [0.5,1.5] , [2.3,3] ,
         [0.6,3.2] , [1.4,2] , [1.5,3.5] , [2.4,4] ,
@@ -554,8 +541,27 @@ graphoObj8.addDataset({
     ]
 });
 
-// The blue dots are printed with even spaces regardless of the actual distance in x,
-// whilst the red dots are printed on an continous axis with their actual distance</code></pre>
+// .. and now the correct way, with a second, x axis in yellow, notice the difference
+graphoObj.addDataset({
+    type: 'scatter',
+    x: { axis: 2},
+    strokeStyle: '#F0F666',
+    data: [ 
+        [0.5,0.1] , [1.2,1] , [0.5,1.5] , [2.3,3] ,
+        [0.6,3.2] , [1.4,2] , [1.5,3.5] , [2.4,4] ,
+        [0.7,2.3] , [1.6,3] , [2.5,2.5] , [2.5,5] ,
+        [0.8,3.4] , [1.8,1] , [3.5,4.5] , [2.6,2] ,
+        [0.9,2.5] , [2.0,2] , [4.5,2.5] , [2.7,3] ,
+        [0.0,3.6] , [2.2,3] , [5.5,3.5] , [2.8,4] ,
+        [0.1,2.7] , [2.4,1] , [6.5,1.5] , [2.9,2] ,
+        [0.2,3.8] , [2.6,2] , [7.5,3.5] , [2.0,3] ,
+        [0.3,2.9] , [2.8,3] , [8.5,2.5] , [2.1,4] ,
+        [0.4,3.0] , [3.0,1] , [9.5,1.5] , [2.2,2]
+    ]
+});
+
+// The red dots are printed with even spaces regardless of the actual distance in x,
+// whilst the yellow dots are printed on an continouos axis with their actual distance</code></pre>
             </article>
         </section>
 
@@ -580,8 +586,8 @@ graphoObj8.addDataset({
                             //    line, scatter, area, bar
                             graphoObj9.addDataset({
                                 type: 'area',
-                                x: { scale: true, name: "Text on primary x axis"},
-                                y: { scale: true, name: "Text on primary y axis"},
+                                x: { scale: true, gridLines: true, name: "Text on primary x axis"},
+                                y: { scale: true, gridLines: true, name: "Text on primary y axis"},
                                 data: [7, 6, 5, 4, 4, 4, 4, 7, 7, 7, 5, 5, 4, 3, 3, 4, 5, 6, 7, 7, 2, 8, 5, 5, 4, 2]
                             });
 
@@ -589,8 +595,8 @@ graphoObj8.addDataset({
                                 type: 'line',
                                 lineDots: true,
                                 lineSmooth: false,
-                                x: { axis: 2, scale: false, name: "Text on secondary x axis", continous: true },
-                                y: { axis: 2, scale: true, name: "Text on secondary y axis" },
+                                x: { axis: 2, scale: false, continouos: true },
+                                y: { axis: 2, scale: false, name: "Text on secondary y axis" },
                                 data: [ [0.5,1] , [1.0,3] , [9.5,2] , [10.0,3.3] ]
                             });
 
