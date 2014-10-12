@@ -460,8 +460,8 @@
 		 * @return {Object} `this`
 		 */
 		return function () {
-			var i, j, x,
-				xSteps, ySteps,
+			var i, j, x, k,
+				xSteps, ySteps, steps, h, w,
 				func,
 				dataset,
 				args = [],
@@ -502,7 +502,6 @@
 						}
 					}
 				}
-
 			}
 
 			// Now when we know accurately how much space each axis will take, we can begin drawing
@@ -510,139 +509,130 @@
 			// vvvv DEEERP, experimental, this needs to be refactored vvvv
 			i = 0;
 			while ((dataset = this.datasets[i++])) {
-				yAxis = this.yAxises[dataset.y.axis];
-				xAxis = this.xAxises[dataset.x.axis];
+				// Array of Axis,left padding idx, right padding idx and wether to rotate
+				axises = [[this.yAxises[dataset.y.axis],1,2,3,0,true],[this.xAxises[dataset.x.axis],3,0,1,2,false]];
+				for (j=0; j<axises.length;j++) {
+					axis = axises[j];
+					steps = axis.continouos ? Math.ceil((axis[0].maxVal - axis[0].minVal) / axis[0].step) : axis[0].values.length;
 
-				xSteps = xAxis.continouos ? Math.round((xAxis.maxVal - xAxis.minVal) / xAxis.step) : xAxis.values.length;
-				ySteps = yAxis.continouos ? Math.round((yAxis.maxVal - yAxis.minVal) / yAxis.step) : yAxis.values.length;
+					h = (j===0) ? this.w : this.h;
+					w = (j===0) ? this.h : this.w;
 
-				// Names
-				if (xAxis.name) {
-					this.ctx.font=xAxis.font;
-					temp = parseInt(this.ctx.font.split(' ')[0].replace('px', ''))+2;
-					this.ctx.fillStyle='#FFFFFF';
-					if (dataset.x.axis % 2) {
-						temp = this.h-temp/5-used[3];
-						used[3]+=temp;
-					} else {
-						temp = used[0]+temp/3*2.1;
-						used[0]+=temp;
+					// Rotate workspace, if working on a y axises
+					if( axis[5] ) {
+						this.ctx.save();
+						this.ctx.translate(0,w);
+						this.ctx.rotate(-0.5*Math.PI);
 					}
-					this.ctx.fillText(xAxis.name,this.w/2-this.ctx.measureText(xAxis.name).width/2,temp);
-				}
-				if (yAxis.name) {
-					this.ctx.font=yAxis.font;
-					temp = parseInt(this.ctx.font.split(' ')[0].replace('px', ''))+2;
-					this.ctx.fillStyle='#FFFFFF';
-					if (dataset.y.axis % 2) {
-						temp = used[1]+temp/3*2.1;
-						used[1]+=temp;
-					} else {
-						temp = this.w-temp/5-used[2];
-						used[2]+=temp;
-					}
-					this.ctx.save();
-					this.ctx.translate(temp,this.h/2+this.ctx.measureText(yAxis.name).width/2);
-					this.ctx.rotate(-0.5*Math.PI);
-					this.ctx.fillText(yAxis.name,0,0);
-					this.ctx.restore();
-				}
 
-				if (xAxis.gridLines) {
-					this.ctx.lineWidth = 1;
-					this.ctx.strokeStyle = '#666666';
-					for (j=0; j<=xSteps; j++) {
-						x = j/xSteps;
-						if (xAxis.scale) {
+					if (axis[0].name) {
+						this.ctx.font=axis.font;
+						temp = parseInt(this.ctx.font.split(' ')[0].replace('px', ''));
+						this.ctx.fillStyle='#FFFFFF';
+						if ((!(axis[0].axis % 2) && axis[5]) || (axis[0].axis % 2) && !axis[5]) {
+							used[axis[1]]+=temp;
+							temp = h-used[axis[1]]+temp/1.3;
+						} else {
+							used[axis[2]]+=temp;
+							temp = used[axis[2]]-temp/4;
+						}
+						this.ctx.fillText(axis[0].name,w/2-this.ctx.measureText(axis[0].name).width/2,temp);
+					}
+
+					if (axis[0].gridLines) {
+						this.ctx.lineWidth = 1;
+						this.ctx.strokeStyle = '#666666';
+						for (k=0; k<steps; k++) {
+							x = k/steps;
 							this.ctx.beginPath();
-							this.ctx.moveTo(Math.round(padding[1]+1+x*(this.w-padding[1]-padding[2]))+0.5,padding[0]+0.5);
-							this.ctx.lineTo(Math.round(padding[1]+1+x*(this.w-padding[1]-padding[2]))+0.5,this.h-padding[3]-0.5);
+							if ((!(axis[0].axis % 2) && axis[5]) || (axis[0].axis % 2) && !axis[5]) {
+								this.ctx.moveTo(Math.round(padding[axis[3]]+x*(w-padding[axis[3]]-padding[axis[4]])),padding[axis[2]]);
+								this.ctx.lineTo(Math.round(padding[axis[3]]+x*(w-padding[axis[3]]-padding[axis[4]])),h-padding[axis[1]]);
+							} else {
+								this.ctx.moveTo(Math.round(padding[axis[3]]+x*(w-padding[axis[3]]-padding[axis[4]])),padding[axis[1]]);
+								this.ctx.lineTo(Math.round(padding[axis[3]]+x*(w-padding[axis[3]]-padding[axis[4]])),h-padding[axis[2]]);
+							}
 							this.ctx.stroke();
 						}
 					}
-				}
-				if (yAxis.gridLines) {
-					this.ctx.lineWidth = 1;
-					this.ctx.strokeStyle = '#666666';
-					for (j=0; j<=ySteps; j++) {
-						x = j/ySteps;
-						if (yAxis.scale) {
-							this.ctx.beginPath();
-							this.ctx.moveTo(padding[1]+0.5,Math.floor(this.h-padding[3]-x*(this.h-padding[0]-padding[3]))+0.5);
-							this.ctx.lineTo(this.w-padding[2]+0.5,Math.floor(this.h-padding[3]-x*(this.h-padding[0]-padding[3]))+0.5);
-							this.ctx.stroke();
-						}
-					}
-				}
 
-				if (xAxis.scale) {
-					// Primary X
-					if (dataset.x.axis % 2) {
+					if (axis[0].scale) {
+
+						// Base scale
 						this.ctx.beginPath();
-						this.ctx.moveTo(padding[1],this.h-padding[3]-0.5); // +/-0.5 is for compensating that lines are drawn "in between" pixels by default
-						this.ctx.lineTo(this.w-padding[2],this.h-padding[3]+0.5);
+						if (axis[5]) {
+							if((axis[0].axis % 2)) {
+								this.ctx.moveTo(padding[axis[3]],h-padding[axis[2]]);
+								this.ctx.lineTo(w-padding[axis[4]],h-padding[axis[2]]);
+							} else {
+								this.ctx.moveTo(padding[axis[3]],padding[axis[1]]);
+								this.ctx.lineTo(w-padding[axis[4]],padding[axis[1]]);
+							}
+						} else {
+							if((axis[0].axis % 2)) {
+								this.ctx.moveTo(padding[axis[3]],h-padding[axis[1]]); 
+								this.ctx.lineTo(w-padding[axis[4]],h-padding[axis[1]]);
+							} else {
+								this.ctx.moveTo(padding[axis[3]],padding[axis[2]]);
+								this.ctx.lineTo(w-padding[axis[4]],padding[axis[2]]);
+							}
+						}
 						this.ctx.lineWidth = 1;
 						this.ctx.strokeStyle = '#FFFFFF';
 						this.ctx.stroke();
-						for (j=0; j<=xSteps; j++) {
-							x = j/xSteps;
+
+						// Ticks
+						this.ctx.beginPath();
+						for (k=0; k<steps; k++) {
+							x = k/steps;
 							this.ctx.beginPath();
-							this.ctx.moveTo(Math.round(padding[1]+1+x*(this.w-padding[1]-padding[2]))+0.5,this.h-padding[3]+0.5);
-							this.ctx.lineTo(Math.round(padding[1]+1+x*(this.w-padding[1]-padding[2]))+0.5,this.h-padding[3]+0.5+xAxis.majorTickHeight);
+							if (axis[5]) {
+								if((axis[0].axis % 2)) {
+									this.ctx.moveTo(Math.round(padding[axis[3]]+x*(w-padding[axis[3]]-padding[axis[4]])),padding[axis[1]]);
+									this.ctx.lineTo(Math.round(padding[axis[3]]+x*(w-padding[axis[3]]-padding[axis[4]])),padding[axis[1]]-axis[0].majorTickHeight);
+								} else {
+									this.ctx.moveTo(Math.round(padding[axis[3]]+x*(w-padding[axis[3]]-padding[axis[4]])),h-padding[axis[2]]);
+									this.ctx.lineTo(Math.round(padding[axis[3]]+x*(w-padding[axis[3]]-padding[axis[4]])),h-padding[axis[2]]+axis[0].majorTickHeight);
+								}
+							} else {
+								if((axis[0].axis % 2)) {
+									this.ctx.moveTo(Math.round(padding[axis[3]]+x*(w-padding[axis[3]]-padding[axis[4]])),h-padding[axis[1]]);
+									this.ctx.lineTo(Math.round(padding[axis[3]]+x*(w-padding[axis[3]]-padding[axis[4]])),h-padding[axis[1]]+axis[0].majorTickHeight);
+								} else {
+									this.ctx.moveTo(Math.round(padding[axis[3]]+x*(w-padding[axis[3]]-padding[axis[4]])),padding[axis[2]]);
+									this.ctx.lineTo(Math.round(padding[axis[3]]+x*(w-padding[axis[3]]-padding[axis[4]])),padding[axis[2]]-axis[0].majorTickHeight);
+								}
+							}
+							this.ctx.lineWidth = 1;
+							this.ctx.strokeStyle = '#FFFFFF';
 							this.ctx.stroke();
 						}
-
-					// Secondary X
-					} else {
-						this.ctx.beginPath();
-						this.ctx.moveTo(padding[1],padding[0]-0.5);
-						this.ctx.lineTo(this.w-padding[2],padding[0]+0.5);
 						this.ctx.lineWidth = 1;
 						this.ctx.strokeStyle = '#FFFFFF';
 						this.ctx.stroke();
-						for (j=0; j<=xSteps; j++) {
-							x = j/xSteps;
+					}
+
+					if (axis[0].gridLines) {
+						this.ctx.lineWidth = 1;
+						this.ctx.strokeStyle = '#666666';
+						for (k=0; k<steps; k++) {
+							x = k/steps;
 							this.ctx.beginPath();
-							this.ctx.moveTo(Math.round(padding[1]+1+x*(this.w-padding[1]-padding[2]))+0.5,padding[0]-0.5);
-							this.ctx.lineTo(Math.round(padding[1]+1+x*(this.w-padding[1]-padding[2]))+0.5,padding[0]-0.5-xAxis.majorTickHeight);
+							if ((!(axis[0].axis % 2) && axis[5]) || (axis[0].axis % 2) && !axis[5]) {
+								this.ctx.moveTo(Math.round(padding[axis[3]]+x*(w-padding[axis[3]]-padding[axis[4]])),padding[axis[2]]);
+								this.ctx.lineTo(Math.round(padding[axis[3]]+x*(w-padding[axis[3]]-padding[axis[4]])),h-padding[axis[1]]);
+							} else {
+								this.ctx.moveTo(Math.round(padding[axis[3]]+x*(w-padding[axis[3]]-padding[axis[4]])),padding[axis[1]]);
+								this.ctx.lineTo(Math.round(padding[axis[3]]+x*(w-padding[axis[3]]-padding[axis[4]])),h-padding[axis[2]]);
+							}
 							this.ctx.stroke();
 						}
 					}
+
+					// De-rotate workspace
+					if (axis[5]) { this.ctx.restore(); }
+
 				}
-
-				if (yAxis.scale) {
-					if (dataset.y.axis % 2) {
-						this.ctx.beginPath();
-						this.ctx.moveTo(padding[1]-0.5,padding[0]-0.5);
-						this.ctx.lineTo(padding[1]-0.5,this.h-padding[3]);
-						this.ctx.lineWidth = 1;
-						this.ctx.strokeStyle = '#FFFFFF';
-						this.ctx.stroke();
-						for (j=0; j<=ySteps; j++) {
-							x = j/ySteps;
-							this.ctx.beginPath();
-							this.ctx.moveTo(padding[1]-0.5-1,this.h-padding[3]-0.5-x*(this.h-padding[0]-padding[3]));
-							this.ctx.lineTo(padding[1]-0.5-1-yAxis.majorTickHeight,this.h-padding[3]-0.5-x*(this.h-padding[0]-padding[3]));
-							this.ctx.stroke();
-						}
-					} else {
-						this.ctx.beginPath();
-						this.ctx.moveTo(this.w-padding[2]+0.5,padding[0]);
-						this.ctx.lineTo(this.w-padding[2]+0.5,this.h-padding[3]+0.5);
-						this.ctx.lineWidth = 1;
-						this.ctx.strokeStyle = '#FFFFFF';
-						this.ctx.stroke();
-						for (j=0; j<=ySteps; j++) {
-							x = j/ySteps;
-							this.ctx.beginPath();
-							this.ctx.moveTo(this.w-padding[2]+0.5+1,this.h-padding[3]-0.5-x*(this.h-padding[0]-padding[3]));
-							this.ctx.lineTo(this.w-padding[2]+0.5+1+yAxis.majorTickHeight,this.h-padding[3]-0.5-x*(this.h-padding[0]-padding[3]));
-							this.ctx.stroke();
-						}
-
-					}
-				}
-
 			}
 
 			// Draw charts
@@ -674,7 +664,7 @@
 					/* `min` */ 		yAxis.minVal,
 					/* `max` */ 		yAxis.maxVal,
 					/* `innerHeight` */ this.h - margin - padding[0] - padding[3],
-					/* `innerWidth` */ 	this.w - margin - padding[2] - padding[2],
+					/* `innerWidth` */ 	this.w - margin - padding[1] - padding[2],
 					/* `margin` */ 		margin,
 					/* `padding` */		padding,
 				];
