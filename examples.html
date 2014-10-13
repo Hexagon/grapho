@@ -215,9 +215,13 @@ graphoObj.addDataset({
                             // reg 0-255, green 0-255, blue 0-255, and finally alpha, 0.0-1.0
                             graphoObj4.addDataset({
                                 type: 'bar',
+                                x: { scale: true },
+                                y: { scale: true, center: 4 },
+                                lineSmooth: false,
                                 fillStyle: 'rgba(0,255,255,0.3)',
-                                data: [7, 6, 5, 4, 4, 4, 4, 7, 7, 7, 5, 5, 4, 3, 3, 4, 5, 6, 7, 7]
+                                data: [1, 6, 5, 3]
                             });
+                            //data: [7, 6, 5, 3, 2, 2, 2, 7, 7, 7, 5, 5, 4, 1, 3, 4, 5, 6, 7, 7]
 
                         </script>
 
@@ -569,7 +573,7 @@ graphoObj.addDataset({
             <article>
                 <h3>
                     <span class="secondary">Example 9 - </span>
-                    <span class="tertiary">Areachart with scales, ticks and stuff (Work in progress).</span>
+                    <span class="tertiary">Getting crazy wth scales, axises and stuff.</span>
                 </h3>
                 <div class="container w-100 h-1">
 
@@ -653,17 +657,120 @@ graphoObj.addDataset({
 
 // The default type is area, if you want to change that, you'll have to specify type, possible values are 
 //    line, scatter, area, bar
+
+// Primär (en på primär x, en på primär y)
 graphoObj9.addDataset({
     type: 'area',
-    x: { scale: true, name: "Text on primary x axis"},
-    y: { scale: true, name: "Text on primary y axis"},
+    x: { scale: true, gridLines: true, name: "Text on primary x axis"}, 
+    y: { scale: true, gridLines: true, name: "Text on primary y axis"},
+    data: [7, 6, 22, 4, 4, 4, 4, 7, 7, 7, 5, 5, 4, 3, 3, 4, 5, 6, 7, 7, 2, 8, 5, 5, 4, 2]
+});
+
+// Sekundär (en sekund primär x, en på på sekundär y)
+graphoObj9.addDataset({
+    type: 'line',
+    lineDots: true,
+    lineSmooth: false,
+    x: { axis: 2, scale: true, continouos: true, name: "Text on secondary x axis" },
+    y: { axis: 2, scale: true, name: "Text on secondary y axis" },
+    data: [ [0.5,1] , [1.0,3] , [9.5,39] , [10.0,13] ]
+});
+
+// Primär (en på primär x, två på primär y)
+graphoObj9.addDataset({
+    type: 'area',
+    x: { axis: 1, scale: true},
+    y: { axis: 3, scale: true, name: "Text on tertiary x axis"},
     data: [7, 6, 5, 4, 4, 4, 4, 7, 7, 7, 5, 5, 4, 3, 3, 4, 5, 6, 7, 7, 2, 8, 5, 5, 4, 2]
 });
+
+// Sekundär (två på sekundär x, två på sekundär y)
 graphoObj9.addDataset({
-    type: 'area',
-    x: { axis:2, scale: false, name: "Text on secondary x axis"},
-    y: { axis:2, scale: true, name: "Text on secondary y axis"},
-    data: [7, 6, 5, 4, 4, 4, 4, 7, 7, 7, 5, 5, 4, 3, 3, 4, 5, 6, 7, 7, 2, 8, 5, 5, 4, 2]
+    type: 'line',
+    lineDots: true,
+    lineSmooth: false,
+    x: { axis: 4, scale: true, continouos: true, name: "Text on quadiary(?) x axis" },
+    y: { axis: 4, scale: true, continouos: true, name: "Text on quadiary(?) y axis" },
+    data: [ [0.5,1] , [1.0,3] , [9.5,15] , [10.0,3.3] ]
+});
+
+// Sekundär (tre på sekundär x, tre på sekundär y)
+graphoObj9.addDataset({
+    type: 'line',
+    lineDots: true,
+    lineSmooth: false,
+    x: { axis: 6, scale: true, continouos: true, name: "Text on hexiary(?) x axis" },
+    y: { axis: 6, scale: true, continouos: true, name: "Text on hexiary(?) y axis" },
+    data: [ [0.5,1] , [1.0,3] , [9.5,13] , [10.0,3.3] ]
+});
+
+// Sekundär (tre på sekundär x, fyra på sekundär y)
+graphoObj9.addDataset({
+    type: 'line',
+    lineDots: true,
+    lineSmooth: false,
+    x: { axis: 1, scale: true, continouos: true },
+    y: { axis: 8, scale: true, continouos: true, name: "Text on octiary(?) y axis" },
+    data: [ [0.5,1] , [1.0,3] , [9.5,10] , [10.0,3.3] ]
+});</code></pre>
+            </article>
+        </section>
+
+        <section>
+            <article>
+                <h3>
+                    <span class="secondary">Example 10 - </span>
+                    <span class="tertiary">Linechart with matched series and axis colors </span>
+                </h3>
+                <div class="container w-100 h-1">
+
+                    <!-- Example 10 - Start -->
+                    <div id="example-10" class="box bw-100 h-100 bg-tertiary">
+
+                        <!-- Example-10 javascript -->
+                        <script>
+
+                            // Create grapho object, pass a parameter pointing to the destination element
+                            var graphoObj10 = new Grapho( { place: 'example-10' } );
+
+                            // Lines are smoothed by default, to disable that, we need to pass an object 
+                            // with properties to addDataset.
+                            // While we're at it, we att some nice data-dots on the line
+                            graphoObj10.addDataset({
+                                lineSmooth: false,
+                                lineDots: true,
+                                strokeStyle: '#F0F066',
+
+                                y: { axis: 1, scale: true, scaleStyle: '#F0F066', gridLines: true, name: "Yellow axis" },
+                                x: { scale: true, gridLines: true},
+                                data: [7, 6, 5, 4, 4, 4, 4, 7, 7, 7, 5, 5, 4, 3, 3, 4, 5, 6, 7, 7, 2, 8, 5, 5, 4, 2]
+                            });
+
+                            graphoObj10.addDataset({
+                                lineSmooth: false,
+                                lineDots: true,
+                                strokeStyle: '#6666F0',
+                                y: { axis: 2, scale: true, scaleStyle: '#6666F0', name: "Blue axis"},
+                                data: [6, 1, 3, 6, 2, 6, 3, 2, 7, 9, 2, 4, 5, 5, 3, 2, 2, 6, 6, 15, 17, 17, 15, 14, 13, 2]
+                            });
+
+                        </script>
+
+                    </div>
+                    <!-- Example 10 - End -->
+                </div>
+            </article>
+            <article>
+                <h3><span class="tertiary">Source code</span></h3>
+                <pre><code data-language="javascript">var graphoObj = new Grapho( { place: 'example-2' } );
+
+// Lines are smoothed by default, to disable that, we need to pass an object 
+// with properties to addDataset.
+// While we're at it, we att some nice data-dots on the line
+graphoObj.addDataset({
+    lineSmooth: false,
+    lineDots: true,
+    data: [7, 6, 5, 4, 4, 4, 4, 7, 7, 7, 5, 5, 4, 3, 3, 4, 5, 6, 7, 7, 2]
 });</code></pre>
             </article>
         </section>

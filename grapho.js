@@ -339,7 +339,7 @@
 		 * @param {Object} graph The Grapho object
 		 * @param {Array} dataset The data datasets
 		 */
-		function renderLineArea (ctx, dataset, data, i, to, stop, xAxis, yAxis, min, max, innerHeight, innerWidth, margin, padding) {
+		function renderLineArea (ctx, dataset, data, i, to, stop, xAxis, yAxis, min, max, innerHeight, innerWidth, padding) {
 			var point,
 				
 				next, npxp,
@@ -357,8 +357,8 @@
 
 					pxp = xAxis.continouos ? (point[0] - xAxis.minVal) / (xAxis.maxVal - xAxis.minVal) : xAxis.values.indexOf(parseFloat([point[0]])) / xAxis.values.length;
 
-					px = round(padding[1] + margin + ((innerWidth-stop) * pxp) + stop / 2);
-					py = round(padding[0] + margin + innerHeight - (point[1] - min) / (max - min) * innerHeight);
+					px = round(padding[1] + ((innerWidth) * pxp));
+					py = round(padding[0] + innerHeight - (point[1] - min) / (max - min) * innerHeight);
 
 					if (!i) {
 						// Keep track of first pixel, for later use by area charts
@@ -369,8 +369,8 @@
 						ctx.quadraticCurveTo(
 							px, // The x-coordinate of the Bézier control point
 							py, // The y-coordinate of the Bézier control point
-							(px+(!next ? 0 : round(padding[1] + margin + ((innerWidth-stop) * npxp) + stop / 2))) / 2, // The x-coordinate of the ending point
-							(py+(!next ? 0 : round(padding[0] + margin + innerHeight - (next[1] - min) / (max - min) * innerHeight))) / 2 // The y-coordinate of the ending point
+							(px+(!next ? 0 : round(padding[1] + ((innerWidth) * npxp)))) / 2, // The x-coordinate of the ending point
+							(py+(!next ? 0 : round(padding[0] + innerHeight - (next[1] - min) / (max - min) * innerHeight))) / 2 // The y-coordinate of the ending point
 						);
 					} else {
 						ctx.lineTo(px, py);
@@ -384,7 +384,7 @@
 
 			if (dataset.type === 'area') {
 
-				cy = round(innerHeight + padding[0] + margin - ((yAxis.center < min ? min : yAxis.center) - min) / (max - min) * innerHeight)-1;
+				cy = round(innerHeight + padding[0] - ((yAxis.center < min ? min : yAxis.center) - min) / (max - min) * innerHeight)-1;
 
 				ctx.lineTo(px, cy); // Move to center at last col
 				ctx.lineTo(fpx, cy); // Move to center at first col
@@ -404,7 +404,7 @@
 		 * @param {Object} graph The Grapho object
 		 * @param {Array} dataset The data datasets
 		 */
-		function renderScatter (ctx, dataset, data, i, to, stop, xAxis, yAxis, min, max, innerHeight, innerWidth, margin, padding) {
+		function renderScatter (ctx, dataset, data, i, to, stop, xAxis, yAxis, min, max, innerHeight, innerWidth, padding) {
 			var point, pxp;
 
 			for ( ; i < to; i++) {
@@ -413,8 +413,8 @@
 					pxp = xAxis.continouos ? (point[0] - xAxis.minVal) / (xAxis.maxVal - xAxis.minVal) : xAxis.values.indexOf(parseFloat([point[0]])) / xAxis.values.length;
 					ctx.beginPath();
 			     	ctx.arc(
-			     		round(padding[1] + margin + ((innerWidth-stop) * pxp) + stop/2), // The x-coordinate of the center of the circle
-			     		round(padding[0] + margin + innerHeight - ((point[1] - min) / (max - min)) * innerHeight), // The y-coordinate of the center of the circle
+			     		round(padding[1] + ((innerWidth) * pxp)), // The x-coordinate of the center of the circle
+			     		round(padding[0] + innerHeight - ((point[1] - min) / (max - min)) * innerHeight), // The y-coordinate of the center of the circle
 			     		dataset.dotWidth, // The radius of the circle
 			     		0, // The starting angle, in radians (0 is at the 3 o'clock position of the arc's circle)
 			     		Math.PI * 2 // The ending angle, in radians
@@ -430,11 +430,11 @@
 		 * @param {Object} graph The Grapho object
 		 * @param {Array} dataset The data datasets
 		 */
-		function renderBarChart (ctx, dataset, data, i, to, stop, xAxis, yAxis, min, max, innerHeight, innerWidth, margin, padding) {
+		function renderBarChart (ctx, dataset, data, i, to, stop, xAxis, yAxis, min, max, innerHeight, innerWidth, padding) {
 			var point, pxp,
 
-				barSpacing 	= (innerWidth / stop)*(100-dataset.barWidthPrc)/100,
-				barWidth 	= (innerWidth / stop)-barSpacing,
+				barSpacing 	= stop*(100-dataset.barWidthPrc)/100,
+				barWidth 	= stop-barSpacing,
 
 				px,
 				py,
@@ -442,6 +442,7 @@
 
 				center = yAxis.center;
 
+			
 			ctx.fillStyle = dataset.fillStyle;
 			
 			for ( ; i < to; i++) {
@@ -450,9 +451,10 @@
 
 					pxp = xAxis.continouos ? (point[0] - xAxis.minVal) / (xAxis.maxVal - xAxis.minVal) : xAxis.values.indexOf(parseFloat([point[0]])) / xAxis.values.length;
 
-					px = round(padding[1] + margin + barSpacing / 2 + (pxp * innerWidth));
-					py = round(padding[0] + margin + innerHeight - (((point[1] <= center) ? center : point[1]) - min) / (max - min) * innerHeight);
-					bh = round(margin + innerHeight - (((point[1] > center) ? center : point[1]) - min) / (max - min) * innerHeight) - py;
+					px = round(padding[1] + (pxp * innerWidth));
+					py = round(padding[0] + innerHeight - (((point[1] <= center) ? center : point[1]) - min) / (max - min) * innerHeight);
+					bh = round(innerHeight - (((point[1] > center) ? center : point[1]) - min) / (max - min) * innerHeight) - py + padding[0];
+					if (py-padding[0]+bh > innerHeight) bh = innerHeight-py+padding[0];
 
 					ctx.fillRect(px, py, barWidth, bh);
 				}
@@ -474,7 +476,7 @@
 				yAxis,
 				axis,
 				axises,
-				margin = 3,
+				margin = 4,
 				padding = [], 	// 0 = top, 1 = left, 2 = right, 3 = bottom
 				used = [],		// Temprorary storage for space used, same as above
 				temp;			// Temporary storage
@@ -482,7 +484,7 @@
 			// Clear canvas before drawing
 			this.ctx.clearRect(0, 0, this.w, this.h);
 
-			padding[0] = padding[1] = padding[2] = padding[3] = used[0] = used[1] = used[2] = used[3] = 0;
+			padding[0] = padding[1] = padding[2] = padding[3] = used[0] = used[1] = used[2] = used[3] = margin;
 
 			// Save matrix and transform 0.5px in boh x and y to draw everything pixel perfect
 			this.ctx.save();
@@ -548,8 +550,6 @@
 					if (!axis[0]._written) {
 
 						steps = axis[0].continouos ? Math.ceil((axis[0].maxVal - axis[0].minVal) / axis[0].step) : axis[0].values.length;
-						
-						console.log(steps,Math.ceil((axis[0].maxVal - axis[0].minVal) / axis[0].step),axis[0].minVal,axis[0].maxVal,axis[0]);
 
 						h = (j===0) ? this.w : this.h;
 						w = (j===0) ? this.h : this.w;
@@ -596,15 +596,18 @@
 							this.ctx.strokeStyle = axis[0].gridStyle;
 							for (k=0; k<steps; k++) {
 								x = k/steps;
-								this.ctx.beginPath();
-								if ((!(axis[0].axis % 2) && axis[5]) || (axis[0].axis % 2) && !axis[5]) {
-									this.ctx.moveTo(Math.round(padding[axis[3]]+x*(w-padding[axis[3]]-padding[axis[4]])),padding[axis[2]]);
-									this.ctx.lineTo(Math.round(padding[axis[3]]+x*(w-padding[axis[3]]-padding[axis[4]])),h-padding[axis[1]]);
-								} else {
-									this.ctx.moveTo(Math.round(padding[axis[3]]+x*(w-padding[axis[3]]-padding[axis[4]])),padding[axis[1]]);
-									this.ctx.lineTo(Math.round(padding[axis[3]]+x*(w-padding[axis[3]]-padding[axis[4]])),h-padding[axis[2]]);
+								// Prevent grid lines from overriding scales
+								if(x != 0 && x != 1) {
+									this.ctx.beginPath();
+									if ((!(axis[0].axis % 2) && axis[5]) || (axis[0].axis % 2) && !axis[5]) {
+										this.ctx.moveTo(Math.round(padding[axis[3]]+x*(w-padding[axis[3]]-padding[axis[4]])),padding[axis[2]]);
+										this.ctx.lineTo(Math.round(padding[axis[3]]+x*(w-padding[axis[3]]-padding[axis[4]])),h-padding[axis[1]]);
+									} else {
+										this.ctx.moveTo(Math.round(padding[axis[3]]+x*(w-padding[axis[3]]-padding[axis[4]])),padding[axis[1]]);
+										this.ctx.lineTo(Math.round(padding[axis[3]]+x*(w-padding[axis[3]]-padding[axis[4]])),h-padding[axis[2]]);
+									}
+									this.ctx.stroke();
 								}
-								this.ctx.stroke();
 							}
 						}
 
@@ -696,14 +699,13 @@
 					/* `data` */	 	dataset.data,
 					/* `i` */ 			0,
 					/* `to` */ 			dataset.data.length,
-					/* `stop` */		xAxis.continouos ? Math.ceil((xAxis.maxVal - xAxis.minVal) / xAxis.step) : xAxis.values.length,
+					/* `stop` */		xAxis.continouos ? (this.w - padding[1] - padding[2]) / (Math.round((xAxis.maxVal - xAxis.minVal) / xAxis.step)) : (this.w - padding[1] - padding[2]) / xAxis.values.length ,
 					/* `xAxis` */ 		xAxis,
 					/* `yAxis` */ 		yAxis,
 					/* `min` */ 		yAxis.minVal,
 					/* `max` */ 		yAxis.maxVal,
 					/* `innerHeight` */ this.h - padding[0] - padding[3],
 					/* `innerWidth` */ 	this.w - padding[1] - padding[2],
-					/* `margin` */ 		margin,
 					/* `padding` */		padding,
 				];
 
