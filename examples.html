@@ -590,7 +590,7 @@ graphoObj.addDataset({
                                 type: 'area',
                                 x: { scale: true, gridLines: true, name: "Text on primary x axis"}, 
                                 y: { scale: true, gridLines: true, name: "Text on primary y axis"},
-                                data: [7, 6, 5, 4, 4, 4, 4, 7, 7, 7, 5, 5, 4, 3, 3, 4, 5, 6, 7, 7, 2, 8, 5, 5, 4, 2]
+                                data: [7, 6, 22, 4, 4, 4, 4, 7, 7, 7, 5, 5, 4, 3, 3, 4, 5, 6, 7, 7, 2, 8, 5, 5, 4, 2]
                             });
 
                             // Sekundär (en sekund primär x, en på på sekundär y)
@@ -598,15 +598,15 @@ graphoObj.addDataset({
                                 type: 'line',
                                 lineDots: true,
                                 lineSmooth: false,
-                                x: { axis: 2, scale: false, continouos: true, name: "Text on secondary x axis" },
-                                y: { axis: 2, scale: false, name: "Text on secondary y axis" },
-                                data: [ [0.5,1] , [1.0,3] , [9.5,10] , [10.0,11] ]
+                                x: { axis: 2, scale: true, continouos: true, name: "Text on secondary x axis" },
+                                y: { axis: 2, scale: true, name: "Text on secondary y axis" },
+                                data: [ [0.5,1] , [1.0,3] , [9.5,39] , [10.0,13] ]
                             });
 
                             // Primär (en på primär x, två på primär y)
                             graphoObj9.addDataset({
                                 type: 'area',
-                                x: { axis: 3, scale: true},
+                                x: { axis: 1, scale: true},
                                 y: { axis: 3, scale: true, name: "Text on tertiary x axis"},
                                 data: [7, 6, 5, 4, 4, 4, 4, 7, 7, 7, 5, 5, 4, 3, 3, 4, 5, 6, 7, 7, 2, 8, 5, 5, 4, 2]
                             });
@@ -616,9 +616,9 @@ graphoObj.addDataset({
                                 type: 'line',
                                 lineDots: true,
                                 lineSmooth: false,
-                                x: { axis: 4, scale: false, continouos: true, name: "Text on quadiary(?) x axis" },
-                                y: { axis: 4, scale: false, continouos: true, name: "Text on quadiary(?) y axis" },
-                                data: [ [0.5,1] , [1.0,3] , [9.5,2] , [10.0,3.3] ]
+                                x: { axis: 4, scale: true, continouos: true, name: "Text on quadiary(?) x axis" },
+                                y: { axis: 4, scale: true, continouos: true, name: "Text on quadiary(?) y axis" },
+                                data: [ [0.5,1] , [1.0,3] , [9.5,15] , [10.0,3.3] ]
                             });
 
                             // Sekundär (tre på sekundär x, tre på sekundär y)
@@ -626,9 +626,9 @@ graphoObj.addDataset({
                                 type: 'line',
                                 lineDots: true,
                                 lineSmooth: false,
-                                x: { axis: 6, scale: false, continouos: true, name: "Text on hexiary(?) x axis" },
-                                y: { axis: 6, scale: false, continouos: true, name: "Text on hexiary(?) y axis" },
-                                data: [ [0.5,1] , [1.0,3] , [9.5,2] , [10.0,3.3] ]
+                                x: { axis: 6, scale: true, continouos: true, name: "Text on hexiary(?) x axis" },
+                                y: { axis: 6, scale: true, continouos: true, name: "Text on hexiary(?) y axis" },
+                                data: [ [0.5,1] , [1.0,3] , [9.5,13] , [10.0,3.3] ]
                             });
 
                             // Sekundär (tre på sekundär x, fyra på sekundär y)
@@ -636,9 +636,9 @@ graphoObj.addDataset({
                                 type: 'line',
                                 lineDots: true,
                                 lineSmooth: false,
-                                x: { axis: 8, scale: true, continouos: true },
+                                x: { axis: 1, scale: true, continouos: true },
                                 y: { axis: 8, scale: true, continouos: true, name: "Text on octiary(?) y axis" },
-                                data: [ [0.5,1] , [1.0,3] , [9.5,2] , [10.0,3.3] ]
+                                data: [ [0.5,1] , [1.0,3] , [9.5,10] , [10.0,3.3] ]
                             });
 
                         </script>
