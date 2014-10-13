@@ -103,12 +103,14 @@
 			min: 'auto',
 			max: 'auto',
 			scale: false,
+			scaleStyle: '#FFFFFF',
+			gridLines: false,
+			gridStyle: '#666666',
 			name: undefined,
 			font: '10px Droid Sans',
 			continouos: true,
 			majorTickHeight: 3,
 			minorTickHeight: 2,
-			gridLines: false,
 			step: Infinity,
 			minVal: Infinity,
 			maxVal: -Infinity,
@@ -482,6 +484,10 @@
 
 			padding[0] = padding[1] = padding[2] = padding[3] = used[0] = used[1] = used[2] = used[3] = 0;
 
+			// Save matrix and transform 0.5px in boh x and y to draw everything pixel perfect
+			this.ctx.save();
+			this.ctx.translate(0.5,0.5);
+
 			for(xAxis in this.xAxises) {
 				xAxis = this.xAxises[xAxis];
 				xAxis._measured = false;
@@ -554,26 +560,17 @@
 							this.ctx.translate(0,w);
 							this.ctx.rotate(-0.5*Math.PI);
 						}
-
 						// Add some pre axis space (margin)
-						if (axis[5]) {
-							if ((!(axis[0].axis % 2) && axis[5]) || (axis[0].axis % 2) && !axis[5]) {
-								used[axis[2]]+=margin;
-							} else {
-								used[axis[1]]+=margin;
-							}
+						if (((axis[0].axis % 2) && axis[5]) || (axis[0].axis % 2) && !axis[5]) {
+							used[axis[1]]+=margin;
 						} else {
-							if ((!(axis[0].axis % 2) && axis[5]) || (axis[0].axis % 2) && !axis[5]) {
-								used[axis[1]]+=margin;
-							} else {
-								used[axis[2]]+=margin;
-							}
+							used[axis[2]]+=margin;
 						}
 
 						if (axis[0].name) {
 							this.ctx.font=axis[0].font;
 							temp = parseInt(this.ctx.font.split(' ')[0]);
-							this.ctx.fillStyle='#FFFFFF';
+							this.ctx.fillStyle=axis[0].scaleStyle;
 							if (axis[5]) {
 								if ((!(axis[0].axis % 2) && axis[5]) || (axis[0].axis % 2) && !axis[5]) {
 									used[axis[2]]+=temp;
@@ -596,7 +593,7 @@
 
 						if (axis[0].gridLines) {
 							this.ctx.lineWidth = 1;
-							this.ctx.strokeStyle = '#666666';
+							this.ctx.strokeStyle = axis[0].gridStyle;
 							for (k=0; k<steps; k++) {
 								x = k/steps;
 								this.ctx.beginPath();
@@ -636,13 +633,11 @@
 									this.ctx.lineTo(w-padding[axis[4]],used[axis[2]]);
 								}
 							}
-
 							this.ctx.lineWidth = 1;
-							this.ctx.strokeStyle = '#FFFFFF';
+							this.ctx.strokeStyle = axis[0].scaleStyle;
 							this.ctx.stroke();
 
 							// Ticks
-							this.ctx.beginPath();
 							for (k=0; k<steps; k++) {
 								x = k/steps;
 								this.ctx.beginPath();
@@ -664,12 +659,9 @@
 									}
 								}
 								this.ctx.lineWidth = 1;
-								this.ctx.strokeStyle = '#FFFFFF';
+								this.ctx.strokeStyle = axis[0].scaleStyle;
 								this.ctx.stroke();
 							}
-							this.ctx.lineWidth = 1;
-							this.ctx.strokeStyle = '#FFFFFF';
-							this.ctx.stroke();
 						}
 
 						// De-rotate workspace
@@ -724,6 +716,8 @@
 					renderScatter.apply(this, args);
 				}
 			}
+
+			this.ctx.restore();
 
 			return this;
 		};
