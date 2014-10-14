@@ -600,18 +600,34 @@
 			}
 			return used;
 		}
+
 		function renderGridLinesLabels(axis,ctx,steps,used,padding,w,h) {
 
-			var temp, x, k, y, text;
+			var temp, 
+				x=0, y,
+				dir,
+				i,
+				k, 
+				text, textSize;
 
-			if (axis[0].gridLines) {
-				ctx.lineWidth = 1;
-				ctx.strokeStyle = axis[0].gridStyle;
-				for (k=0; k<steps; k++) {
-					x = k/steps;
-					temp = Math.round(padding[axis[3]]+x*(w-padding[axis[3]]-padding[axis[4]]));
-					// Prevent grid lines from overriding scales
-					if(x !== 0 && x !== 1) {
+			ctx.lineWidth = 1;
+			ctx.strokeStyle = axis[0].gridStyle;
+
+			textSize = parseInt(axis[0].font.split(' ')[0].replace('px',''));
+			if (axis[0].labels) {
+				used[axis[(axis[0].axis % 2)?1:2]]+=textSize;
+			}
+
+			dir=[+Math.abs(axis[0]._step),-Math.abs(axis[0]._step)];
+			for(i=0;i<dir.length;i++) {
+				k=0;
+				while(k<axis[0]._maxVal && k>axis[0]._minVal) {
+					temp = Math.round(padding[axis[3]]+(k-axis[0]._minVal)/(axis[0]._maxVal-axis[0]._minVal)*(w-padding[axis[3]]-padding[axis[4]]));
+
+					// Render grid lines
+					if (axis[0].gridLines) {
+
+						// Prevent grid lines from overriding scales
 						ctx.beginPath();
 						if ((!(axis[0].axis % 2) && axis[5]) || ((axis[0].axis % 2) && !axis[5])) {
 							ctx.moveTo(temp,padding[axis[2]]);
@@ -622,31 +638,30 @@
 						}
 						ctx.stroke();
 					}
-				}
-			}
-
-			if (axis[0].labels) {
-				temp = parseInt(axis[0].font.split(' ')[0].replace('px',''));
-				used[axis[(axis[0].axis % 2)?1:2]]+=temp;
-				for (k=0; k<steps; k++) {
-					x = k/steps;
-					ctx.beginPath();
-					x  = Math.round(padding[axis[3]]+x*(w-padding[axis[3]]-padding[axis[4]]));
-					if (axis[5]) {
-						if((axis[0].axis % 2)) {
-							y = used[axis[1]]-temp/4;
+					if(axis[0].labels) {
+						ctx.beginPath();
+						if (axis[5]) {
+							if((axis[0].axis % 2)) {
+								y = used[axis[1]]-textSize/4;
+							} else {
+								y = h-used[axis[2]]+textSize*1.3;
+							}
 						} else {
-							y = h-used[axis[2]]+temp*1.3;
+							if((axis[0].axis % 2)) {
+								y = h-used[axis[1]]+textSize;
+							} else {
+								y = used[axis[2]]-textSize/4;
+							}
 						}
-					} else {
-						if((axis[0].axis % 2)) {
-							y = h-used[axis[1]]+temp;
-						} else {
-							y = used[axis[2]]-temp/4;
-						}
+						text = axis[0].labelFormat(k);
+						ctx.save();
+						ctx.translate(temp-textSize/2,y-ctx.measureText(text).width/2);
+						ctx.rotate(0.5*Math.PI);
+						ctx.translate(-textSize/2,-ctx.measureText(text).width/2);
+						ctx.fillText(text,0,0);
+						ctx.restore();
 					}
-					text = axis[0].labelFormat(axis[0].continouos ? k/steps * (axis[0]._maxVal - axis[0]._minVal) : axis[0]._values[k]);
-					ctx.fillText(text,x-ctx.measureText(text).width/2,y);
+					k+=dir[i];
 				}
 			}
 
@@ -711,6 +726,7 @@
 			// Now when we know accurately how much space each axis will take, we can begin drawing
 			i = 0;
 			while ((dataset = this.datasets[i++])) {
+
 				// Array of Axis,left padding idx, right padding idx and wether to rotate
 				axises = [[this.yAxises[dataset.y.axis],1,2,3,0,true],[this.xAxises[dataset.x.axis],3,0,1,2,false]];
 				for (j=0; j<axises.length;j++) {
@@ -718,8 +734,53 @@
 
 					if (!axis[0]._written) {
 
-						steps = (axis[0].continouos ? Math.ceil((axis[0]._maxVal - axis[0]._minVal) / axis[0]._step) : axis[0]._values.length) + axis[0].extraSteps * 2;
+						if( axis[0].continouos ) {
 
+							var steps = 15,
+								interval,
+								step,
+								magnitude,
+								power,
+								msd,
+								step_range,
+								newStepSize,
+								newMin,
+								newMax,
+								newRange,
+								newNumSteps;
+
+							interval = axis[0]._maxVal - axis[0]._minVal;
+							step = interval/(steps);
+							magnitude = Math.floor(Math.log10(step));
+							power = Math.pow(10, magnitude);
+							msd = Math.round(step/power + 0.5);
+
+							if (msd > 5) {
+							    msd = 10;
+							} else if (msd > 2) {
+								msd = 5;
+							} else if (msd > 1) {
+								msd = 2;
+							}
+							   
+							newStepSize = msd * power;
+							newNumSteps = Math.round(Math.ceil((interval) / newStepSize)) ;
+							newRange = newStepSize * newNumSteps;
+							newMin = axis[0]._minVal - (axis[0]._minVal % newStepSize) - newStepSize;
+							newMax = axis[0]._minVal + newRange
+							axis[0]._step = newStepSize;
+
+							
+							if(axis[5]) {
+								steps = newNumSteps;
+								axis[0]._minVal = newMin;
+								axis[0]._maxVal = newMax;
+							}
+
+						} else {
+							steps = axis[0]._values.length + axis[0].extraSteps * 2;
+						}
+						
 						h = (j===0) ? this.w : this.h;
 						w = (j===0) ? this.h : this.w;
 
