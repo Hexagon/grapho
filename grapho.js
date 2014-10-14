@@ -19,7 +19,8 @@
 		isArray = Array.isArray || function (it) {
 			return toString.call(it) === '[object Array]';
 		},
-		prot;
+		prot,
+		auto='auto';
 
 	function unique (ain) {
 	   var u = {}, a = [];
@@ -33,10 +34,34 @@
 	   return a;
 	}
 
+	function isNumber(n) {
+	  return !isNaN(parseFloat(n)) && isFinite(n);
+	}
+
+	function isInt(n) {
+	   return n % 1 === 0;
+	}
+
+	function defaultLabelFormatter(l) {
+		// Check if we got a number, else just return
+		var i;
+		if (isNumber(l)) {
+			// Protext against very-very-close to ints
+			if (Math.round(l,19) === (i = parseInt(l))) {
+				return i;
+			} else {
+				return l;
+			}
+		} else {
+			return l;	
+		}
+		
+	}
+
 	function merge (target, source, recurse) {
 
 		// Added to always get a true deep copy
-		if(recurse === undefined) { 
+		if(recurse === undef) { 
 			target = merge({},target,true);
 		}
 
@@ -73,8 +98,8 @@
 		this.datasets = [];
 
 		this.container = {
-			width: 'auto',
-			height: 'auto'
+			width: auto,
+			height: auto
 		};
 
 		this.datasetDefaults = {
@@ -100,25 +125,29 @@
 		};
 
 		this.axisDefaults = {
-			min: 'auto',
-			max: 'auto',
+			min: auto,
+			max: auto,
 			scale: false,
 			scaleStyle: '#FFFFFF',
 			gridLines: false,
 			gridStyle: '#666666',
-			name: undefined,
+			name: undef,
 			font: '10px Droid Sans',
+			labelFormat: defaultLabelFormatter,
+			showLabels: false,
 			continouos: true,
-			majorTickHeight: 3,
+			majorTickHeight: 4,
 			minorTickHeight: 2,
-			step: Infinity,
-			minVal: Infinity,
-			maxVal: -Infinity,
 			center: 0,
-			values: [],
 			extraSteps: 0,
-			_measured: false,	// Used internaly
-			_written: false, 	// Used internaly
+			_values: [],
+
+			// Used internaly
+			_step: Infinity,
+			_minVal: Infinity,
+			_maxVal: -Infinity,
+			_measured: false,	
+			_written: false
 			
 		};
 
@@ -259,37 +288,39 @@
 		}
 
 		// Update axis min/max of axis, last dataset of axis has the control
-		yAxis.maxVal = yAxis.max !== 'auto' ? yAxis.max : Math.max(Math.max.apply(null, cleanDataY), yAxis.maxVal);
-		yAxis.minVal = yAxis.min !== 'auto' ? yAxis.min : Math.min(Math.min.apply(null, cleanDataY), yAxis.minVal);
-		xAxis.maxVal = xAxis.max !== 'auto' ? xAxis.max : Math.max(Math.max.apply(null, cleanDataX), xAxis.maxVal);
-		xAxis.minVal = xAxis.min !== 'auto' ? xAxis.min : Math.min(Math.min.apply(null, cleanDataX), xAxis.minVal);
+		yAxis._maxVal = yAxis.max !== auto ? yAxis.max : Math.max(Math.max.apply(null, cleanDataY), yAxis._maxVal);
+		yAxis._minVal = yAxis.min !== auto ? yAxis.min : Math.min(Math.min.apply(null, cleanDataY), yAxis._minVal);
+		xAxis._maxVal = xAxis.max !== auto ? xAxis.max : Math.max(Math.max.apply(null, cleanDataX), xAxis._maxVal);
+		xAxis._minVal = xAxis.min !== auto ? xAxis.min : Math.min(Math.min.apply(null, cleanDataX), xAxis._minVal);
 
 		// Mege unique values of this and previous datasets
-		xAxis.values = unique(xAxis.values.concat(cleanDataX));
-		yAxis.values = unique(yAxis.values.concat(cleanDataY));
+		xAxis._values = unique(xAxis._values.concat(cleanDataX));
+		yAxis._values = unique(yAxis._values.concat(cleanDataY));
 
 		// Sort the unique values
-		xAxis.values.sort(function(a, b){return a-b;});
-		yAxis.values.sort(function(a, b){return a-b;});
+		xAxis._values.sort(function(a, b){return a-b;});
+		yAxis._values.sort(function(a, b){return a-b;});
 
 		// Recalculate smallest step
-		for (i = 0; i < xAxis.values.length - 1; i++) {
-			step = xAxis.values[i + 1] - xAxis.values[i];
-			if (step < xAxis.step) {
-				xAxis.step = step;
+		for (i = 0; i < xAxis._values.length - 1; i++) {
+			step = xAxis._values[i + 1] - xAxis._values[i];
+			if (step < xAxis._step) {
+				xAxis._step = step;
 			}
 		}
 
 		// Recalculate smallest step
-		for (i = 0; i < yAxis.values.length - 1; i++) {
-			step = yAxis.values[i + 1] - yAxis.values[i];
-			if (step < yAxis.step) {
-				yAxis.step = step;
+		for (i = 0; i < yAxis._values.length - 1; i++) {
+			step = yAxis._values[i + 1] - yAxis._values[i];
+			if (step < yAxis._step) {
+				yAxis._step = step;
 			}
 		}
 
 		// If type == 'bar', force extra steps on x axis
-		if (dataset.type=='bar' && xAxis.extraSteps < 1) xAxis.extraSteps = 1;
+		if (dataset.type==='bar' && xAxis.extraSteps < 1) {
+			xAxis.extraSteps = 1;
+		}
 
 		this.datasets.push(dataset);
 
@@ -323,7 +354,7 @@
 	 * @return {Object} `this`.
 	 */
 	prot.remove = function () {
-		if (this.container.width === 'auto' || this.container.height === 'auto') {
+		if (this.container.width === auto || this.container.height === auto) {
 			window.removeEventListener('resize', this.resize);
 		}
 
@@ -360,7 +391,7 @@
 			for ( ; i < to; i++) {
 				if ((point = data[i])) {
 
-					pxp = xAxis.continouos ? (point[0] - xAxis.minVal) / (xAxis.maxVal - xAxis.minVal) : xAxis.values.indexOf(parseFloat([point[0]])) / xAxis.values.length;
+					pxp = xAxis.continouos ? (point[0] - xAxis._minVal) / (xAxis._maxVal - xAxis._minVal) : xAxis._values.indexOf(parseFloat([point[0]])) / xAxis._values.length;
 
 					px = round(padding[1] + pad + ((innerWidth) * pxp));
 					py = round(padding[0] + innerHeight - (point[1] - min) / (max - min) * innerHeight);
@@ -370,7 +401,7 @@
 						ctx.moveTo((fpx = px+1), py);
 					} else if (dataset.lineSmooth && i < data.length - 1) {
 						next = data[i + 1];
-						npxp = xAxis.continouos ? (next[0] - xAxis.minVal) / (xAxis.maxVal - xAxis.minVal) : xAxis.values.indexOf(parseFloat([next[0]])) / xAxis.values.length;
+						npxp = xAxis.continouos ? (next[0] - xAxis._minVal) / (xAxis._maxVal - xAxis._minVal) : xAxis._values.indexOf(parseFloat([next[0]])) / xAxis._values.length;
 						ctx.quadraticCurveTo(
 							px, // The x-coordinate of the Bézier control point
 							py, // The y-coordinate of the Bézier control point
@@ -415,7 +446,7 @@
 			for ( ; i < to; i++) {
 				// We might need to skip some points that are not in the dataset
 				if ((point = data[i])) {
-					pxp = xAxis.continouos ? (point[0] - xAxis.minVal) / (xAxis.maxVal - xAxis.minVal) : xAxis.values.indexOf(parseFloat([point[0]])) / xAxis.values.length;
+					pxp = xAxis.continouos ? (point[0] - xAxis._minVal) / (xAxis._maxVal - xAxis._minVal) : xAxis._values.indexOf(parseFloat([point[0]])) / xAxis._values.length;
 					ctx.beginPath();
 			     	ctx.arc(
 			     		round(padding[1] + pad + ((innerWidth) * pxp)), // The x-coordinate of the center of the circle
@@ -454,16 +485,173 @@
 				// We might need to skip some points that are not in the dataset
 				if ((point = data[i])) {
 
-					pxp = xAxis.continouos ? (point[0] - xAxis.minVal) / (xAxis.maxVal - xAxis.minVal) : xAxis.values.indexOf(parseFloat([point[0]])) / xAxis.values.length;
+					pxp = xAxis.continouos ? (point[0] - xAxis._minVal) / (xAxis._maxVal - xAxis._minVal) : xAxis._values.indexOf(parseFloat([point[0]])) / xAxis._values.length;
 
 					px = round(padding[1] + pad - stop/2 + barSpacing/2 + (pxp * innerWidth));
 					py = round(padding[0] + innerHeight - (((point[1] <= center) ? center : point[1]) - min) / (max - min) * innerHeight);
 					bh = round(innerHeight - (((point[1] > center) ? center : point[1]) - min) / (max - min) * innerHeight) - py + padding[0];
-					if (py-padding[0]+bh > innerHeight) bh = innerHeight-py+padding[0];
+					if (py-padding[0]+bh > innerHeight) {
+						bh = innerHeight-py+padding[0];
+					}
 
 					ctx.fillRect(px, py, barWidth, bh);
 				}
 			}
+		}
+
+		function renderNames(axis,ctx,used,padding,w,h) {
+			var temp;
+			if (axis[0].name) {
+				ctx.font=axis[0].font;
+				temp = parseInt(ctx.font.split(' ')[0]);
+				ctx.fillStyle=axis[0].scaleStyle;
+				if (axis[5]) {
+					if (axis[0].axis % 2) {
+						temp = (used[axis[1]]+=temp)-temp/4;
+					} else {
+						temp = h-(used[axis[2]]+=temp)+temp/1.3;
+					}
+				} else {
+					if (axis[0].axis % 2) {
+						temp = h-(used[axis[1]]+=temp)+temp/1.3;
+					} else {
+						temp = (used[axis[2]]+=temp)-temp/4;
+					}
+				}
+				ctx.fillText(axis[0].name,w/2-ctx.measureText(axis[0].name).width/2,temp);
+			}
+			return used;
+		}
+
+		function renderScale(axis,ctx,steps,used,padding,w,h) {
+			var temp, x, k;
+			if (axis[0].scale) {
+
+				// Base scale
+				ctx.beginPath();
+				if (axis[5]) {
+					if((axis[0].axis % 2)) {
+						used[axis[1]]+=axis[0].majorTickHeight;
+						ctx.moveTo(padding[axis[3]],used[axis[1]]);
+						ctx.lineTo(w-padding[axis[4]],used[axis[1]]);
+					} else {
+						used[axis[2]]+=axis[0].majorTickHeight;
+						ctx.moveTo(padding[axis[3]],h-used[axis[2]]);
+						ctx.lineTo(w-padding[axis[4]],h-used[axis[2]]);
+					}
+				} else {
+					if((axis[0].axis % 2)) {
+						used[axis[1]]+=axis[0].majorTickHeight;
+						ctx.moveTo(padding[axis[3]],h-used[axis[1]]); 
+						ctx.lineTo(w-padding[axis[4]],h-used[axis[1]]);
+					} else {
+						used[axis[2]]+=axis[0].majorTickHeight;
+						ctx.moveTo(padding[axis[3]],used[axis[2]]);
+						ctx.lineTo(w-padding[axis[4]],used[axis[2]]);
+					}
+				}
+				ctx.lineWidth = 1;
+				ctx.strokeStyle = axis[0].scaleStyle;
+				ctx.stroke();
+
+				// Center line
+				if ((axis[0].center > axis[0]._minVal && axis[0].center < axis[0]._maxVal) && axis[0].scale ) {
+					ctx.beginPath();
+					temp = ((axis[0].center- axis[0]._minVal) / (axis[0]._maxVal - axis[0]._minVal));	// Calculate center line position in "y"
+					temp = Math.round(padding[axis[3]]+temp*(w-padding[axis[3]]-padding[axis[4]]));
+					if ((!(axis[0].axis % 2) && !axis[5]) || ((axis[0].axis % 2) && !axis[5])) {
+						ctx.moveTo(temp,padding[axis[2]]);
+						ctx.lineTo(temp,h-padding[axis[1]]);
+					} else {
+						ctx.moveTo(temp,padding[axis[1]]);
+						ctx.lineTo(temp,h-padding[axis[2]]);
+					}
+					ctx.lineWidth = 1;
+					ctx.strokeStyle = axis[0].scaleStyle;
+					ctx.stroke();
+				}
+
+				// Ticks
+				for (k=0; k<steps; k++) {
+					x = k/steps;
+					ctx.beginPath();
+					temp = Math.round(padding[axis[3]]+x*(w-padding[axis[3]]-padding[axis[4]]));
+					if (axis[5]) {
+						if((axis[0].axis % 2)) {
+							ctx.moveTo(temp,used[axis[1]]);
+							ctx.lineTo(temp,used[axis[1]]-axis[0].majorTickHeight);
+						} else {
+							ctx.moveTo(temp,h-used[axis[2]]);
+							ctx.lineTo(temp,h-used[axis[2]]+axis[0].majorTickHeight);
+						}
+					} else {
+						if((axis[0].axis % 2)) {
+							ctx.moveTo(temp,h-used[axis[1]]);
+							ctx.lineTo(temp,h-used[axis[1]]+axis[0].majorTickHeight);
+						} else {
+							ctx.moveTo(temp,used[axis[2]]);
+							ctx.lineTo(temp,used[axis[2]]-axis[0].majorTickHeight);
+						}
+					}
+					ctx.lineWidth = 1;
+					ctx.strokeStyle = axis[0].scaleStyle;
+					ctx.stroke();
+				}
+			}
+			return used;
+		}
+		function renderGridLinesLabels(axis,ctx,steps,used,padding,w,h) {
+
+			var temp, x, k, y, text;
+
+			if (axis[0].gridLines) {
+				ctx.lineWidth = 1;
+				ctx.strokeStyle = axis[0].gridStyle;
+				for (k=0; k<steps; k++) {
+					x = k/steps;
+					temp = Math.round(padding[axis[3]]+x*(w-padding[axis[3]]-padding[axis[4]]));
+					// Prevent grid lines from overriding scales
+					if(x !== 0 && x !== 1) {
+						ctx.beginPath();
+						if ((!(axis[0].axis % 2) && axis[5]) || ((axis[0].axis % 2) && !axis[5])) {
+							ctx.moveTo(temp,padding[axis[2]]);
+							ctx.lineTo(temp,h-padding[axis[1]]);
+						} else {
+							ctx.moveTo(temp,padding[axis[1]]);
+							ctx.lineTo(temp,h-padding[axis[2]]);
+						}
+						ctx.stroke();
+					}
+				}
+			}
+
+			if (axis[0].labels) {
+				temp = parseInt(axis[0].font.split(' ')[0].replace('px',''));
+				used[axis[(axis[0].axis % 2)?1:2]]+=temp;
+				for (k=0; k<steps; k++) {
+					x = k/steps;
+					ctx.beginPath();
+					x  = Math.round(padding[axis[3]]+x*(w-padding[axis[3]]-padding[axis[4]]));
+					if (axis[5]) {
+						if((axis[0].axis % 2)) {
+							y = used[axis[1]]-temp/4;
+						} else {
+							y = h-used[axis[2]]+temp*1.3;
+						}
+					} else {
+						if((axis[0].axis % 2)) {
+							y = h-used[axis[1]]+temp;
+						} else {
+							y = used[axis[2]]-temp/4;
+						}
+					}
+					text = axis[0].labelFormat(axis[0].continouos ? k/steps * (axis[0]._maxVal - axis[0]._minVal) : axis[0]._values[k]);
+					ctx.fillText(text,x-ctx.measureText(text).width/2,y);
+				}
+			}
+
+			return used;
+
 		}
 
 		/**
@@ -472,8 +660,8 @@
 		 * @return {Object} `this`
 		 */
 		return function () {
-			var i, j, x, k,
-				xSteps, ySteps, steps, h, w,
+			var i, j, 
+				steps, h, w,
 				func,
 				dataset,
 				args = [],
@@ -512,31 +700,9 @@
 				axises = [[this.yAxises[dataset.y.axis],1,2],[this.xAxises[dataset.x.axis],3,0]];
 				for (j = 0; j < axises.length; j++) {
 					axis = axises[j];
-
 					if (!axis[0]._measured) {
-						// Add some pre axis space ( margin )
-						if (axis[0].axis % 2) {
-							padding[axis[1]] += margin;
-						} else {
-							padding[axis[2]] += margin;
-						}
-
-						if (axis[0].scale) {
-							temp = axis[0].majorTickHeight;
-							if (axis[0].axis % 2) {
-								padding[axis[1]] += temp;
-							} else {
-								padding[axis[2]] += temp;
-							}
-						}
-						if (axis[0].name) {
-							temp = parseInt(axis[0].font.split(' ')[0]);
-							if (axis[0].axis % 2) {
-								padding[axis[1]] += temp;
-							} else {
-								padding[axis[2]] += temp;
-							}
-						}
+						temp = parseInt(axis[0].font.split(' ')[0]);
+						padding[axis[(axis[0].axis % 2) ? 1 : 2]] += margin + (axis[0].scale?axis[0].majorTickHeight:0) + (axis[0].name?temp:0) + (axis[0].labels?temp:0);
 						axis[0]._measured=true;
 					}
 				}
@@ -552,7 +718,7 @@
 
 					if (!axis[0]._written) {
 
-						steps = (axis[0].continouos ? Math.ceil((axis[0].maxVal - axis[0].minVal) / axis[0].step) : axis[0].values.length) + axis[0].extraSteps * 2;
+						steps = (axis[0].continouos ? Math.ceil((axis[0]._maxVal - axis[0]._minVal) / axis[0]._step) : axis[0]._values.length) + axis[0].extraSteps * 2;
 
 						h = (j===0) ? this.w : this.h;
 						w = (j===0) ? this.h : this.w;
@@ -563,6 +729,7 @@
 							this.ctx.translate(0,w);
 							this.ctx.rotate(-0.5*Math.PI);
 						}
+
 						// Add some pre axis space (margin)
 						if (((axis[0].axis % 2) && axis[5]) || (axis[0].axis % 2) && !axis[5]) {
 							used[axis[1]]+=margin;
@@ -570,121 +737,9 @@
 							used[axis[2]]+=margin;
 						}
 
-						if (axis[0].name) {
-							this.ctx.font=axis[0].font;
-							temp = parseInt(this.ctx.font.split(' ')[0]);
-							this.ctx.fillStyle=axis[0].scaleStyle;
-							if (axis[5]) {
-								if ((!(axis[0].axis % 2) && axis[5]) || (axis[0].axis % 2) && !axis[5]) {
-									used[axis[2]]+=temp;
-									temp = h-used[axis[2]]+temp/1.3;
-								} else {
-									used[axis[1]]+=temp;
-									temp = used[axis[1]]-temp/4;
-								}
-							} else {
-								if ((!(axis[0].axis % 2) && axis[5]) || (axis[0].axis % 2) && !axis[5]) {
-									used[axis[1]]+=temp;
-									temp = h-used[axis[1]]+temp/1.3;
-								} else {
-									used[axis[2]]+=temp;
-									temp = used[axis[2]]-temp/4;
-								}
-							}
-							this.ctx.fillText(axis[0].name,w/2-this.ctx.measureText(axis[0].name).width/2,temp);
-						}
-
-						if (axis[0].gridLines) {
-							this.ctx.lineWidth = 1;
-							this.ctx.strokeStyle = axis[0].gridStyle;
-							for (k=0; k<steps; k++) {
-								x = k/steps;
-								// Prevent grid lines from overriding scales
-								if(x != 0 && x != 1) {
-									this.ctx.beginPath();
-									if ((!(axis[0].axis % 2) && axis[5]) || (axis[0].axis % 2) && !axis[5]) {
-										this.ctx.moveTo(Math.round(padding[axis[3]]+x*(w-padding[axis[3]]-padding[axis[4]])),padding[axis[2]]);
-										this.ctx.lineTo(Math.round(padding[axis[3]]+x*(w-padding[axis[3]]-padding[axis[4]])),h-padding[axis[1]]);
-									} else {
-										this.ctx.moveTo(Math.round(padding[axis[3]]+x*(w-padding[axis[3]]-padding[axis[4]])),padding[axis[1]]);
-										this.ctx.lineTo(Math.round(padding[axis[3]]+x*(w-padding[axis[3]]-padding[axis[4]])),h-padding[axis[2]]);
-									}
-									this.ctx.stroke();
-								}
-							}
-						}
-
-						if (axis[0].scale) {
-
-							// Base scale
-							this.ctx.beginPath();
-							if (axis[5]) {
-								if((axis[0].axis % 2)) {
-									used[axis[1]]+=axis[0].majorTickHeight;
-									this.ctx.moveTo(padding[axis[3]],used[axis[1]]);
-									this.ctx.lineTo(w-padding[axis[4]],used[axis[1]]);
-								} else {
-									used[axis[2]]+=axis[0].majorTickHeight;
-									this.ctx.moveTo(padding[axis[3]],h-used[axis[2]]);
-									this.ctx.lineTo(w-padding[axis[4]],h-used[axis[2]]);
-								}
-							} else {
-								if((axis[0].axis % 2)) {
-									used[axis[1]]+=axis[0].majorTickHeight;
-									this.ctx.moveTo(padding[axis[3]],h-used[axis[1]]); 
-									this.ctx.lineTo(w-padding[axis[4]],h-used[axis[1]]);
-								} else {
-									used[axis[2]]+=axis[0].majorTickHeight;
-									this.ctx.moveTo(padding[axis[3]],used[axis[2]]);
-									this.ctx.lineTo(w-padding[axis[4]],used[axis[2]]);
-								}
-							}
-							this.ctx.lineWidth = 1;
-							this.ctx.strokeStyle = axis[0].scaleStyle;
-							this.ctx.stroke();
-
-							// Center line
-							if ((axis[0].center > axis[0].minVal && axis[0].center < axis[0].maxVal) && axis[0].scale ) {
-								this.ctx.beginPath();
-								temp = ((axis[0].center- axis[0].minVal) / (axis[0].maxVal - axis[0].minVal));	// Calculate center line position in "y"
-								if ((!(axis[0].axis % 2) && axis[5]) || (axis[0].axis % 2) && !axis[5]) {
-									this.ctx.moveTo(Math.round(padding[axis[3]]+temp*(w-padding[axis[3]]-padding[axis[4]])),padding[axis[2]]);
-									this.ctx.lineTo(Math.round(padding[axis[3]]+temp*(w-padding[axis[3]]-padding[axis[4]])),h-padding[axis[1]]);
-								} else {
-									this.ctx.moveTo(Math.round(padding[axis[3]]+temp*(w-padding[axis[3]]-padding[axis[4]])),padding[axis[1]]);
-									this.ctx.lineTo(Math.round(padding[axis[3]]+temp*(w-padding[axis[3]]-padding[axis[4]])),h-padding[axis[2]]);
-								}
-								this.ctx.lineWidth = 1;
-								this.ctx.strokeStyle = axis[0].scaleStyle;
-								this.ctx.stroke();
-							}
-
-							// Ticks
-							for (k=0; k<steps; k++) {
-								x = k/steps;
-								this.ctx.beginPath();
-								if (axis[5]) {
-									if((axis[0].axis % 2)) {
-										this.ctx.moveTo(Math.round(padding[axis[3]]+x*(w-padding[axis[3]]-padding[axis[4]])),used[axis[1]]);
-										this.ctx.lineTo(Math.round(padding[axis[3]]+x*(w-padding[axis[3]]-padding[axis[4]])),used[axis[1]]-axis[0].majorTickHeight);
-									} else {
-										this.ctx.moveTo(Math.round(padding[axis[3]]+x*(w-padding[axis[3]]-padding[axis[4]])),h-used[axis[2]]);
-										this.ctx.lineTo(Math.round(padding[axis[3]]+x*(w-padding[axis[3]]-padding[axis[4]])),h-used[axis[2]]+axis[0].majorTickHeight);
-									}
-								} else {
-									if((axis[0].axis % 2)) {
-										this.ctx.moveTo(Math.round(padding[axis[3]]+x*(w-padding[axis[3]]-padding[axis[4]])),h-used[axis[1]]);
-										this.ctx.lineTo(Math.round(padding[axis[3]]+x*(w-padding[axis[3]]-padding[axis[4]])),h-used[axis[1]]+axis[0].majorTickHeight);
-									} else {
-										this.ctx.moveTo(Math.round(padding[axis[3]]+x*(w-padding[axis[3]]-padding[axis[4]])),used[axis[2]]);
-										this.ctx.lineTo(Math.round(padding[axis[3]]+x*(w-padding[axis[3]]-padding[axis[4]])),used[axis[2]]-axis[0].majorTickHeight);
-									}
-								}
-								this.ctx.lineWidth = 1;
-								this.ctx.strokeStyle = axis[0].scaleStyle;
-								this.ctx.stroke();
-							}
-						}
+						used = renderNames(axis,this.ctx,used,padding,w,h);
+						used = renderGridLinesLabels(axis,this.ctx,steps,used,padding,w,h);
+						used = renderScale(axis,this.ctx,steps,used,padding,w,h);
 
 						// De-rotate workspace
 						if (axis[5]) { this.ctx.restore(); }
@@ -701,7 +756,7 @@
 				yAxis = this.yAxises[dataset.y.axis];
 				xAxis = this.xAxises[dataset.x.axis];
 
-				steps = xAxis.continouos ? Math.ceil((xAxis.maxVal - xAxis.minVal) / xAxis.step) + axis[0].extraSteps * 2 : xAxis.values.length + axis[0].extraSteps * 2;
+				steps = xAxis.continouos ? Math.ceil((xAxis._maxVal - xAxis._minVal) / xAxis._step) + axis[0].extraSteps * 2 : xAxis._values.length + axis[0].extraSteps * 2;
 				temp = (this.w - padding[1] - padding[2]) - ((this.w - padding[1] - padding[2]) / (steps) * (steps- axis[0].extraSteps * 2));
 
 				if (dataset.type === 'bar') {
@@ -725,11 +780,11 @@
 					/* `pad` */			temp/2,
 					/* `xAxis` */ 		xAxis,
 					/* `yAxis` */ 		yAxis,
-					/* `min` */ 		yAxis.minVal,
-					/* `max` */ 		yAxis.maxVal,
+					/* `min` */ 		yAxis._minVal,
+					/* `max` */ 		yAxis._maxVal,
 					/* `innerHeight` */ this.h - padding[0] - padding[3],
 					/* `innerWidth` */ 	this.w - padding[1] - padding[2] - temp,
-					/* `padding` */		padding,
+					/* `padding` */		padding
 				];
 
 				if (func) {
@@ -757,11 +812,11 @@
 	 * @return {Object} `this`.
 	 */
 	prot.resize = function () {
-		if ((this.w = this.container.width) === 'auto') {
+		if ((this.w = this.container.width) === auto) {
 			this.w = getComputedStyle(this.dest, null).getPropertyValue('width');
 		}
 
-		if ((this.h = this.container.height) === 'auto') {
+		if ((this.h = this.container.height) === auto) {
 			this.h = getComputedStyle(this.dest, null).getPropertyValue('height');
 		}
 
