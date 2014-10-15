@@ -262,7 +262,10 @@ graphoObj.addDataset({
                             // Lets reuse the area chart from a previous example as the first data source
                             graphoObj5.addDataset({
                                 type: 'area',
-                                data: [7, 6, 5, 4, 4, 4, 4, 7, 7, 7, 5, 5, 4, 3, 3, 4, 5, 6, 7, 7, 2, 8, 5, 5, 4, 2]
+
+                                x: { scale: true, gridLines: true, name: "Text on primary x axis"}, 
+                                y: { scale: true, gridLines: true, name: "Text on primary y axis"},
+                                data: [7, 6, 5, 4, 4, 4, 4, 7, 7, 7, 5, 5, 4, 3, 3, 4, 5, 6, 7, 7, 2, 8, 5, 5, 4, 2, 7, 6, 5, 4, 4, 4, 4, 7, 7, 7, 5, 5, 4, 3, 3, 4, 5, 6, 7, 7, 2, 8, 5, 5, 4, 2, 7, 6, 5, 4, 4, 4, 4, 7, 7, 7, 5, 5, 4, 3, 3, 4, 5, 6, 7, 7, 2, 8, 5, 5, 4, 2]
                             });
 
                             // Then we add the bar chart from the previous example, as this is transparent, the bars
@@ -270,7 +273,7 @@ graphoObj.addDataset({
                             graphoObj5.addDataset({
                                 type: 'bar',
                                 fillStyle: 'rgba(0,255,255,0.3)',
-                                data: [7, 3, 5, 4, 6, 5, 4, 1, 4, 2, 3, 5, 1, 3, 3, 4, 5, 6, 7, 7]
+                                data: [7, 3, 5, 4, 6, 5, 4, 1, 4, 2, 3, 5, 1, 3, 3, 4, 5, 6, 7, 7,1]
                             });
 
                             // On top of all, we add a red smoothed line chart with custom dots
@@ -735,7 +738,7 @@ graphoObj9.addDataset({
                                 strokeStyle: '#F0F066',
                                 y: { axis: 1, scale: true, scaleStyle: '#F0F066', gridLines: true, name: "Yellow axis", center: 0, labels: true },
                                 x: { scale: true, gridLines: true, labels: true},
-                                data: [7, 6, 5, 4, 2.5, 4, 4, 10, -7, 57, 5, 5, -41, 25, 3, 4, 5, 6, 7, 7, 2, 8, 5, 5, 4, 2]
+                                data: [7, 6, 5, 4, 2.5, 4, 4, 10, -7, 57, 0, 0, -41, 25, 3, 4, 5, 6, 7, 7, 2, 8, 5, 5, 4, 2]
                             });
 
                             graphoObj10.addDataset({
@@ -743,7 +746,7 @@ graphoObj9.addDataset({
                                 lineDots: true,
                                 strokeStyle: '#6666F0',
                                 y: { axis: 2, scale: true, scaleStyle: '#6666F0', name: "Blue axis"},
-                                data: [6, 1, 3, 6, 2, 6, 3, 2, -7, 9, 2, 4, 5, 5, 3, 2, 2, 6, 6, 15, 17, 17, 15, 14, 13, 2]
+                                data: [6, 1, 3, 6, 2, 6, 3, 2, -7, 9, 2, 0, 0, 5, 3, 2, 2, 6, 6, 15, 17, 17, 15, 14, 13, 2]
                             });
 
                         </script>

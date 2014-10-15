@@ -34,6 +34,10 @@
 	   return a;
 	}
 
+	function log10(x) {
+	  return Math.log(x) / Math.LN10;
+	}
+
 	function isNumber(n) {
 	  return !isNaN(parseFloat(n)) && isFinite(n);
 	}
@@ -56,6 +60,13 @@
 			return l;	
 		}
 		
+	}
+
+	function fText(ctx,text,x,y)  {
+		ctx.save();
+		ctx.scale(1,-1);
+		ctx.fillText(text,x,-y);
+		ctx.restore();
 	}
 
 	function merge (target, source, recurse) {
@@ -394,7 +405,7 @@
 					pxp = xAxis.continouos ? (point[0] - xAxis._minVal) / (xAxis._maxVal - xAxis._minVal) : xAxis._values.indexOf(parseFloat([point[0]])) / xAxis._values.length;
 
 					px = round(padding[1] + pad + ((innerWidth) * pxp));
-					py = round(padding[0] + innerHeight - (point[1] - min) / (max - min) * innerHeight);
+					py = round(padding[3] + (point[1] - min) / (max - min) * innerHeight);
 
 					if (!i) {
 						// Keep track of first pixel, for later use by area charts
@@ -406,7 +417,7 @@
 							px, // The x-coordinate of the Bézier control point
 							py, // The y-coordinate of the Bézier control point
 							(px+(!next ? 0 : round(padding[1] + pad + ((innerWidth) * npxp)))) / 2, // The x-coordinate of the ending point
-							(py+(!next ? 0 : round(padding[0] + innerHeight - (next[1] - min) / (max - min) * innerHeight))) / 2 // The y-coordinate of the ending point
+							(py+(!next ? 0 : round(padding[3] + (next[1] - min) / (max - min) * innerHeight))) / 2 // The y-coordinate of the ending point
 						);
 					} else {
 						ctx.lineTo(px-1, py);
@@ -420,7 +431,7 @@
 
 			if (dataset.type === 'area') {
 
-				cy = round(innerHeight + padding[0] - ((yAxis.center < min ? min : yAxis.center) - min) / (max - min) * innerHeight)-1;
+				cy = Math.round(((yAxis.center < min ? min : yAxis.center) - min) / (max - min) * innerHeight + padding[3])+0.5;
 
 				ctx.lineTo(px-1, cy); // Move to center at last col
 				ctx.lineTo(fpx, cy); // Move to center at first col
@@ -450,7 +461,7 @@
 					ctx.beginPath();
 			     	ctx.arc(
 			     		round(padding[1] + pad + ((innerWidth) * pxp)), // The x-coordinate of the center of the circle
-			     		round(padding[0] + innerHeight - ((point[1] - min) / (max - min)) * innerHeight), // The y-coordinate of the center of the circle
+			     		round(padding[3] + ((point[1] - min) / (max - min)) * innerHeight), // The y-coordinate of the center of the circle
 			     		dataset.dotWidth, // The radius of the circle
 			     		0, // The starting angle, in radians (0 is at the 3 o'clock position of the arc's circle)
 			     		Math.PI * 2 // The ending angle, in radians
@@ -477,7 +488,6 @@
 				bh, // Bar height
 
 				center = yAxis.center;
-
 			
 			ctx.fillStyle = dataset.fillStyle;
 			
@@ -488,10 +498,10 @@
 					pxp = xAxis.continouos ? (point[0] - xAxis._minVal) / (xAxis._maxVal - xAxis._minVal) : xAxis._values.indexOf(parseFloat([point[0]])) / xAxis._values.length;
 
 					px = round(padding[1] + pad - stop/2 + barSpacing/2 + (pxp * innerWidth));
-					py = round(padding[0] + innerHeight - (((point[1] <= center) ? center : point[1]) - min) / (max - min) * innerHeight);
-					bh = round(innerHeight - (((point[1] > center) ? center : point[1]) - min) / (max - min) * innerHeight) - py + padding[0];
-					if (py-padding[0]+bh > innerHeight) {
-						bh = innerHeight-py+padding[0];
+					py = round(padding[3] + (((point[1] <= center) ? center : point[1]) - min) / (max - min) * innerHeight);
+					bh = round((((point[1] > center) ? center : point[1]) - min) / (max - min) * innerHeight) - py + padding[3];
+					if (py-padding[3]+bh > innerHeight) {
+						bh = innerHeight-py+padding[3];
 					}
 
 					ctx.fillRect(px, py, barWidth, bh);
@@ -505,20 +515,12 @@
 				ctx.font=axis[0].font;
 				temp = parseInt(ctx.font.split(' ')[0]);
 				ctx.fillStyle=axis[0].scaleStyle;
-				if (axis[5]) {
 					if (axis[0].axis % 2) {
 						temp = (used[axis[1]]+=temp)-temp/4;
 					} else {
 						temp = h-(used[axis[2]]+=temp)+temp/1.3;
 					}
-				} else {
-					if (axis[0].axis % 2) {
-						temp = h-(used[axis[1]]+=temp)+temp/1.3;
-					} else {
-						temp = (used[axis[2]]+=temp)-temp/4;
-					}
-				}
-				ctx.fillText(axis[0].name,w/2-ctx.measureText(axis[0].name).width/2,temp);
+				fText(ctx,axis[0].name,w/2-ctx.measureText(axis[0].name).width/2,temp);
 			}
 			return used;
 		}
@@ -529,26 +531,14 @@
 
 				// Base scale
 				ctx.beginPath();
-				if (axis[5]) {
-					if((axis[0].axis % 2)) {
-						used[axis[1]]+=axis[0].majorTickHeight;
-						ctx.moveTo(padding[axis[3]],used[axis[1]]);
-						ctx.lineTo(w-padding[axis[4]],used[axis[1]]);
-					} else {
-						used[axis[2]]+=axis[0].majorTickHeight;
-						ctx.moveTo(padding[axis[3]],h-used[axis[2]]);
-						ctx.lineTo(w-padding[axis[4]],h-used[axis[2]]);
-					}
+				if((axis[0].axis % 2)) {
+					used[axis[1]]+=axis[0].majorTickHeight;
+					ctx.moveTo(padding[axis[3]],used[axis[1]]);
+					ctx.lineTo(w-padding[axis[4]],used[axis[1]]);
 				} else {
-					if((axis[0].axis % 2)) {
-						used[axis[1]]+=axis[0].majorTickHeight;
-						ctx.moveTo(padding[axis[3]],h-used[axis[1]]); 
-						ctx.lineTo(w-padding[axis[4]],h-used[axis[1]]);
-					} else {
-						used[axis[2]]+=axis[0].majorTickHeight;
-						ctx.moveTo(padding[axis[3]],used[axis[2]]);
-						ctx.lineTo(w-padding[axis[4]],used[axis[2]]);
-					}
+					used[axis[2]]+=axis[0].majorTickHeight;
+					ctx.moveTo(padding[axis[3]],h-used[axis[2]]);
+					ctx.lineTo(w-padding[axis[4]],h-used[axis[2]]);
 				}
 				ctx.lineWidth = 1;
 				ctx.strokeStyle = axis[0].scaleStyle;
@@ -557,11 +547,11 @@
 				// Center line
 				if ((axis[0].center > axis[0]._minVal && axis[0].center < axis[0]._maxVal) && axis[0].scale ) {
 					ctx.beginPath();
-					temp = ((axis[0].center- axis[0]._minVal) / (axis[0]._maxVal - axis[0]._minVal));	// Calculate center line position in "y"
-					temp = Math.round(padding[axis[3]]+temp*(w-padding[axis[3]]-padding[axis[4]]));
-					if ((!(axis[0].axis % 2) && !axis[5]) || ((axis[0].axis % 2) && !axis[5])) {
-						ctx.moveTo(temp,padding[axis[2]]);
-						ctx.lineTo(temp,h-padding[axis[1]]);
+					temp = ((axis[0].center - axis[0]._minVal) / (axis[0]._maxVal - axis[0]._minVal));	// Calculate center line position in "y"
+					temp = Math.round(w-padding[axis[4]]-temp*(w-padding[axis[3]]-padding[axis[4]]));
+					if (axis[0].axis % 2) {
+						ctx.moveTo(temp,padding[axis[1]]);
+						ctx.lineTo(temp,h-padding[axis[2]]);
 					} else {
 						ctx.moveTo(temp,padding[axis[1]]);
 						ctx.lineTo(temp,h-padding[axis[2]]);
@@ -571,32 +561,6 @@
 					ctx.stroke();
 				}
 
-				// Ticks
-				for (k=0; k<steps; k++) {
-					x = k/steps;
-					ctx.beginPath();
-					temp = Math.round(padding[axis[3]]+x*(w-padding[axis[3]]-padding[axis[4]]));
-					if (axis[5]) {
-						if((axis[0].axis % 2)) {
-							ctx.moveTo(temp,used[axis[1]]);
-							ctx.lineTo(temp,used[axis[1]]-axis[0].majorTickHeight);
-						} else {
-							ctx.moveTo(temp,h-used[axis[2]]);
-							ctx.lineTo(temp,h-used[axis[2]]+axis[0].majorTickHeight);
-						}
-					} else {
-						if((axis[0].axis % 2)) {
-							ctx.moveTo(temp,h-used[axis[1]]);
-							ctx.lineTo(temp,h-used[axis[1]]+axis[0].majorTickHeight);
-						} else {
-							ctx.moveTo(temp,used[axis[2]]);
-							ctx.lineTo(temp,used[axis[2]]-axis[0].majorTickHeight);
-						}
-					}
-					ctx.lineWidth = 1;
-					ctx.strokeStyle = axis[0].scaleStyle;
-					ctx.stroke();
-				}
 			}
 			return used;
 		}
@@ -615,50 +579,43 @@
 
 			textSize = parseInt(axis[0].font.split(' ')[0].replace('px',''));
 			if (axis[0].labels) {
-				used[axis[(axis[0].axis % 2)?1:2]]+=textSize;
+				used[axis[(axis[0].axis % 2)?1:2]]+=textSize*3;
 			}
 
 			dir=[+Math.abs(axis[0]._step),-Math.abs(axis[0]._step)];
 			for(i=0;i<dir.length;i++) {
 				k=0;
-				while(k<axis[0]._maxVal && k>axis[0]._minVal) {
-					temp = Math.round(padding[axis[3]]+(k-axis[0]._minVal)/(axis[0]._maxVal-axis[0]._minVal)*(w-padding[axis[3]]-padding[axis[4]]));
-
+				while(k<axis[0]._maxVal && k>=axis[0]._minVal) {
+					if(axis[5]) {
+						temp = Math.round(w-(padding[axis[4]]+(k-axis[0]._minVal)/(axis[0]._maxVal-axis[0]._minVal)*(w-padding[axis[3]]-padding[axis[4]])));
+					} else {
+						temp = Math.round(padding[axis[3]]+(k-axis[0]._minVal)/(axis[0]._maxVal-axis[0]._minVal)*(w-padding[axis[3]]-padding[axis[4]]));
+					}
 					// Render grid lines
 					if (axis[0].gridLines) {
-
 						// Prevent grid lines from overriding scales
 						ctx.beginPath();
-						if ((!(axis[0].axis % 2) && axis[5]) || ((axis[0].axis % 2) && !axis[5])) {
-							ctx.moveTo(temp,padding[axis[2]]);
-							ctx.lineTo(temp,h-padding[axis[1]]);
-						} else {
-							ctx.moveTo(temp,padding[axis[1]]);
-							ctx.lineTo(temp,h-padding[axis[2]]);
-						}
+						ctx.moveTo(temp,padding[axis[1]]);
+						ctx.lineTo(temp,h-padding[axis[2]]);
 						ctx.stroke();
 					}
 					if(axis[0].labels) {
 						ctx.beginPath();
-						if (axis[5]) {
-							if((axis[0].axis % 2)) {
-								y = used[axis[1]]-textSize/4;
-							} else {
-								y = h-used[axis[2]]+textSize*1.3;
-							}
+						if(axis[0].axis % 2) {
+							y = used[axis[1]]-textSize/4;
 						} else {
-							if((axis[0].axis % 2)) {
-								y = h-used[axis[1]]+textSize;
-							} else {
-								y = used[axis[2]]-textSize/4;
-							}
+							y = h-used[axis[2]]+textSize*1.3;
 						}
 						text = axis[0].labelFormat(k);
 						ctx.save();
-						ctx.translate(temp-textSize/2,y-ctx.measureText(text).width/2);
+						if (axis[5]) {
+							ctx.translate(temp-textSize/2,y-ctx.measureText(text).width/2);
+						} else {
+							ctx.translate(temp-textSize/7,y-ctx.measureText(text).width/2);
+						}
 						ctx.rotate(0.5*Math.PI);
 						ctx.translate(-textSize/2,-ctx.measureText(text).width/2);
-						ctx.fillText(text,0,0);
+						fText(ctx,text,0,0);
 						ctx.restore();
 					}
 					k+=dir[i];
@@ -697,6 +654,8 @@
 			// Save matrix and transform 0.5px in boh x and y to draw everything pixel perfect
 			this.ctx.save();
 			this.ctx.translate(0.5,0.5);
+			this.ctx.scale(1,-1);
+			this.ctx.translate(0,-this.h);
 
 			for(xAxis in this.xAxises) {
 				xAxis = this.xAxises[xAxis];
@@ -717,7 +676,7 @@
 					axis = axises[j];
 					if (!axis[0]._measured) {
 						temp = parseInt(axis[0].font.split(' ')[0]);
-						padding[axis[(axis[0].axis % 2) ? 1 : 2]] += margin + (axis[0].scale?axis[0].majorTickHeight:0) + (axis[0].name?temp:0) + (axis[0].labels?temp:0);
+						padding[axis[(axis[0].axis % 2) ? 1 : 2]] += (axis[0].name||axis[0].labels?margin:0) + (axis[0].scale?axis[0].majorTickHeight:0) + (axis[0].name?temp:0) + (axis[0].labels?temp*3:0);
 						axis[0]._measured=true;
 					}
 				}
@@ -728,7 +687,7 @@
 			while ((dataset = this.datasets[i++])) {
 
 				// Array of Axis,left padding idx, right padding idx and wether to rotate
-				axises = [[this.yAxises[dataset.y.axis],1,2,3,0,true],[this.xAxises[dataset.x.axis],3,0,1,2,false]];
+				axises = [[this.yAxises[dataset.y.axis],1,2,0,3,true],[this.xAxises[dataset.x.axis],3,0,1,2,false]];
 				for (j=0; j<axises.length;j++) {
 					axis = axises[j];
 
@@ -751,7 +710,7 @@
 
 							interval = axis[0]._maxVal - axis[0]._minVal;
 							step = interval/(steps);
-							magnitude = Math.floor(Math.log10(step));
+							magnitude = Math.floor(log10(step));
 							power = Math.pow(10, magnitude);
 							msd = Math.round(step/power + 0.5);
 
@@ -766,11 +725,10 @@
 							newStepSize = msd * power;
 							newNumSteps = Math.round(Math.ceil((interval) / newStepSize)) ;
 							newRange = newStepSize * newNumSteps;
-							newMin = axis[0]._minVal - (axis[0]._minVal % newStepSize) - newStepSize;
+							newMin = (axis[0]._minVal === 0 || axis[0].min === 0) ? axis[0]._minVal : axis[0]._minVal - (axis[0]._minVal % newStepSize) - newStepSize;
 							newMax = axis[0]._minVal + newRange
 							axis[0]._step = newStepSize;
 
-							
 							if(axis[5]) {
 								steps = newNumSteps;
 								axis[0]._minVal = newMin;
@@ -792,10 +750,12 @@
 						}
 
 						// Add some pre axis space (margin)
-						if (((axis[0].axis % 2) && axis[5]) || (axis[0].axis % 2) && !axis[5]) {
-							used[axis[1]]+=margin;
-						} else {
-							used[axis[2]]+=margin;
+						if( axis[0].name || axis[0].labels ) {
+							if (axis[0].axis % 2) {
+								used[axis[1]]+=margin;
+							} else {
+								used[axis[2]]+=margin;
+							}
 						}
 
 						used = renderNames(axis,this.ctx,used,padding,w,h);
@@ -817,7 +777,7 @@
 				yAxis = this.yAxises[dataset.y.axis];
 				xAxis = this.xAxises[dataset.x.axis];
 
-				steps = xAxis.continouos ? Math.ceil((xAxis._maxVal - xAxis._minVal) / xAxis._step) + axis[0].extraSteps * 2 : xAxis._values.length + axis[0].extraSteps * 2;
+				steps = xAxis.continouos ? Math.round((xAxis._maxVal - xAxis._minVal) / xAxis._step) + axis[0].extraSteps * 2 : xAxis._values.length + axis[0].extraSteps * 2;
 				temp = (this.w - padding[1] - padding[2]) - ((this.w - padding[1] - padding[2]) / (steps) * (steps- axis[0].extraSteps * 2));
 
 				if (dataset.type === 'bar') {
