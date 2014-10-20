@@ -499,10 +499,9 @@
 
 					px = round(padding[1] + pad - stop/2 + barSpacing/2 + (pxp * innerWidth));
 					py = round(padding[3] + (((point[1] <= center) ? center : point[1]) - min) / (max - min) * innerHeight);
-					bh = round((((point[1] > center) ? center : point[1]) - min) / (max - min) * innerHeight) - py + padding[3];
-					if (py-padding[3]+bh > innerHeight) {
-						bh = innerHeight-py+padding[3];
-					}
+					bh = round(padding[3] + (((point[1] > center) ? center : point[1]) - min) / (max - min) * innerHeight) - py;
+
+
 
 					ctx.fillRect(px, py, barWidth, bh);
 				}
@@ -725,7 +724,7 @@
 							newStepSize = msd * power;
 							newNumSteps = Math.round(Math.ceil((interval) / newStepSize)) ;
 							newRange = newStepSize * newNumSteps;
-							newMin = (axis[0]._minVal === 0 || axis[0].min === 0) ? axis[0]._minVal : axis[0]._minVal - (axis[0]._minVal % newStepSize) - newStepSize;
+							newMin = axis[0]._minVal;
 							newMax = axis[0]._minVal + newRange
 							axis[0]._step = newStepSize;
 
