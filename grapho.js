@@ -150,7 +150,6 @@
 			majorTickHeight: 4,
 			minorTickHeight: 2,
 			center: 0,
-			extraSteps: 0,
 			_values: [],
 
 			// Used internaly
@@ -158,7 +157,8 @@
 			_minVal: Infinity,
 			_maxVal: -Infinity,
 			_measured: false,	
-			_written: false
+			_written: false,
+			_padded: false
 			
 		};
 
@@ -329,8 +329,8 @@
 		}
 
 		// If type == 'bar', force extra steps on x axis
-		if (dataset.type==='bar' && xAxis.extraSteps < 1) {
-			xAxis.extraSteps = 1;
+		if (dataset.type==='bar') {
+			xAxis._padded = true;
 		}
 
 		this.datasets.push(dataset);
@@ -386,10 +386,10 @@
 		 * @param {Object} graph The Grapho object
 		 * @param {Array} dataset The data datasets
 		 */
-		function renderLineArea (ctx, dataset, data, i, to, stop, pad, xAxis, yAxis, min, max, innerHeight, innerWidth, padding) {
+		function renderLineArea (ctx, dataset, data, i, to, xAxis, yAxis, min, max, innerHeight, innerWidth, padding) {
 			var point,
 				
-				next, npxp,
+				next, npxp, mpxpdiff, pad,
 
 				px, // Current X-pixel
 				py, // Current Y-pixel
@@ -399,10 +399,15 @@
 
 			ctx.beginPath();
 
+			mpxpdiff = calcMinStep(xAxis,data,to);
+			innerWidth = (innerWidth-(mpxpdiff*innerWidth*((xAxis._padded)?1:0)));
+			mpxpdiff = mpxpdiff * innerWidth;
+			pad = (xAxis._padded)?mpxpdiff/2:0;
+
 			for ( ; i < to; i++) {
 				if ((point = data[i])) {
 
-					pxp = xAxis.continouos ? (point[0] - xAxis._minVal) / (xAxis._maxVal - xAxis._minVal) : xAxis._values.indexOf(parseFloat([point[0]])) / xAxis._values.length;
+					pxp = xAxis.continouos ? (point[0] - xAxis._minVal) / (xAxis._maxVal - xAxis._minVal) : xAxis._values.indexOf(parseFloat([point[0]])) / (xAxis._values.length - 1);
 
 					px = round(padding[1] + pad + ((innerWidth) * pxp));
 					py = round(padding[3] + (point[1] - min) / (max - min) * innerHeight);
@@ -412,7 +417,7 @@
 						ctx.moveTo((fpx = px+1), py);
 					} else if (dataset.lineSmooth && i < data.length - 1) {
 						next = data[i + 1];
-						npxp = xAxis.continouos ? (next[0] - xAxis._minVal) / (xAxis._maxVal - xAxis._minVal) : xAxis._values.indexOf(parseFloat([next[0]])) / xAxis._values.length;
+						npxp = xAxis.continouos ? (next[0] - xAxis._minVal) / (xAxis._maxVal - xAxis._minVal) : xAxis._values.indexOf(parseFloat([next[0]])) / (xAxis._values.length - 1);
 						ctx.quadraticCurveTo(
 							px, // The x-coordinate of the Bézier control point
 							py, // The y-coordinate of the Bézier control point
@@ -451,13 +456,18 @@
 		 * @param {Object} graph The Grapho object
 		 * @param {Array} dataset The data datasets
 		 */
-		function renderScatter (ctx, dataset, data, i, to, stop, pad, xAxis, yAxis, min, max, innerHeight, innerWidth, padding) {
-			var point, pxp;
+		function renderScatter (ctx, dataset, data, i, to, xAxis, yAxis, min, max, innerHeight, innerWidth, padding) {
+			var point, pxp, mpxpdiff, pad;
+
+			mpxpdiff = calcMinStep(xAxis,data,to);
+			innerWidth = (innerWidth-(mpxpdiff*innerWidth*((xAxis._padded)?1:0)));
+			mpxpdiff = mpxpdiff * innerWidth;
+			pad = (xAxis._padded)?mpxpdiff/2:0;
 
 			for ( ; i < to; i++) {
 				// We might need to skip some points that are not in the dataset
 				if ((point = data[i])) {
-					pxp = xAxis.continouos ? (point[0] - xAxis._minVal) / (xAxis._maxVal - xAxis._minVal) : xAxis._values.indexOf(parseFloat([point[0]])) / xAxis._values.length;
+					pxp = xAxis.continouos ? (point[0] - xAxis._minVal) / (xAxis._maxVal - xAxis._minVal) : xAxis._values.indexOf(parseFloat([point[0]])) / xAxis._values.length - 1;
 					ctx.beginPath();
 			     	ctx.arc(
 			     		round(padding[1] + pad + ((innerWidth) * pxp)), // The x-coordinate of the center of the circle
@@ -472,40 +482,65 @@
 			}
 		}
 
+		function calcMinStep(xAxis,data,to) {
+			var i,mpxpdiff = Infinity,lpxp,pxp,point;
+			for ( i=0; i < to; i++) {
+				if (point = data[i]) {
+					pxp = xAxis.continouos ? (point[0] - xAxis._minVal) / (xAxis._maxVal - xAxis._minVal) : xAxis._values.indexOf(parseFloat([point[0]])) / (xAxis._values.length - 1);
+					if (lpxp !== undef && (pxp - lpxp) < mpxpdiff) {
+						mpxpdiff = (pxp - lpxp);
+					}
+					lpxp = pxp;
+				}
+			}
+			return mpxpdiff;
+		}
+
 		/**
 		 * Renders a bar chart
 		 * @param {Object} graph The Grapho object
 		 * @param {Array} dataset The data datasets
 		 */
-		function renderBarChart (ctx, dataset, data, i, to, stop, pad, xAxis, yAxis, min, max, innerHeight, innerWidth, padding) {
-			var point, pxp,
+		function renderBarChart (ctx, dataset, data, i, to, xAxis, yAxis, min, max, innerHeight, innerWidth, padding) {
+			var point, pxp, pad, mpxpdiff,
 
-				barSpacing 	= stop*(100-dataset.barWidthPrc)/100,
-				barWidth 	= stop-barSpacing,
+				barSpacing,
+				barWidth,
 
 				px,
 				py,
 				bh, // Bar height
+				ct, // Center temp
 
 				center = yAxis.center;
 			
 			ctx.fillStyle = dataset.fillStyle;
-			
-			for ( ; i < to; i++) {
+
+			mpxpdiff = calcMinStep(xAxis,data,to);
+			innerWidth = (innerWidth-(mpxpdiff*innerWidth*((xAxis._padded)?1:0)));
+			mpxpdiff = mpxpdiff * innerWidth;
+			pad = (xAxis._padded)?mpxpdiff/2:0;
+
+			barSpacing 	= mpxpdiff*(100-dataset.barWidthPrc)/100;
+			barWidth 	= mpxpdiff-barSpacing;
+
+			for ( i=0; i < to; i++) {
 				// We might need to skip some points that are not in the dataset
 				if ((point = data[i])) {
 
-					pxp = xAxis.continouos ? (point[0] - xAxis._minVal) / (xAxis._maxVal - xAxis._minVal) : xAxis._values.indexOf(parseFloat([point[0]])) / xAxis._values.length;
-
-					px = round(padding[1] + pad - stop/2 + barSpacing/2 + (pxp * innerWidth));
-					py = round(padding[3] + (((point[1] <= center) ? center : point[1]) - min) / (max - min) * innerHeight);
-					bh = round(padding[3] + (((point[1] > center) ? center : point[1]) - min) / (max - min) * innerHeight) - py;
-
-
+					pxp = xAxis.continouos ? (point[0] - xAxis._minVal) / (xAxis._maxVal - xAxis._minVal) : xAxis._values.indexOf(parseFloat([point[0]])) / (xAxis._values.length - 1);
+					
+					ct = (center < min) ? min : center; 
+					
+					px = round(padding[1] - mpxpdiff/2 + pad + barSpacing/2 + (pxp * innerWidth));
+					py = round(padding[3] + (((point[1] <= ct) ? ct : point[1]) - min) / (max - min) * innerHeight);
+					bh = round(padding[3] + (((point[1] > ct) ? ct : point[1]) - min) / (max - min) * innerHeight) - py;
 
 					ctx.fillRect(px, py, barWidth, bh);
+
 				}
 			}
+
 		}
 
 		function renderNames(axis,ctx,used,padding,w,h) {
@@ -526,6 +561,7 @@
 
 		function renderScale(axis,ctx,steps,used,padding,w,h) {
 			var temp, x, k;
+
 			if (axis[0].scale) {
 
 				// Base scale
@@ -539,6 +575,7 @@
 					ctx.moveTo(padding[axis[3]],h-used[axis[2]]);
 					ctx.lineTo(w-padding[axis[4]],h-used[axis[2]]);
 				}
+
 				ctx.lineWidth = 1;
 				ctx.strokeStyle = axis[0].scaleStyle;
 				ctx.stroke();
@@ -735,7 +772,7 @@
 							}
 
 						} else {
-							steps = axis[0]._values.length + axis[0].extraSteps * 2;
+							steps = axis[0]._values.length;
 						}
 						
 						h = (j===0) ? this.w : this.h;
@@ -776,8 +813,8 @@
 				yAxis = this.yAxises[dataset.y.axis];
 				xAxis = this.xAxises[dataset.x.axis];
 
-				steps = xAxis.continouos ? Math.round((xAxis._maxVal - xAxis._minVal) / xAxis._step) + axis[0].extraSteps * 2 : xAxis._values.length + axis[0].extraSteps * 2;
-				temp = (this.w - padding[1] - padding[2]) - ((this.w - padding[1] - padding[2]) / (steps) * (steps- axis[0].extraSteps * 2));
+				steps = xAxis.continouos ? Math.round((xAxis._maxVal - xAxis._minVal) / xAxis._step) : (xAxis._values.length - 1);
+				temp = (this.w - padding[1] - padding[2]) - ((this.w - padding[1] - padding[2]) / (steps) * (steps));
 
 				if (dataset.type === 'bar') {
 					// Temporarily "restore" matrix
@@ -796,15 +833,14 @@
 					/* `data` */	 	dataset.data,
 					/* `i` */ 			0,
 					/* `to` */ 			dataset.data.length,
-					/* `stop` */		(this.w - padding[1] - padding[2]) / steps,
-					/* `pad` */			temp/2,
 					/* `xAxis` */ 		xAxis,
 					/* `yAxis` */ 		yAxis,
 					/* `min` */ 		yAxis._minVal,
 					/* `max` */ 		yAxis._maxVal,
 					/* `innerHeight` */ this.h - padding[0] - padding[3],
 					/* `innerWidth` */ 	this.w - padding[1] - padding[2] - temp,
-					/* `padding` */		padding
+					/* `padding` */		padding,
+					/* `steps` */		steps
 				];
 
 				if (func) {
