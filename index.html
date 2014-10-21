@@ -779,6 +779,51 @@ graphoObj.addDataset({
             </article>
         </section>
 
+        <section>
+            <article>
+                <h3>
+                    <span class="secondary">Example 11 - </span>
+                    <span class="tertiary">Barchart and line test</span>
+                </h3>
+                <div class="container w-100 h-1">
+
+                    <!-- Example 11 - Start -->
+                    <div id="example-11" class="box bw-100 h-100 bg-tertiary">
+
+                        <!-- Example-11 javascript -->
+                        <script>
+
+                            // Create grapho object, pass a parameter pointing to the destination element
+                            var graphoObj11 = new Grapho( { place: 'example-11' } );
+
+                            graphoObj11.addDataset({
+                                type:'bar',
+                                strokeStyle: '#F0F066',
+                                y: { axis: 1, scale: true, scaleStyle: '#F0F066', gridLines: true, name: "Yellow axis", center: 0, labels: true },
+                                x: { scale: true, gridLines: true, labels: true, continouos: false},
+                                data: [7, 6, 5, 4, 2.5, 4, 4, 10, 0, 12, 14]
+                            });
+                            
+                            graphoObj11.addDataset({
+                                type:'line',
+                                strokeStyle: '#F0F066',
+                                y: { axis: 1, scale: true, scaleStyle: '#F0F066', gridLines: true, name: "Yellow axis", center: 0, labels: true },
+                                x: { scale: true, gridLines: true, labels: true, continouos: false},
+                                data: [7, 6, 5, 4, 2.5, 4, 4, 10, 0, 12,14]
+                            });
+
+                        </script>
+
+                    </div>
+                    <!-- Example 11 - End -->
+                </div>
+            </article>
+            <article>
+                <h3><span class="tertiary">Source code</span></h3>
+                <pre><code data-language="javascript"></code></pre>
+            </article>
+        </section>
+
         <div class="clear"><!-- --></div>
     </body>
 </html>
