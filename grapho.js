@@ -50,7 +50,10 @@
 				dotWidth: 4,
 
 				// type: 'bar'
-				barWidthPrc: 80
+				barWidthPrc: 90,
+
+				// Internal stuff
+				_labels: []
 			},
 			axis: {
 				min: "auto",
@@ -150,7 +153,7 @@
 
 					mpxpdiff = xAxis._minStepPrc / xAxis._range;
 					innerWidth = (grapho.wsw-(mpxpdiff*grapho.wsw*((xAxis._padded)?1:0)));
-					mpxpdiff = mpxpdiff * grapho.wsw;
+					mpxpdiff = mpxpdiff * innerWidth;
 					pad = (xAxis._padded)?mpxpdiff/2:0;
 
 					for ( i = 0; i < dataset.data.length; i++) {
@@ -216,7 +219,7 @@
 
 					mpxpdiff = xAxis._minStepPrc / xAxis._range;
 					innerWidth = (grapho.wsw-(mpxpdiff*grapho.wsw*((xAxis._padded)?1:0)));
-					mpxpdiff = mpxpdiff * grapho.wsw;
+					mpxpdiff = mpxpdiff * innerWidth;
 					pad = (xAxis._padded)?mpxpdiff/2:0;
 
 					barSpacing 	= mpxpdiff*(100-dataset.barWidthPrc)/100;
@@ -244,7 +247,7 @@
 
 					mpxpdiff = xAxis._minStepPrc / xAxis._range;
 					innerWidth = (grapho.wsw-(mpxpdiff*grapho.wsw*((xAxis._padded)?1:0)));
-					mpxpdiff = mpxpdiff * grapho.wsw;
+					mpxpdiff = mpxpdiff * innerWidth;
 					pad = (xAxis._padded)?mpxpdiff/2:0;
 
 					for ( i=0; i < dataset.data.length; i++) {
@@ -465,21 +468,6 @@
 
 	};
 
-	prot.calcMinStep = function (axis,data) {
-		var i,minstep = Infinity,lpxp,pxp,point;
-		for ( i=0; i < data.length; i++) {
-			if (point = data[i]) {
-				pxp = xAxis.continouos ? (point[0] - axis._minVal) / (axis._range) : axis._values.indexOf(parseFloat([point[0]])) / (axis._values.length - 1);
-				if (lpxp !== undef && (pxp - lpxp) < mpxpdiff) {
-					mpxpdiff = (pxp - lpxp);
-				}
-				lpxp = pxp;
-			}
-		}
-		axis._minStepPrc = minstep;
-		return axis;
-	};
-
 	prot.pushDataset = function (dataset) {
 		var yAxis = this.yAxises[dataset.y.axis],
 			xAxis = this.xAxises[dataset.x.axis],
@@ -496,6 +484,13 @@
 				cleanDataX[i] = i;
 				dataset.data[i] = [i, dataset.data[i]];
 			}
+		// If we got a double element array with strings , do some magic
+		} else if(typeof dataset.data[0][0] == 'string') {
+			for (i = 0; i < datasetLen; i++) {
+				cleanDataY[i] = dataset.data[i][1];
+				dataset._labels[i] = dataset.data[i][0];
+				dataset.data[i][0] = cleanDataX[i] = i;
+			}
 		} else {
 			for (i = 0 ; i < datasetLen; i++) {
 				cleanDataY[i] = dataset.data[i][1];
@@ -509,6 +504,9 @@
 		xAxis._maxVal = xAxis.max !== "auto" ? xAxis.max : Math.max(Math.max.apply(null, cleanDataX), xAxis._maxVal);
 		xAxis._minVal = xAxis.min !== "auto" ? xAxis.min : Math.min(Math.min.apply(null, cleanDataX), xAxis._minVal);
 
+		// Update values of xAxis
+		xAxis._labels = dataset._labels;
+
 		// Mege unique values of this and previous datasets
 		xAxis._values = helpers.array.unique(xAxis._values.concat(cleanDataX));
 		yAxis._values = helpers.array.unique(yAxis._values.concat(cleanDataY));
@@ -518,10 +516,14 @@
 		yAxis._range = yAxis._maxVal - yAxis._minVal;
 
 		// Update axis steps
-		yAxis = this.calcAxisSteps(yAxis); xAxis = this.calcAxisSteps(xAxis);
+		yAxis = this.calcAxisSteps(yAxis); 
 
-		// Calculate axis minimum step
-		yAxis = this.calcAxisSteps(yAxis); xAxis = this.calcAxisSteps(xAxis);
+		if (dataset._labels.length > 0) {
+			xAxis._step = 1;
+			xAxis._steps = dataset._labels.length - 1;
+		} else {
+			xAxis = this.calcAxisSteps(xAxis);	
+		}
 
 		// If type == 'bar', force extra steps on x axis
 		if (dataset.type==='bar') {
@@ -544,7 +546,8 @@
 			k,
 			lwsw, lwsh,
 			lwox, lwoy,
-			text;
+			text,
+			mpxpdiff, innerWidth, pad, sl;
 
 		context.lineWidth = 1;
 		context.strokeStyle = axis.gridStyle;
@@ -569,13 +572,20 @@
 			lwox = this.wox;
 		}
 
+		mpxpdiff = axis._minStepPrc / axis._range;
+		innerWidth = (lwsw-(mpxpdiff*lwsw*((axis._padded)?1:0)));
+		mpxpdiff = mpxpdiff * innerWidth;
+		pad = (axis._padded)?mpxpdiff/2:0;
+					
+
 		// Draw grid and ticks
 		dir=[+Math.abs(axis._step),-Math.abs(axis._step)];
 		for(i=0;i<dir.length;i++) {
 			k=0;
 
-			while(k<axis._maxVal && k>=axis._minVal) {
-				temp = Math.round( lwox+(k-axis._minVal)/(axis._range)*(lwsw));
+			while(k<=axis._maxVal && k>=axis._minVal) {
+
+				temp = Math.round( lwox+pad+(k-axis._minVal)/(axis._range)*(innerWidth));
 
 				// Render grid lines
 				if (axis.gridLines) {
@@ -594,7 +604,11 @@
 					} else {
 						y = h-axis._offset+axis._textSize*1.3;
 					}
-					text = axis.labelFormat(k);
+					if (axis._labels && axis._labels[k] !== undefined) {
+						text = axis.labelFormat(axis._labels[k]);	
+					} else {
+						text = axis.labelFormat(k);	
+					}
 					context.save();
 					if (orientation==='y') {
 						context.scale(-1,1);
@@ -626,6 +640,16 @@
 
 				k+=dir[i];
 			}
+		}
+
+		// Render center line
+		if (axis.gridLines && axis.scale && axis.center > axis._minVal && axis.center < axis._maxVal) {
+			temp = Math.round( lwox+pad+(axis.center-axis._minVal)/(axis._range)*(innerWidth));
+			context.beginPath();
+			context.moveTo(temp,lwoy);
+			context.lineTo(temp,lwoy+lwsh);
+			context.strokeStyle = axis.scaleStyle;
+			context.stroke();
 		}
 
 		// Render scale line
@@ -671,16 +695,26 @@
 	prot.redraw = function() {
 
 		var a, c,
-			d, ds,
-			calcAxis = function(axis) {
-				if( axis._h === undefined ) {
-					axis._textSize = (axis.font !== undefined) ? parseInt(axis.font.split(' ')[0]) : 0;
-					axis._h = 0;
-					axis._h += (axis.scale) ? 1 : 0;				// Add one pixel for scale
-					axis._h += (axis.scale) ? axis.majorTickHeight : 0;	// Add n pixels for major ticks
-					axis._h += (axis.labels) ? axis._textSize : 0 // Add n pixels for text
-					axis._h += (axis.name) ? axis._textSize : 0 // Add n pixels for name
+			d, ds, mw, i, ts,
+			calcAxis = function(axis,ctx) {
+				axis._textSize = (axis.font !== undefined) ? parseInt(axis.font.split(' ')[0]) : 0;
+				axis._h = 0;
+				axis._h += (axis.scale) ? 1 : 0;				// Add one pixel for scale
+				axis._h += (axis.scale) ? axis.majorTickHeight : 0;	// Add n pixels for major ticks
+				axis._h += (axis.name) ? axis._textSize : 0 // Add n pixels for name
+				if (axis.labels) {
+					mw = 0;
+					for (i=axis._minVal; i<=axis._maxVal; i+=axis._step) {
+						if (axis._labels && axis._labels[i] !== undefined) {
+							ts = ctx.measureText(axis.labelFormat(axis._labels[i])).width;
+						} else {
+							ts = ctx.measureText(axis.labelFormat(i)).width;
+						}
+						if(ts > mw) mw = ts;
+					}
+					axis._h += mw;
 				}
+				// To get the label width, we need to loop throug them all
 				return axis;
 			};
 
@@ -691,7 +725,7 @@
 
 		// 1. Calculate axis "heights", workpace width, and workspace offset
 		for(a in this.yAxises) {
-			this.yAxises[a] = calcAxis(this.yAxises[a]);
+			this.yAxises[a] = calcAxis(this.yAxises[a],this.ctx);
 
 			// Reduce workspace width by axis height
 			this.wsw -= this.yAxises[a]._h;
@@ -702,7 +736,7 @@
 			else 		this.nwox += this.yAxises[a]._h;
 		}
 		for(a in this.xAxises) {
-			this.xAxises[a] = calcAxis(this.xAxises[a]);
+			this.xAxises[a] = calcAxis(this.xAxises[a],this.ctx);
 
 			this.wsh -= this.xAxises[a]._h;
 
