@@ -45,6 +45,7 @@
 				strokeStyle: '#9494BA',
 				fillStyle: '#121612',
 				lineDots: false,
+				shadow: true,
 
 				// type: scatter || lineDots: true
 				dotWidth: 4,
@@ -81,7 +82,8 @@
 				_minVal: Infinity,
 				_maxVal: -Infinity,
 				_padded: false, 			// Padding adds a half step to the width, usable for bar charts
-				_values: []
+				_values: [],
+				_labels: []
 				
 			}
 		},
@@ -140,9 +142,7 @@
 			renderers: {
 				line: function(grapho, context, dataset, xAxis, yAxis) {
 					var point, i,
-						
 						next, npxp, mpxpdiff, pad, innerWidth,
-
 						px, // Current X-pixel
 						py, // Current Y-pixel
 						cy, // Center Y-pixel
@@ -156,6 +156,7 @@
 					mpxpdiff = mpxpdiff * innerWidth;
 					pad = (xAxis._padded)?mpxpdiff/2:0;
 
+					// Primary line
 					for ( i = 0; i < dataset.data.length; i++) {
 						if ((point = dataset.data[i])) {
 
@@ -181,11 +182,10 @@
 							}
 						}
 					}
-
 					context.lineWidth = dataset.lineWidth;
 					context.strokeStyle = dataset.strokeStyle;
 					context.stroke();
-
+					
 					if (dataset.type === 'area') {
 
 						cy = Math.round(((yAxis.center < yAxis._minVal ? yAxis._minVal : yAxis.center) - yAxis._minVal) / (yAxis._range) * grapho.wsw + grapho.woy)+0.5;
@@ -204,18 +204,15 @@
 				},
 				bar: function (grapho, context, dataset, xAxis, yAxis) {
 					var point, pxp, pad, mpxpdiff, i,
-
 						barSpacing,
 						barWidth,
-
 						px,
 						py,
-						bh, // Bar height
+						bh,
+						heightflag,
 						ct, // Center temp
-
 						center = yAxis.center;
 					
-					context.fillStyle = dataset.fillStyle;
 
 					mpxpdiff = xAxis._minStepPrc / xAxis._range;
 					innerWidth = (grapho.wsw-(mpxpdiff*grapho.wsw*((xAxis._padded)?1:0)));
@@ -237,7 +234,19 @@
 							py = Math.round(grapho.woy + (((point[1] <= ct) ? ct : point[1]) - yAxis._minVal) / (yAxis._range) * grapho.wsh);
 							bh = Math.round(grapho.woy + (((point[1] > ct) ? ct : point[1]) - yAxis._minVal) / (yAxis._range) * grapho.wsh) - py;
 
+							// Use strokestyle instead of fillstyle when height > lineWidth*2
+							if((heightflag = (Math.abs(bh)>dataset.lineWidth*2))) {
+								context.fillStyle = dataset.fillStyle;
+							} else {
+								context.fillStyle = dataset.strokeStyle;
+							}
 							context.fillRect(px, py, barWidth, bh);
+
+							if (dataset.lineWidth > 0 && heightflag) {
+								context.strokeStyle = dataset.strokeStyle;
+								context.lineWidth = dataset.lineWidth;
+								context.strokeRect(px+context.lineWidth/2-0.5, py-context.lineWidth/2-0.5, barWidth-context.lineWidth+1, bh+context.lineWidth+1);
+							}
 
 						}
 					}
@@ -421,6 +430,9 @@
 			def = helpers.object.merge(def, dataset);
 		}
 
+		// Modify defaults for bar charts
+		if ( dataset.type == 'bar' && dataset.lineWidth === undefined) def.lineWidth = 0;
+
 		// Make sure the axis exists
 		this.initAxis(def.y,this.yAxises);
 		this.initAxis(def.x,this.xAxises);
@@ -437,45 +449,17 @@
 		return this;
 	};
 
-	prot.calcAxisSteps = function (axis, stepsGoal) {
-
-		// Default goal steps to 15
-		stepsGoal = (stepsGoal === undefined) ? 15 : stepsGoal;
-
-		var step, 		msd,
-			magnitude, 	power,
-			newSteps, 	newRange,
-			newStepSize;
-
-		step 		= axis._range/(stepsGoal);
-		magnitude 	= Math.floor(helpers.math.log10(step));
-		power 		= Math.pow(10, magnitude);
-		msd 		= Math.round(step/power + 0.5);
-
-		if (msd > 5) 		msd = 10;
-		else if (msd > 2) 	msd = 5;
-		else if (msd > 1) 	msd = 2;
-		
-		newStepSize 	= msd * power;
-		newSteps 		= Math.round(Math.ceil((axis._range) / newStepSize)) ;
-		newRange 		= newStepSize * newSteps;
-
-		axis._maxVal 	= axis._minVal + newRange
-		axis._step 		= newStepSize;
-		axis._steps		= newSteps;
-
-		return axis;
-
-	};
-
 	prot.pushDataset = function (dataset) {
 		var yAxis = this.yAxises[dataset.y.axis],
 			xAxis = this.xAxises[dataset.x.axis],
-			i,
+			i, j,
 			step,
+			tryindex,
 			datasetLen = dataset.data.length,
 			cleanDataY = [],
 			cleanDataX = [];
+
+		dataset._labels = xAxis._labels.slice();
 
 		// If we got a single element dataset ( [4,3,2,...] , expand it into [ [0,4] , [1,3] , [2,2] , ]
 		if (!helpers.array.is(dataset.data[0])) {
@@ -487,9 +471,21 @@
 		// If we got a double element array with strings , do some magic
 		} else if(typeof dataset.data[0][0] == 'string') {
 			for (i = 0; i < datasetLen; i++) {
-				cleanDataY[i] = dataset.data[i][1];
-				dataset._labels[i] = dataset.data[i][0];
-				dataset.data[i][0] = cleanDataX[i] = i;
+				// Find out if this is an existing string
+				tryindex = -1;
+				for (j = 0; j < dataset._labels.length; j++) {
+					if (dataset._labels[j] === dataset.data[i][0]) {
+						tryindex = j;
+					}
+				}
+				if(tryindex > -1) {
+					dataset.data[i][0] = cleanDataX[i] = tryindex;
+					dataset.data[i][1] = cleanDataY[i] = dataset.data[i][1];
+				} else {
+					cleanDataY[i] = dataset.data[i][1];
+					tryindex = dataset._labels.push(dataset.data[i][0])-1;
+					dataset.data[i][0] = cleanDataX[i] = tryindex;	
+				}
 			}
 		} else {
 			for (i = 0 ; i < datasetLen; i++) {
@@ -535,6 +531,38 @@
 		// Chain
 		return this;
 	};
+
+	prot.calcAxisSteps = function (axis, stepsGoal) {
+
+		// Default goal steps to 15
+		stepsGoal = (stepsGoal === undefined) ? 15 : stepsGoal;
+
+		var step, 		msd,
+			magnitude, 	power,
+			newSteps, 	newRange,
+			newStepSize;
+
+		step 		= axis._range/(stepsGoal);
+		magnitude 	= Math.floor(helpers.math.log10(step));
+		power 		= Math.pow(10, magnitude);
+		msd 		= Math.round(step/power + 0.5);
+
+		if (msd > 5) 		msd = 10;
+		else if (msd > 2) 	msd = 5;
+		else if (msd > 1) 	msd = 2;
+		
+		newStepSize 	= msd * power;
+		newSteps 		= Math.round(Math.ceil((axis._range) / newStepSize)) ;
+		newRange 		= newStepSize * newSteps;
+
+		axis._maxVal 	= axis._minVal + newRange
+		axis._step 		= newStepSize;
+		axis._steps		= newSteps;
+
+		return axis;
+
+	};
+
 
 	prot.drawAxis = function (context,axis,orientation,primary) {
 
