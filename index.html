@@ -829,7 +829,7 @@ graphoObj.addDataset({
             <article>
                 <h3>
                     <span class="secondary">Example 12 - </span>
-                    <span class="tertiary">Barchart with text axis</span>
+                    <span class="tertiary">Barchart with "joined" text x-axies</span>
                 </h3>
                 <div class="container w-100 h-1">
 
@@ -842,13 +842,35 @@ graphoObj.addDataset({
                             // Create grapho object, pass a parameter pointing to the destination element
                             var graphoObj12 = new Grapho( { place: 'example-12' } );
 
+                            // Negatives
                             graphoObj12.addDataset({
                                 type:'bar',
-                                strokeStyle: '#F0F066',
-                                y: { axis: 1, scale: true, scaleStyle: '#F0F066', gridLines: true, name: "Yellow axis", center: 0, labels: true },
-                                x: { scale: true, gridLines: true, labels: true},
-                                data: [["First",4],["Second",1],["Turd?",5],["Foo",6],["Bar",7],["Baz",9]]
+                                strokeStyle: '#F06666',
+                                fillStyle: 'rgba(196,96,96,0.4)',
+                                lineWidth: 1,
+                                y: { 
+                                    scale: true, 
+                                    scaleStyle: '#F0F066', 
+                                    gridLines: true, 
+                                    labels: true 
+                                },
+                                x: { 
+                                    scale: true, 
+                                    gridLines: true, 
+                                    labels: true
+                                },
+                                data: [["First",-9],["Second",-1],["Baz",-3]]
                             });
+
+                            // Positives
+                            graphoObj12.addDataset({
+                                type:'bar',
+                                strokeStyle: '#66F066',
+                                fillStyle: 'rgba(96,196,96,0.4)',
+                                lineWidth: 1,
+                                data: [["Turd?",5],["Foo",6],["Baz",7]]
+                            });
+
                         </script>
 
                     </div>
@@ -857,14 +879,36 @@ graphoObj.addDataset({
             </article>
             <article>
                 <h3><span class="tertiary">Source code</span></h3>
-                <pre><code data-language="javascript">var graphoObj12 = new Grapho( { place: 'example-12' } );
+                <pre><code data-language="javascript">
+var graphoObj12 = new Grapho( { place: 'example-12' } );
 
+// Negatives
 graphoObj12.addDataset({
     type:'bar',
-    strokeStyle: '#F0F066',
-    y: { axis: 1, scale: true, scaleStyle: '#F0F066', gridLines: true, name: "Yellow axis", center: 0, labels: true },
-    x: { scale: true, gridLines: true, labels: true},
-    data: [["First",4],["Second",2],["Turd?",5],["Foo",6],["Bar",7],["Baz",9]]
+    strokeStyle: '#F06666',
+    fillStyle: 'rgba(196,96,96,0.4)',
+    lineWidth: 1,
+    y: { 
+        scale: true, 
+        scaleStyle: '#F0F066', 
+        gridLines: true, 
+        labels: true 
+    },
+    x: { 
+        scale: true, 
+        gridLines: true, 
+        labels: true
+    },
+    data: [["First",-9],["Second",-1],["Baz",-3]]
+});
+
+// Positives
+graphoObj12.addDataset({
+    type:'bar',
+    strokeStyle: '#66F066',
+    fillStyle: 'rgba(96,196,96,0.4)',
+    lineWidth: 1,
+    data: [["Turd?",5],["Foo",6],["Baz",7]]
 });</code></pre>
             </article>
         </section>
