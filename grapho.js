@@ -15,22 +15,34 @@
 	var 
 		// A collection of all instantiated Grapho's
 		graphos = [],
-
-		// Reasonable defaults for everything
-		defaultLabelFormatter = function (l) {
-			// Check if we got a number, else just return
-			var i;
-			if (helpers.math.isNumber(l)) {
-				// Protext against very-very-close to ints
-				if (Math.round(l,19) === (i = parseInt(l))) {
-					return i;
+		formats = {
+			default: function (l) {
+				// Check if we got a number, else just return
+				var i;
+				if (helpers.math.isNumber(l)) {
+					// Protext against very-very-close to ints
+					if (Math.round(l,19) === (i = parseInt(l))) {
+						return i;
+					} else {
+						return l;
+					}
 				} else {
-					return l;
+					return l;	
 				}
-			} else {
-				return l;	
+				
+			},
+
+			datetime: function (l) {
+				return helpers.math.isNumber(l) ? new Date(l*1000).toLocaleString() : l;
+			},
+
+			date: function (l) {
+				return helpers.math.isNumber(l) ? new Date(l*1000).toLocaleDateString() : l;
+			},
+
+			time: function (l) {
+				return helpers.math.isNumber(l) ? new Date(l*1000).toLocaleTimeString() : l;
 			}
-			
 		},
 		defaults = {
 			dataset: {
@@ -43,7 +55,7 @@
 				lineWidth: 2,
 				lineSmooth: true,
 				strokeStyle: '#9494BA',
-				fillStyle: '#121612',
+				fillStyle: '#343536',
 				lineDots: false,
 				shadow: true,
 
@@ -59,14 +71,15 @@
 			axis: {
 				min: "auto",
 				max: "auto",
-				scale: false,
+				showscale: false,
 				scaleStyle: '#FFFFFF',
 				gridLines: false,
-				gridStyle: '#666666',
+				gridStyle: '#353637',
 				name: undefined,
 				font: '10px Droid Sans',
-				labelFormat: defaultLabelFormatter,
-				labels: false,
+				labelFormat: formats.default,
+				showlabels: false,
+				showCenter: false,
 				majorTickHeight: 4,
 				minorTickHeight: 2,
 				center: 0,
@@ -151,10 +164,10 @@
 
 					context.beginPath();
 
-					mpxpdiff = xAxis._minStepPrc / xAxis._range;
-					innerWidth = (grapho.wsw-(mpxpdiff*grapho.wsw*((xAxis._padded)?1:0)));
-					mpxpdiff = mpxpdiff * innerWidth;
+					mpxpdiff = xAxis._minStepPrc;
+					mpxpdiff = mpxpdiff * (grapho.wsw-(mpxpdiff*grapho.wsw*((xAxis._padded)?1:0)));
 					pad = (xAxis._padded)?mpxpdiff/2:0;
+					innerWidth = (grapho.wsw-pad*2);
 
 					// Primary line
 					for ( i = 0; i < dataset.data.length; i++) {
@@ -214,10 +227,10 @@
 						center = yAxis.center;
 					
 
-					mpxpdiff = xAxis._minStepPrc / xAxis._range;
-					innerWidth = (grapho.wsw-(mpxpdiff*grapho.wsw*((xAxis._padded)?1:0)));
-					mpxpdiff = mpxpdiff * innerWidth;
+					mpxpdiff = xAxis._minStepPrc;
+					mpxpdiff = mpxpdiff * (grapho.wsw-(mpxpdiff*grapho.wsw*((xAxis._padded)?1:0)));
 					pad = (xAxis._padded)?mpxpdiff/2:0;
+					innerWidth = (grapho.wsw-pad*2);
 
 					barSpacing 	= mpxpdiff*(100-dataset.barWidthPrc)/100;
 					barWidth 	= mpxpdiff-barSpacing;
@@ -254,10 +267,10 @@
 				scatter: function (grapho, context, dataset, xAxis, yAxis) {
 					var point, pxp, mpxpdiff, pad, i;
 
-					mpxpdiff = xAxis._minStepPrc / xAxis._range;
-					innerWidth = (grapho.wsw-(mpxpdiff*grapho.wsw*((xAxis._padded)?1:0)));
-					mpxpdiff = mpxpdiff * innerWidth;
+					mpxpdiff = xAxis._minStepPrc;
+					mpxpdiff = mpxpdiff * (grapho.wsw-(mpxpdiff*grapho.wsw*((xAxis._padded)?1:0)));
 					pad = (xAxis._padded)?mpxpdiff/2:0;
+					innerWidth = (grapho.wsw-pad*2);
 
 					for ( i=0; i < dataset.data.length; i++) {
 						// We might need to skip some points that are not in the dataset
@@ -363,6 +376,8 @@
 
 	// Prototype shortcut, hopefully makes minified code more compact
 	prot = Grapho.prototype;
+	
+	prot.formats = formats;
 
 	// Place the grapho
 	prot.place = function (newDestination) { 
@@ -511,15 +526,19 @@
 		xAxis._range = xAxis._maxVal - xAxis._minVal;
 		yAxis._range = yAxis._maxVal - yAxis._minVal;
 
-		// Update axis steps
-		yAxis = this.calcAxisSteps(yAxis); 
-
+		// Update axis min step
+		dataset.data.sort(function(a, b){return a[0]-b[0]});
+		xAxis = this.calcMinStep(xAxis,dataset.data,0);
+		yAxis = this.calcMinStep(yAxis,dataset.data,1);
 		if (dataset._labels.length > 0) {
 			xAxis._step = 1;
 			xAxis._steps = dataset._labels.length - 1;
 		} else {
 			xAxis = this.calcAxisSteps(xAxis);	
 		}
+
+		// Update axis steps
+		yAxis = this.calcAxisSteps(yAxis);
 
 		// If type == 'bar', force extra steps on x axis
 		if (dataset.type==='bar') {
@@ -540,9 +559,10 @@
 		var step, 		msd,
 			magnitude, 	power,
 			newSteps, 	newRange,
-			newStepSize;
+			newStepSize, oldStep;
 
-		step 		= axis._range/(stepsGoal);
+		step 		= axis._range / (stepsGoal);
+		oldStep		= axis._range * axis._minStepPrc;
 		magnitude 	= Math.floor(helpers.math.log10(step));
 		power 		= Math.pow(10, magnitude);
 		msd 		= Math.round(step/power + 0.5);
@@ -552,6 +572,7 @@
 		else if (msd > 1) 	msd = 2;
 		
 		newStepSize 	= msd * power;
+		if(newStepSize < oldStep) newStepSize = oldStep;
 		newSteps 		= Math.round(Math.ceil((axis._range) / newStepSize)) ;
 		newRange 		= newStepSize * newSteps;
 
@@ -563,6 +584,20 @@
 
 	};
 
+	prot.calcMinStep = function (axis,data,xy) {
+		var i,minstep = axis._minStepPrc,lpxp,pxp,point;
+		for ( i=0; i < data.length; i++) {
+			if (point = data[i]) {
+				pxp = (point[xy] - axis._minVal) / (axis._range);	
+				if (lpxp !== undefined && (pxp - lpxp) < minstep) {
+					minstep = (pxp - lpxp);
+				}
+				lpxp = pxp;
+			}
+		}
+		axis._minStepPrc = minstep;
+		return axis;
+	};
 
 	prot.drawAxis = function (context,axis,orientation,primary) {
 
@@ -600,23 +635,23 @@
 			lwox = this.wox;
 		}
 
-		mpxpdiff = axis._minStepPrc / axis._range;
-		innerWidth = (lwsw-(mpxpdiff*lwsw*((axis._padded)?1:0)));
-		mpxpdiff = mpxpdiff * innerWidth;
+		mpxpdiff = axis._minStepPrc;
+		mpxpdiff = mpxpdiff * (lwsw-(mpxpdiff*lwsw*((axis._padded)?1:0)));
 		pad = (axis._padded)?mpxpdiff/2:0;
-					
+		innerWidth = (lwsw-pad*2);
 
 		// Draw grid and ticks
 		dir=[+Math.abs(axis._step),-Math.abs(axis._step)];
 		for(i=0;i<dir.length;i++) {
-			k=0;
+			
+			k=axis._minVal;
 
 			while(k<=axis._maxVal && k>=axis._minVal) {
 
 				temp = Math.round( lwox+pad+(k-axis._minVal)/(axis._range)*(innerWidth));
 
 				// Render grid lines
-				if (axis.gridLines) {
+				if (axis.showGridLines) {
 					context.beginPath();
 					context.moveTo(temp,lwoy);
 					context.lineTo(temp,lwoy+lwsh);
@@ -625,7 +660,7 @@
 				}
 
 				// Render labels
-				if(axis.labels) {
+				if(axis.showLabels) {
 					context.beginPath();
 					if (primary) {
 						y = axis._offset+axis._h-axis._textSize/4;
@@ -645,7 +680,7 @@
 					} else {
 						temp2 = temp;
 					}
-					context.translate(temp2-axis._textSize/3,y-context.measureText(text).width-1-((axis.scale)? axis.majorTickHeight : 0));
+					context.translate(temp2-axis._textSize/3,y-context.measureText(text).width-1-((axis.showScale)? axis.majorTickHeight : 0));
 					context.rotate(0.5*Math.PI);
 					context.fillStyle = axis.scaleStyle;
 					context.fillText(text,0,0);
@@ -653,7 +688,7 @@
 				}
 
 				// Render ticks
-				if (axis.scale) {
+				if (axis.showScale) {
 					context.beginPath();
 					if (primary) {
 						context.moveTo(temp,axis._offset+axis._h-1);
@@ -671,7 +706,7 @@
 		}
 
 		// Render center line
-		if (axis.gridLines && axis.scale && axis.center > axis._minVal && axis.center < axis._maxVal) {
+		if (axis.showCenter && axis.center > axis._minVal && axis.center < axis._maxVal) {
 			temp = Math.round( lwox+pad+(axis.center-axis._minVal)/(axis._range)*(innerWidth));
 			context.beginPath();
 			context.moveTo(temp,lwoy);
@@ -681,7 +716,7 @@
 		}
 
 		// Render scale line
-		if (axis.scale) {
+		if (axis.showScale) {
 			context.beginPath();
 			if (primary) {
 				context.moveTo(lwox,axis._offset+axis._h-1);
@@ -727,10 +762,10 @@
 			calcAxis = function(axis,ctx) {
 				axis._textSize = (axis.font !== undefined) ? parseInt(axis.font.split(' ')[0]) : 0;
 				axis._h = 0;
-				axis._h += (axis.scale) ? 1 : 0;				// Add one pixel for scale
-				axis._h += (axis.scale) ? axis.majorTickHeight : 0;	// Add n pixels for major ticks
+				axis._h += (axis.showScale) ? 1 : 0;				// Add one pixel for scale
+				axis._h += (axis.showScale) ? axis.majorTickHeight : 0;	// Add n pixels for major ticks
 				axis._h += (axis.name) ? axis._textSize : 0 // Add n pixels for name
-				if (axis.labels) {
+				if (axis.showLabels) {
 					mw = 0;
 					for (i=axis._minVal; i<=axis._maxVal; i+=axis._step) {
 						if (axis._labels && axis._labels[i] !== undefined) {
