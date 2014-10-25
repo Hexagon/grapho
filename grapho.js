@@ -78,6 +78,7 @@
 				name: undefined,
 				font: '10px Droid Sans',
 				labelFormat: formats.default,
+				labelRotation: 0,
 				showlabels: false,
 				showCenter: false,
 				majorTickHeight: 4,
@@ -301,6 +302,22 @@
 				},
 				isInt: function(n) {
 				   return n % 1 === 0;
+				},
+				bboxrot: function(w,h,deg) {
+
+					var theta = 0.0174532925 * deg,w2,h2,w3,h3;
+
+					w=w/2; h=h/2;
+					w2 = w*Math.cos(theta)+h*Math.sin(theta);
+					h2 = -w*Math.sin(theta)+h*Math.cos(theta);
+
+					w3 = w*Math.cos(theta)-h*Math.sin(theta);
+					h3 = -w*Math.sin(theta)-h*Math.cos(theta);
+
+					return {
+						width: Math.round(Math.max(Math.abs(w2*2),Math.abs(w3*2))),
+						height: Math.round(Math.max(Math.abs(h2*2),Math.abs(h3*2)))
+					};
 				}
 			}
 		},
@@ -607,10 +624,11 @@
 			dir,
 			i,
 			k,
+			labeldim,
 			lwsw, lwsh,
 			lwox, lwoy,
 			text,
-			mpxpdiff, innerWidth, pad, sl;
+			mpxpdiff, innerWidth, pad, sl, lr;
 
 		context.lineWidth = 1;
 		context.strokeStyle = axis.gridStyle;
@@ -661,28 +679,50 @@
 
 				// Render labels
 				if(axis.showLabels) {
+
 					context.beginPath();
-					if (primary) {
-						y = axis._offset+axis._h-axis._textSize/4;
-					} else {
-						y = h-axis._offset+axis._textSize*1.3;
-					}
+
+					lr = axis.labelRotation+90+((orientation==='y')?90:0);
+
 					if (axis._labels && axis._labels[k] !== undefined) {
 						text = axis.labelFormat(axis._labels[k]);	
 					} else {
 						text = axis.labelFormat(k);	
 					}
+					
 					context.save();
 					if (orientation==='y') {
 						context.scale(-1,1);
 						context.translate(-this.w,0);
+						labeldim = helpers.math.bboxrot(context.measureText(text).width,axis._textSize,lr);
 						temp2 = w-temp;
 					} else {
+						labeldim = helpers.math.bboxrot(context.measureText(text).width,axis._textSize,lr);
 						temp2 = temp;
+					}	
+
+					if (primary) {
+						y = axis._offset+axis._h-labeldim.height/2-(axis.showScale?axis.majorTickHeight+1:0)-2;
+					} else {
+						y = h-(axis._offset+axis._h-labeldim.height/2-(axis.showScale?axis.majorTickHeight+1:0)-2);
 					}
-					context.translate(temp2-axis._textSize/3,y-context.measureText(text).width-1-((axis.showScale)? axis.majorTickHeight : 0));
-					context.rotate(0.5*Math.PI);
+
+					
+					context.translate(temp2,y);
+
+					context.beginPath();
+					context.moveTo(-2,-2);
+					context.lineTo(2,2);
+					context.stroke();
+
+					context.beginPath();
+					context.moveTo(2,-2);
+					context.lineTo(-2,2);
+					context.stroke();
+
+					context.rotate(lr*0.0174532925);
 					context.fillStyle = axis.scaleStyle;
+					context.translate(-context.measureText(text).width/2,axis._textSize/3);
 					context.fillText(text,0,0);
 					context.restore();
 				}
@@ -758,8 +798,8 @@
 	prot.redraw = function() {
 
 		var a, c,
-			d, ds, mw, i, ts,
-			calcAxis = function(axis,ctx) {
+			d, ds, mw, i, tw, th, tt,
+			calcAxis = function(axis,ctx,dir) {
 				axis._textSize = (axis.font !== undefined) ? parseInt(axis.font.split(' ')[0]) : 0;
 				axis._h = 0;
 				axis._h += (axis.showScale) ? 1 : 0;				// Add one pixel for scale
@@ -768,12 +808,18 @@
 				if (axis.showLabels) {
 					mw = 0;
 					for (i=axis._minVal; i<=axis._maxVal; i+=axis._step) {
+
 						if (axis._labels && axis._labels[i] !== undefined) {
-							ts = ctx.measureText(axis.labelFormat(axis._labels[i])).width;
+							tw = ctx.measureText(axis.labelFormat(axis._labels[i])).width;
 						} else {
-							ts = ctx.measureText(axis.labelFormat(i)).width;
+							tw = ctx.measureText(axis.labelFormat(i)).width;
 						}
-						if(ts > mw) mw = ts;
+						th = axis._textSize;
+
+						// Rot 0 is different in x and y
+						tw = helpers.math.bboxrot(tw,th,axis.labelRotation+((dir==='x')?90:0)).width;
+
+						if(tw > mw) mw = tw;
 					}
 					axis._h += mw;
 				}
@@ -788,7 +834,7 @@
 
 		// 1. Calculate axis "heights", workpace width, and workspace offset
 		for(a in this.yAxises) {
-			this.yAxises[a] = calcAxis(this.yAxises[a],this.ctx);
+			this.yAxises[a] = calcAxis(this.yAxises[a],this.ctx,'y');
 
 			// Reduce workspace width by axis height
 			this.wsw -= this.yAxises[a]._h;
@@ -799,7 +845,7 @@
 			else 		this.nwox += this.yAxises[a]._h;
 		}
 		for(a in this.xAxises) {
-			this.xAxises[a] = calcAxis(this.xAxises[a],this.ctx);
+			this.xAxises[a] = calcAxis(this.xAxises[a],this.ctx,'x');
 
 			this.wsh -= this.xAxises[a]._h;
 

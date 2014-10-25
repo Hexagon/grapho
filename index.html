@@ -248,7 +248,8 @@ graphoObj12.addDataset({
         showCenter: true
     },
     x: { 
-        showLabels: true
+        showLabels: true,
+        labelRotation: 90
     },
     data: [["First",-9],["Second",-1],["Baz",-3]]
 });
@@ -259,11 +260,11 @@ graphoObj12.addDataset({
     strokeStyle: '#66F066',
     fillStyle: 'rgba(96,196,96,0.4)',
     lineWidth: 1,
-    data: [["Fourth",5],["Foo",6],["Baz",7]]
+    data: [["Turd?",5],["Foo",6],["Baz",7]]
 });</code></pre>
             </article>
         </section>
-<
+
 <section>
             <article>
                 <h3>
@@ -296,6 +297,7 @@ graphoObj12.addDataset({
                                 },
                                 x: { 
                                     showLabels: true,
+                                    labelRotation: -45,
                                     labelFormat: graphoObj13.formats.time
                                 },
                                 data: [[1420188000,1],[1420248000,2],[1420308000,3],[1420368000,4]]
@@ -311,6 +313,7 @@ graphoObj12.addDataset({
                 <h3><span class="tertiary">Source code</span></h3>
                 <pre><code data-language="javascript">var graphoObj13 = new Grapho( { place: 'example-4' } );
 
+// Negatives
 graphoObj13.addDataset({
     type:'bar',
     strokeStyle: '#F06666',
@@ -325,7 +328,7 @@ graphoObj13.addDataset({
     },
     x: { 
         showLabels: true,
-        // Available time formatters are .time, .date, .datetime
+        labelRotation: -45,
         labelFormat: graphoObj13.formats.time
     },
     data: [[1420188000,1],[1420248000,2],[1420308000,3],[1420368000,4]]
