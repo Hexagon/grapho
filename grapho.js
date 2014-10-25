@@ -704,7 +704,7 @@
 					if (primary) {
 						y = axis._offset+axis._h-labeldim.height/2-(axis.showScale?axis.majorTickHeight+1:0)-2;
 					} else {
-						//y = h-axis._offset;
+						y = h-(axis._offset+axis._h-labeldim.height/2-(axis.showScale?axis.majorTickHeight+1:0)-2);
 					}
 
 					
