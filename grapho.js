@@ -290,7 +290,7 @@
 					     		0, // The starting angle, in radians (0 is at the 3 o'clock position of the arc's circle)
 					     		Math.PI * 2 // The ending angle, in radians
 					     	);
-					     	context.fillStyle = dataset.strokeStyle;
+					     	context.fillStyle = dataset.fillStyle;
 					     	context.fill();
 					    }
 					}
@@ -419,7 +419,7 @@
 	};
 
 	prot.initAxis = function (props,dest) {
-		var def = helpers.object.merge({},defaults.axis),
+		var def = defaults.axis,
 			index = props.axis;
 
 		if (typeof index === 'number' && isFinite(index) && index % 1 ===0) {
@@ -458,7 +458,7 @@
 		}
 
 		// Define some reasonable defaults for each dataset
-		var def = helpers.object.merge({},defaults.dataset);
+		var def = defaults.dataset;
 
 		// `dataset` can be either an array or an object.
 		if (datasetIsArray) {
@@ -561,7 +561,6 @@
 		} else {
 			xAxis = this.calcAxisSteps(xAxis);	
 		}
-		console.log(xAxis._labels);
 
 		// Update axis steps
 		yAxis = this.calcAxisSteps(yAxis);
