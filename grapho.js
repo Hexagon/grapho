@@ -144,6 +144,8 @@
 								//   merge(target[name], source[name])
 								// To: 
 								target[name] = helpers.object.merge(helpers.object.merge({},target[name]), source[name],true);
+							} else if (Object.prototype.toString.call(source[name]) === '[object Array]') {
+								target[name] = source[name].slice();
 							} else {
 								target[name] = source[name];
 							}
@@ -417,7 +419,7 @@
 	};
 
 	prot.initAxis = function (props,dest) {
-		var def = defaults.axis,
+		var def = helpers.object.merge({},defaults.axis),
 			index = props.axis;
 
 		if (typeof index === 'number' && isFinite(index) && index % 1 ===0) {
@@ -579,8 +581,8 @@
 			d;
 
 		// Reset axises
-		xAxis = helpers.object.merge(defaults.axis,xAxis);
-		yAxis = helpers.object.merge(defaults.axis,yAxis);
+		xAxis = helpers.object.merge({},defaults.axis);
+		yAxis = helpers.object.merge({},defaults.axis);
 
 		// Loop through each dataset that uses these axises, and update the axises
 		for( d=0; d<this.datasets.length; d++)  {
@@ -622,6 +624,7 @@
 		
 		newStepSize 	= msd * power;
 		if(newStepSize < oldStep) { newStepSize = oldStep; }
+
 		newSteps 		= Math.round(Math.ceil((axis._range) / newStepSize)) ;
 		newRange 		= newStepSize * newSteps;
 
