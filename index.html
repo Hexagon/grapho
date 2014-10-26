@@ -465,42 +465,53 @@ graphoObj5.addDataset({
 
                             // Create grapho object, pass a parameter pointing to the destination element
                             var graphoObj6 = new Grapho( { place: 'example-6' } ),
-                                currentDSCos, currentDSSin,
-                                iteratorSin=0,iteratorCos=0;
+                                currentDS1, currentDS2, currentDS3,
+                                iteratorSin=0;
 
                             function randomData() {
-                                console.log('calling');
+
                                 // Generate random data
-                                var randomArrayCos = [],randomArraySin = [];
+                                var randomArray1 = [],randomArray2 = [],randomArray3 = [];
                                 for (var i = 0, l = 40; i < l; i++) {
-                                    randomArrayCos.push((Math.sin(iteratorCos/10*iteratorSin/5) * 15)+15);
-                                    randomArraySin.push((Math.sin(iteratorSin/10) * 15)+15);
-                                    iteratorSin+=0.01;
-                                    iteratorCos+=0.01;
+                                    randomArray1.push((Math.sin(iteratorSin/10+i/10) * 15)+15);
+                                    randomArray2.push(-(Math.cos(iteratorSin/10+i/15+Math.tan(i/5)) * 15)-15);
+                                    randomArray3.push((Math.cos(iteratorSin/10+i/20+Math.sin(i/2)) * 15)+15);
                                 }
+                                iteratorSin+=0.7;
                                 // Remove last dataset, if there is one
-                                if (currentDSSin!==undefined) {
-                                    graphoObj6.removeDataset(currentDSCos);
-                                    graphoObj6.removeDataset(currentDSSin);
+                                if (currentDS1!==undefined) {
+                                    graphoObj6.removeDataset(currentDS1);
+                                    graphoObj6.removeDataset(currentDS2);
+                                    graphoObj6.removeDataset(currentDS3);
                                 }
                                 // Push a new dataset
-                                currentDSSin = graphoObj6.addDataset({
-                                    type: 'bar',
-                                    strokeStyle: '#F0F066',
-                                    fillStyle: '#F0F066',
-                                    y: {  showScale: true, scaleStyle: '#F0F066', showGridLines: true, name: "Yellow axis", showLabels: true, showCenter: true, min: 0, max: 30 },
-                                    x: {  showGridLines: true, showLabels: true},
-                                    data: randomArrayCos
+                                currentDS1 = graphoObj6.addDataset({
+                                    type: 'area',
+                                    strokeStyle: '#F06666',
+                                    fillStyle: 'rgba(192,64,64,0.3)',
+                                    y: {  showScale: true, scaleStyle: '#F0F066', showGridLines: true, name: "Primary axis", showLabels: true, showCenter: true, min: 0, max: 30 },
+                                    data: randomArray1
                                 });
                                 // Push a new dataset
-                                currentDSCos = graphoObj6.addDataset({
-                                    type: 'line',
+                                currentDS2 = graphoObj6.addDataset({
+                                    type: 'area',
+                                    strokeStyle: '#66F066',
+                                    fillStyle: 'rgba(64,192,64,0.3)',
+                                    y: {  axis:2, showScale: true, scaleStyle: '#F0F066', showGridLines: true, name: "Yellow axis", showLabels: true, showCenter: true, min: -30, max: 0 },
+                                    x: {  showGridLines: true, showLabels: true},
+                                    data: randomArray2
+                                });
+                                // Push a new dataset
+                                currentDS3 = graphoObj6.addDataset({
+                                    type: 'area',
                                     strokeStyle: '#6666F0',
-                                    fillStyle: '#6666F0',
-                                    data: randomArraySin
+                                    fillStyle: 'rgba(64,64,196,0.3)',
+                                    y: {  showScale: true, scaleStyle: '#F0F066', showGridLines: true, name: "Secondary axis", showLabels: true, showCenter: true, min: 0, max: 30 },
+                                    x: {  showGridLines: true, showLabels: true},
+                                    data: randomArray3
                                 });
                                 // Iterate
-                                requestAnimationFrame(randomData);
+                                setTimeout(randomData,1000/60);
                             }
                             // Start the loop
                             randomData();
@@ -513,7 +524,57 @@ graphoObj5.addDataset({
             </article>
             <article>
                 <h3><span class="tertiary">Source code</span></h3>
-                <pre><code data-language="javascript"></code></pre>
+                <pre><code data-language="javascript">var graphoObj6 = new Grapho( { place: 'example-6' } ),
+    currentDS1, currentDS2, currentDS3,
+    iteratorSin=0;
+
+function randomData() {
+
+    // Generate random data
+    var randomArray1 = [],randomArray2 = [],randomArray3 = [];
+    for (var i = 0, l = 40; i < l; i++) {
+        randomArray1.push((Math.sin(iteratorSin/10+i/10) * 15)+15);
+        randomArray2.push(-(Math.cos(iteratorSin/10+i/15) * 15)-15);
+        randomArray3.push((Math.cos(iteratorSin/10+i/20) * 15)+15);
+    }
+    iteratorSin+=0.4;
+    // Remove last dataset, if there is one
+    if (currentDS1!==undefined) {
+        graphoObj6.removeDataset(currentDS1);
+        graphoObj6.removeDataset(currentDS2);
+        graphoObj6.removeDataset(currentDS3);
+    }
+    // Push a new dataset
+    currentDS1 = graphoObj6.addDataset({
+        type: 'area',
+        strokeStyle: '#F06666',
+        fillStyle: 'rgba(192,64,64,0.3)',
+        y: {  showScale: true, scaleStyle: '#F0F066', showGridLines: true, name: "Yellow axis", showLabels: true, showCenter: true, min: 0, max: 30 },
+        data: randomArray1
+    });
+    // Push a new dataset
+    currentDS2 = graphoObj6.addDataset({
+        type: 'area',
+        strokeStyle: '#66F066',
+        fillStyle: 'rgba(64,192,64,0.3)',
+        y: {  axis:2, showScale: true, scaleStyle: '#F0F066', showGridLines: true, name: "Yellow axis", showLabels: true, showCenter: true, min: -30, max: 0 },
+        x: {  showGridLines: true, showLabels: true},
+        data: randomArray2
+    });
+    // Push a new dataset
+    currentDS3 = graphoObj6.addDataset({
+        type: 'area',
+        strokeStyle: '#6666F0',
+        fillStyle: 'rgba(64,64,196,0.3)',
+        y: {  showScale: true, scaleStyle: '#F0F066', showGridLines: true, name: "Yellow axis", showLabels: true, showCenter: true, min: 0, max: 30 },
+        x: {  showGridLines: true, showLabels: true},
+        data: randomArray3
+    });
+    // Iterate
+    requestAnimationFrame(randomData);
+}
+// Start the loop
+randomData();</code></pre>
             </article>
         </section>
 
