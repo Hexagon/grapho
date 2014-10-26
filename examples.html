@@ -534,10 +534,10 @@ function randomData() {
     var randomArray1 = [],randomArray2 = [],randomArray3 = [];
     for (var i = 0, l = 40; i < l; i++) {
         randomArray1.push((Math.sin(iteratorSin/10+i/10) * 15)+15);
-        randomArray2.push(-(Math.cos(iteratorSin/10+i/15) * 15)-15);
-        randomArray3.push((Math.cos(iteratorSin/10+i/20) * 15)+15);
+        randomArray2.push(-(Math.cos(iteratorSin/10+i/15+Math.tan(i/5)) * 15)-15);
+        randomArray3.push((Math.cos(iteratorSin/10+i/20+Math.sin(i/2)) * 15)+15);
     }
-    iteratorSin+=0.4;
+    iteratorSin+=0.7;
     // Remove last dataset, if there is one
     if (currentDS1!==undefined) {
         graphoObj6.removeDataset(currentDS1);
@@ -549,7 +549,7 @@ function randomData() {
         type: 'area',
         strokeStyle: '#F06666',
         fillStyle: 'rgba(192,64,64,0.3)',
-        y: {  showScale: true, scaleStyle: '#F0F066', showGridLines: true, name: "Yellow axis", showLabels: true, showCenter: true, min: 0, max: 30 },
+        y: {  showScale: true, scaleStyle: '#F0F066', showGridLines: true, name: "Primary axis", showLabels: true, showCenter: true, min: 0, max: 30 },
         data: randomArray1
     });
     // Push a new dataset
@@ -566,12 +566,12 @@ function randomData() {
         type: 'area',
         strokeStyle: '#6666F0',
         fillStyle: 'rgba(64,64,196,0.3)',
-        y: {  showScale: true, scaleStyle: '#F0F066', showGridLines: true, name: "Yellow axis", showLabels: true, showCenter: true, min: 0, max: 30 },
+        y: {  showScale: true, scaleStyle: '#F0F066', showGridLines: true, name: "Secondary axis", showLabels: true, showCenter: true, min: 0, max: 30 },
         x: {  showGridLines: true, showLabels: true},
         data: randomArray3
     });
     // Iterate
-    requestAnimationFrame(randomData);
+    setTimeout(randomData,1000/60);
 }
 // Start the loop
 randomData();</code></pre>
