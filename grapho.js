@@ -447,6 +447,16 @@
 		return this;
 	};
 
+	prot.removeDataset = function(dataset) {
+		var dsIndex;
+
+		dsIndex = this.datasets.indexOf(dataset);
+
+		if (dsIndex !== -1) {
+			this.datasets.splice(dsIndex);
+		}
+
+	}
 	prot.addDataset = function (dataset) {
 		var datasetIsArray = helpers.array.is(dataset);
 
@@ -484,8 +494,9 @@
 			this.redraw();
 		}
 
-		// Chain
-		return this;
+		// Return the object, so that the user can reference to it while removing
+		// Hence, not chainable :(
+		return def;
 	};
 
 	prot.updateAxises = function (dataset) {
@@ -575,13 +586,12 @@
 	};
 
 	prot.pushDataset = function (dataset) {
-		var yAxis = this.yAxises[dataset.y.axis],
-			xAxis = this.xAxises[dataset.x.axis],
-			d;
+		var d;
 
-		// Reset axises
-		xAxis = helpers.object.merge({},defaults.axis);
-		yAxis = helpers.object.merge({},defaults.axis);
+		this.xAxises[dataset.x.axis]._values = [];
+		this.yAxises[dataset.y.axis]._values = [];
+		this.xAxises[dataset.x.axis]._labels = [];
+		this.yAxises[dataset.y.axis]._labels = [];
 
 		// Loop through each dataset that uses these axises, and update the axises
 		for( d=0; d<this.datasets.length; d++)  {
@@ -593,7 +603,6 @@
 		// Add this dataset
 		this.updateAxises(dataset);
 
-		// Push this dataset
 		this.datasets.push(dataset);
 
 		// Chain
