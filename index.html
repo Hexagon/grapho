@@ -265,7 +265,7 @@ graphoObj12.addDataset({
             </article>
         </section>
 
-<section>
+        <section>
             <article>
                 <h3>
                     <span class="secondary">Example 4 - </span>
@@ -332,6 +332,115 @@ graphoObj13.addDataset({
         labelFormat: graphoObj13.formats.time
     },
     data: [[1420188000,1],[1420248000,2],[1420308000,3],[1420368000,4]]
+});</code></pre>
+            </article>
+        </section>
+
+
+        <section>
+            <article>
+                <h3>
+                    <span class="secondary">Example 5 - </span>
+                    <span class="tertiary">Line plot smiley</span>
+                </h3>
+                <div class="container w-100 h-1">
+
+                    <!-- Example 5 Start -->
+                    <div id="example-5" class="box bw-100 h-100">
+
+                        <!-- example-5 javascript -->
+                        <script>
+
+                            // Create grapho object, pass a parameter pointing to the destination element
+                            var graphoObj5 = new Grapho( { place: 'example-5' } );
+
+                            graphoObj5.addDataset({
+                                type:'line',
+                                strokeStyle: '#F0F066',
+                                lineSmooth: true,
+                                lineWidth: 5,
+                                x: { 
+                                    min: -0.5,
+                                    max: 4.5
+                                },
+                               data: [[0.5,0],[1,-1],[2,-1.5],[3,-1],[3.5,0]]
+                            });
+
+                            graphoObj5.addDataset({
+                                type:'line',
+                                strokeStyle: '#F0F066',
+                                lineWidth: 5,
+                                data: [[1,3],[1,1]]
+                            });
+
+                            graphoObj5.addDataset({
+                                type:'line',
+                                strokeStyle: '#F0F066',
+                                lineWidth: 5,
+                                data: [[3,3],[3,1]]
+                            });
+
+                            graphoObj5.addDataset({
+                                type:'scatter',
+                                fillStyle: 'rgba(96,96,196,1.0)',
+                                dotWidth: 15,
+                                data: [[1,2],[3,2]]
+                            });
+
+                            graphoObj5.addDataset({
+                                type:'scatter',
+                                fillStyle: 'rgba(255,96,96,1.0)',
+                                dotWidth: 26,
+                                data: [[0.5,1],[3.5,1]]
+                            });
+                        </script>
+
+                    </div>
+                    <!-- Example 5 - End -->
+                </div>
+            </article>
+            <article>
+                <h3><span class="tertiary">Source code</span></h3>
+                <pre><code data-language="javascript">var graphoObj5 = new Grapho( { place: 'example-5' } );
+
+graphoObj5.addDataset({
+    type:'line',
+    strokeStyle: '#F0F066',
+    lineSmooth: true,
+    lineWidth: 5,
+    x: { 
+        min: -0.5,
+        max: 4.5
+    },
+   data: [[0.5,0],[1,-1],[2,-1.5],[3,-1],[3.5,0]]
+});
+
+graphoObj5.addDataset({
+    type:'line',
+    strokeStyle: '#F0F066',
+    lineWidth: 5,
+    data: [[1,3],[1,1]]
+});
+
+graphoObj5.addDataset({
+    type:'line',
+    strokeStyle: '#F0F066',
+    lineWidth: 5,
+    data: [[3,3],[3,1]]
+});
+
+graphoObj5.addDataset({
+    type:'scatter',
+    fillStyle: 'rgba(96,96,196,1.0)',
+    dotWidth: 15,
+    data: [[1,2],[3,2]]
+});
+
+graphoObj5.addDataset({
+    type:'scatter',
+    fillStyle: 'rgba(255,96,96,1.0)',
+    dotWidth: 26,
+    data: [[0.5,1],[3.5,1]]
 });</code></pre>
             </article>
         </section>
