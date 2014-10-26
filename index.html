@@ -449,6 +449,74 @@ graphoObj5.addDataset({
             </article>
         </section>
 
+        <section>
+            <article>
+                <h3>
+                    <span class="secondary">Example 6 - </span>
+                    <span class="tertiary">Add/Remove dataset </span>
+                </h3>
+                <div class="container w-100 h-1">
+
+                    <!-- Example 6 - Start -->
+                    <div id="example-6" class="box bw-100 h-100">
+
+                        <!-- example-6javascript -->
+                        <script>
+
+                            // Create grapho object, pass a parameter pointing to the destination element
+                            var graphoObj6 = new Grapho( { place: 'example-6' } ),
+                                currentDSCos, currentDSSin,
+                                iteratorSin=0,iteratorCos=0;
+
+                            function randomData() {
+                                console.log('calling');
+                                // Generate random data
+                                var randomArrayCos = [],randomArraySin = [];
+                                for (var i = 0, l = 40; i < l; i++) {
+                                    randomArrayCos.push((Math.sin(iteratorCos/10*iteratorSin/5) * 15)+15);
+                                    randomArraySin.push((Math.sin(iteratorSin/10) * 15)+15);
+                                    iteratorSin+=0.01;
+                                    iteratorCos+=0.01;
+                                }
+                                // Remove last dataset, if there is one
+                                if (currentDSSin!==undefined) {
+                                    graphoObj6.removeDataset(currentDSCos);
+                                    graphoObj6.removeDataset(currentDSSin);
+                                }
+                                // Push a new dataset
+                                currentDSSin = graphoObj6.addDataset({
+                                    type: 'bar',
+                                    strokeStyle: '#F0F066',
+                                    fillStyle: '#F0F066',
+                                    y: {  showScale: true, scaleStyle: '#F0F066', showGridLines: true, name: "Yellow axis", showLabels: true, showCenter: true, min: 0, max: 30 },
+                                    x: {  showGridLines: true, showLabels: true},
+                                    data: randomArrayCos
+                                });
+                                // Push a new dataset
+                                currentDSCos = graphoObj6.addDataset({
+                                    type: 'line',
+                                    strokeStyle: '#6666F0',
+                                    fillStyle: '#6666F0',
+                                    data: randomArraySin
+                                });
+                                // Iterate
+                                requestAnimationFrame(randomData);
+                            }
+                            // Start the loop
+                            randomData();
+
+                        </script>
+
+                    </div>
+                    <!-- Example 2 - End -->
+                </div>
+            </article>
+            <article>
+                <h3><span class="tertiary">Source code</span></h3>
+                <pre><code data-language="javascript"></code></pre>
+            </article>
+        </section>
+
         <div class="clear"><!-- --></div>
     </body>
 </html>
