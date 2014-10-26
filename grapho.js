@@ -69,8 +69,8 @@
 				_labels: []
 			},
 			axis: {
-				min: "auto",
-				max: "auto",
+				min: 'auto',
+				max: 'auto',
 				showscale: false,
 				scaleStyle: '#FFFFFF',
 				gridLines: false,
@@ -108,7 +108,8 @@
 			// Array helpers
 			array: {	
 				is: Array.isArray || function (it) {
-					return toString.call(it) === '[object Array]';
+					// toString does not work if "Object.prototype." is removed!
+					return Object.prototype.toString.call(it) === '[object Array]';
 				},
 				unique: function(ain) {
 					var u = {}, a = [];
@@ -136,7 +137,8 @@
 				
 					for (name in source) {
 						if (source[name] !== undefined) {
-							if (target[name] && toString.call(target[name]) === '[object Object]') {
+							// toString Does not work if "Object.prototype." is removed!
+							if (target[name] && Object.prototype.toString.call(target[name]) === '[object Object]') {
 								// Changed to get a true deep copy
 								// From:
 								//   merge(target[name], source[name])
@@ -224,6 +226,7 @@
 						py,
 						bh,
 						heightflag,
+						innerWidth,
 						ct, // Center temp
 						center = yAxis.center;
 					
@@ -266,7 +269,7 @@
 					}
 				},
 				scatter: function (grapho, context, dataset, xAxis, yAxis) {
-					var point, pxp, mpxpdiff, pad, i;
+					var point, pxp, mpxpdiff, pad, i, innerWidth;
 
 					mpxpdiff = xAxis._minStepPrc;
 					mpxpdiff = mpxpdiff * (grapho.wsw-(mpxpdiff*grapho.wsw*((xAxis._padded)?1:0)));
@@ -340,8 +343,8 @@
 		this.datasets = [];
 
 		this.container = {
-			width: "auto",
-			height: "auto"
+			width: 'auto',
+			height: 'auto'
 		};
 
 		// If the user has defined a parent element in the settings object,
@@ -453,7 +456,7 @@
 		}
 
 		// Define some reasonable defaults for each dataset
-		var def = defaults.dataset;
+		var def = helpers.object.merge({},defaults.dataset);
 
 		// `dataset` can be either an array or an object.
 		if (datasetIsArray) {
@@ -463,7 +466,9 @@
 		}
 
 		// Modify defaults for bar charts
-		if ( dataset.type == 'bar' && dataset.lineWidth === undefined) def.lineWidth = 0;
+		if ( dataset.type === 'bar' && dataset.lineWidth === undefined) {
+			def.lineWidth = 0;
+		}
 
 		// Make sure the axis exists
 		this.initAxis(def.y,this.yAxises);
@@ -481,17 +486,14 @@
 		return this;
 	};
 
-	prot.pushDataset = function (dataset) {
+	prot.updateAxises = function (dataset) {
 		var yAxis = this.yAxises[dataset.y.axis],
 			xAxis = this.xAxises[dataset.x.axis],
-			i, j,
-			step,
+			i, j, 
 			tryindex,
 			datasetLen = dataset.data.length,
 			cleanDataY = [],
 			cleanDataX = [];
-
-		dataset._labels = xAxis._labels.slice();
 
 		// If we got a single element dataset ( [4,3,2,...] , expand it into [ [0,4] , [1,3] , [2,2] , ]
 		if (!helpers.array.is(dataset.data[0])) {
@@ -501,21 +503,28 @@
 				dataset.data[i] = [i, dataset.data[i]];
 			}
 		// If we got a double element array with strings , do some magic
-		} else if(typeof dataset.data[0][0] == 'string') {
+		} else if(typeof dataset.data[0][0] === 'string' || dataset.data[0][2] !== undefined) {
 			for (i = 0; i < datasetLen; i++) {
+
+				// Restore eventual string to [i][0] for re-evaluation
+				if(dataset.data[i][2] !== undefined) {
+					dataset.data[i][0] = dataset.data[i][2];
+				}
+
 				// Find out if this is an existing string
 				tryindex = -1;
-				for (j = 0; j < dataset._labels.length; j++) {
-					if (dataset._labels[j] === dataset.data[i][0]) {
+				for (j = 0; j < xAxis._labels.length; j++) {
+					if (xAxis._labels[j] === dataset.data[i][0]) {
 						tryindex = j;
 					}
 				}
+				dataset.data[i][2] = dataset.data[i][0];
 				if(tryindex > -1) {
 					dataset.data[i][0] = cleanDataX[i] = tryindex;
 					dataset.data[i][1] = cleanDataY[i] = dataset.data[i][1];
 				} else {
 					cleanDataY[i] = dataset.data[i][1];
-					tryindex = dataset._labels.push(dataset.data[i][0])-1;
+					tryindex = xAxis._labels.push(dataset.data[i][0])-1;
 					dataset.data[i][0] = cleanDataX[i] = tryindex;	
 				}
 			}
@@ -527,13 +536,10 @@
 		}
 
 		// Update axis min/max of axis, last dataset of axis has the control
-		yAxis._maxVal = yAxis.max !== "auto" ? yAxis.max : Math.max(Math.max.apply(null, cleanDataY), yAxis._maxVal);
-		yAxis._minVal = yAxis.min !== "auto" ? yAxis.min : Math.min(Math.min.apply(null, cleanDataY), yAxis._minVal);
-		xAxis._maxVal = xAxis.max !== "auto" ? xAxis.max : Math.max(Math.max.apply(null, cleanDataX), xAxis._maxVal);
-		xAxis._minVal = xAxis.min !== "auto" ? xAxis.min : Math.min(Math.min.apply(null, cleanDataX), xAxis._minVal);
-
-		// Update values of xAxis
-		xAxis._labels = dataset._labels;
+		yAxis._maxVal = yAxis.max !== 'auto' ? yAxis.max : Math.max(Math.max.apply(null, cleanDataY), yAxis._maxVal);
+		yAxis._minVal = yAxis.min !== 'auto' ? yAxis.min : Math.min(Math.min.apply(null, cleanDataY), yAxis._minVal);
+		xAxis._maxVal = xAxis.max !== 'auto' ? xAxis.max : Math.max(Math.max.apply(null, cleanDataX), xAxis._maxVal);
+		xAxis._minVal = xAxis.min !== 'auto' ? xAxis.min : Math.min(Math.min.apply(null, cleanDataX), xAxis._minVal);
 
 		// Mege unique values of this and previous datasets
 		xAxis._values = helpers.array.unique(xAxis._values.concat(cleanDataX));
@@ -544,15 +550,16 @@
 		yAxis._range = yAxis._maxVal - yAxis._minVal;
 
 		// Update axis min step
-		dataset.data.sort(function(a, b){return a[0]-b[0]});
+		dataset.data.sort(function(a, b){return a[0]-b[0];});
 		xAxis = this.calcMinStep(xAxis,dataset.data,0);
 		yAxis = this.calcMinStep(yAxis,dataset.data,1);
-		if (dataset._labels.length > 0) {
+		if (xAxis._labels.length > 0) {
 			xAxis._step = 1;
-			xAxis._steps = dataset._labels.length - 1;
+			xAxis._steps = xAxis._labels.length - 1;
 		} else {
 			xAxis = this.calcAxisSteps(xAxis);	
 		}
+		console.log(xAxis._labels);
 
 		// Update axis steps
 		yAxis = this.calcAxisSteps(yAxis);
@@ -562,10 +569,35 @@
 			xAxis._padded = true;
 		}
 
+		// Chain
+		return this;
+	};
+
+	prot.pushDataset = function (dataset) {
+		var yAxis = this.yAxises[dataset.y.axis],
+			xAxis = this.xAxises[dataset.x.axis],
+			d;
+
+		// Reset axises
+		xAxis = helpers.object.merge(defaults.axis,xAxis);
+		yAxis = helpers.object.merge(defaults.axis,yAxis);
+
+		// Loop through each dataset that uses these axises, and update the axises
+		for( d=0; d<this.datasets.length; d++)  {
+			if (this.datasets[d].x.axis === dataset.x.axis || this.datasets[d].y.axis === dataset.y.axis) {
+				this.updateAxises(this.datasets[d]);
+			}
+		}
+
+		// Add this dataset
+		this.updateAxises(dataset);
+
+		// Push this dataset
 		this.datasets.push(dataset);
 
 		// Chain
 		return this;
+
 	};
 
 	prot.calcAxisSteps = function (axis, stepsGoal) {
@@ -584,16 +616,16 @@
 		power 		= Math.pow(10, magnitude);
 		msd 		= Math.round(step/power + 0.5);
 
-		if (msd > 5) 		msd = 10;
-		else if (msd > 2) 	msd = 5;
-		else if (msd > 1) 	msd = 2;
+		if (msd > 5) {		msd = 10; }
+		else if (msd > 2) {	msd = 5; }
+		else if (msd > 1) {	msd = 2; }
 		
 		newStepSize 	= msd * power;
-		if(newStepSize < oldStep) newStepSize = oldStep;
+		if(newStepSize < oldStep) { newStepSize = oldStep; }
 		newSteps 		= Math.round(Math.ceil((axis._range) / newStepSize)) ;
 		newRange 		= newStepSize * newSteps;
 
-		axis._maxVal 	= axis._minVal + newRange
+		axis._maxVal 	= axis._minVal + newRange;
 		axis._step 		= newStepSize;
 		axis._steps		= newSteps;
 
@@ -604,7 +636,7 @@
 	prot.calcMinStep = function (axis,data,xy) {
 		var i,minstep = axis._minStepPrc,lpxp,pxp,point;
 		for ( i=0; i < data.length; i++) {
-			if (point = data[i]) {
+			if ((point = data[i])) {
 				pxp = (point[xy] - axis._minVal) / (axis._range);	
 				if (lpxp !== undefined && (pxp - lpxp) < minstep) {
 					minstep = (pxp - lpxp);
@@ -619,7 +651,7 @@
 	prot.drawAxis = function (context,axis,orientation,primary) {
 
 		var temp, temp2,
-			x=0, y,
+			y,
 			h, w,
 			dir,
 			i,
@@ -628,7 +660,7 @@
 			lwsw, lwsh,
 			lwox, lwoy,
 			text,
-			mpxpdiff, innerWidth, pad, sl, lr;
+			mpxpdiff, innerWidth, pad, lr;
 
 		context.lineWidth = 1;
 		context.strokeStyle = axis.gridStyle;
@@ -690,14 +722,14 @@
 						text = axis.labelFormat(k);	
 					}
 					
+					labeldim = helpers.math.bboxrot(context.measureText(text).width,axis._textSize,lr);
+
 					context.save();
 					if (orientation==='y') {
 						context.scale(-1,1);
 						context.translate(-this.w,0);
-						labeldim = helpers.math.bboxrot(context.measureText(text).width,axis._textSize,lr);
 						temp2 = w-temp;
 					} else {
-						labeldim = helpers.math.bboxrot(context.measureText(text).width,axis._textSize,lr);
 						temp2 = temp;
 					}	
 
@@ -706,7 +738,6 @@
 					} else {
 						y = h-(axis._offset+axis._h-labeldim.height/2-(axis.showScale?axis.majorTickHeight+1:0)-2);
 					}
-
 					
 					context.translate(temp2,y);
 
@@ -798,13 +829,13 @@
 	prot.redraw = function() {
 
 		var a, c,
-			d, ds, mw, i, tw, th, tt,
+			d, ds, mw, i, tw, th,
 			calcAxis = function(axis,ctx,dir) {
 				axis._textSize = (axis.font !== undefined) ? parseInt(axis.font.split(' ')[0]) : 0;
 				axis._h = 0;
 				axis._h += (axis.showScale) ? 1 : 0;				// Add one pixel for scale
 				axis._h += (axis.showScale) ? axis.majorTickHeight : 0;	// Add n pixels for major ticks
-				axis._h += (axis.name) ? axis._textSize : 0 // Add n pixels for name
+				axis._h += (axis.name) ? axis._textSize : 0; // Add n pixels for name
 				if (axis.showLabels) {
 					mw = 0;
 					for (i=axis._minVal; i<=axis._maxVal; i+=axis._step) {
@@ -819,7 +850,7 @@
 						// Rot 0 is different in x and y
 						tw = helpers.math.bboxrot(tw,th,axis.labelRotation+((dir==='x')?90:0)).width;
 
-						if(tw > mw) mw = tw;
+						if(tw > mw) { mw = tw; }
 					}
 					axis._h += mw;
 				}
@@ -832,26 +863,30 @@
 		this.wox = this.margin; this.woy = this.margin;
 		this.nwox = this.margin; this.nwoy = this.margin;
 
-		// 1. Calculate axis "heights", workpace width, and workspace offset
+		// 1. Calculate axis 'heights', workpace width, and workspace offset
 		for(a in this.yAxises) {
-			this.yAxises[a] = calcAxis(this.yAxises[a],this.ctx,'y');
+			if (this.yAxises.hasOwnProperty(a)) {
+				this.yAxises[a] = calcAxis(this.yAxises[a],this.ctx,'y');
 
-			// Reduce workspace width by axis height
-			this.wsw -= this.yAxises[a]._h;
+				// Reduce workspace width by axis height
+				this.wsw -= this.yAxises[a]._h;
 
-			// Add workspace offset if this is a primary axis
-			this.yAxises[a]._offset = (a % 2) ? this.wox : this.nwox;
-			if (a % 2) 	this.wox += this.yAxises[a]._h;
-			else 		this.nwox += this.yAxises[a]._h;
+				// Add workspace offset if this is a primary axis
+				this.yAxises[a]._offset = (a % 2) ? this.wox : this.nwox;
+				if (a % 2) 	{ this.wox += this.yAxises[a]._h; }
+				else 		{ this.nwox += this.yAxises[a]._h; }
+			}
 		}
 		for(a in this.xAxises) {
-			this.xAxises[a] = calcAxis(this.xAxises[a],this.ctx,'x');
+			if (this.xAxises.hasOwnProperty(a)) {
+				this.xAxises[a] = calcAxis(this.xAxises[a],this.ctx,'x');
 
-			this.wsh -= this.xAxises[a]._h;
+				this.wsh -= this.xAxises[a]._h;
 
-			this.xAxises[a]._offset = (a % 2) ? this.woy : this.nwoy;
-			if (a % 2) 	this.woy += this.xAxises[a]._h;
-			else 		this.nwoy += this.xAxises[a]._h;
+				this.xAxises[a]._offset = (a % 2) ? this.woy : this.nwoy;
+				if (a % 2) 	{ this.woy += this.xAxises[a]._h; }
+				else 		{ this.nwoy += this.xAxises[a]._h;  }
+			}
 		}
 
 		// 2. Setup matrix
@@ -863,29 +898,31 @@
 		c.translate(0,-this.h);				// Move pointer from old 0,0 (upper left corner) to new 0,0 (lower left corner)
 
 		// 3. Draw axises
-		for(a in this.yAxises) this.drawAxis(c,this.yAxises[a],'x',(a % 2));
-		for(a in this.xAxises) this.drawAxis(c,this.xAxises[a],'y',(a % 2));
+		for(a in this.yAxises) { if (this.yAxises.hasOwnProperty(a)) { this.drawAxis(c,this.yAxises[a],'x',(a % 2)); }}
+		for(a in this.xAxises) { if (this.xAxises.hasOwnProperty(a)) {this.drawAxis(c,this.xAxises[a],'y',(a % 2)); }}
 
 		// 4. Draw datasets
 		for(d in this.datasets) {
-			ds = this.datasets[d];
-			if (helpers.renderers[ds.type]!==undefined || ds.type == 'area') {
+			if (this.datasets.hasOwnProperty(d)) {
+				ds = this.datasets[d];
+				if (helpers.renderers[ds.type]!==undefined || ds.type === 'area') {
 
-				// Call renderer, first a special case for line and area
-				if (ds.type == 'line' || ds.type == 'area') {
-					helpers.renderers['line'](this, c, ds, this.xAxises[ds.x.axis], this.yAxises[ds.y.axis]);
-					if (ds.lineDots) {
-						helpers.renderers['scatter'](this, c, ds, this.xAxises[ds.x.axis], this.yAxises[ds.y.axis]);
+					// Call renderer, first a special case for line and area
+					if (ds.type === 'line' || ds.type === 'area') {
+						helpers.renderers.line(this, c, ds, this.xAxises[ds.x.axis], this.yAxises[ds.y.axis]);
+					// ... then the general fallback
+					} else {
+						helpers.renderers[ds.type](this, c, ds, this.xAxises[ds.x.axis], this.yAxises[ds.y.axis]);
 					}
 
-				// ... then the general fallback
-				} else {
-					helpers.renderers[ds.type](this, c, ds, this.xAxises[ds.x.axis], this.yAxises[ds.y.axis])
-				}
+					if (ds.lineDots) {
+						helpers.renderers.scatter(this, c, ds, this.xAxises[ds.x.axis], this.yAxises[ds.y.axis]);
+					}
 
-			} else {
-				// Missing renderer
-				console.error("Grapho: Missing renderer '" + ds.type + "', cannot render dataset.");
+				} else {
+					// Missing renderer
+					console.error('Grapho: Missing renderer "' + ds.type + '", cannot render dataset.');
+				}
 			}
 		}
 
@@ -896,10 +933,10 @@
 
 	// Handle resize event
 	prot.resize = function () {
-		if ((this.w = this.container.width) === "auto") {
+		if ((this.w = this.container.width) === 'auto') {
 			this.w = getComputedStyle(this.dest, null).getPropertyValue('width');
 		}
-		if ((this.h = this.container.height) === "auto") {
+		if ((this.h = this.container.height) === 'auto') {
 			this.h = getComputedStyle(this.dest, null).getPropertyValue('height');
 		}
 		this.canvas.height = this.h = parseInt(this.h);
