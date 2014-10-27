@@ -66,7 +66,9 @@
 				barWidthPrc: 90,
 
 				// Internal stuff
-				_labels: []
+				_labels: [],
+				_usedPos: [],				// Used for stacking charts
+				_usedNeg: [],
 			},
 			axis: {
 				min: 'auto',
@@ -85,6 +87,8 @@
 				minorTickHeight: 2,
 				center: 0,
 				padded: false,
+				stacked: false,
+				numeric: true,				// Handle this as an numerical (continouos) axis, or a text-axis
 				
 				// Used internaly
 				_textSize: 0,				// Parsed height of font in pixels
@@ -97,8 +101,11 @@
 				_minVal: Infinity,
 				_maxVal: -Infinity,
 				_padded: false, 			// Padding adds a half step to the width, usable for bar charts
+
 				_values: [],
-				_labels: []
+				_labels: [],
+				_usedPos: [],				// Used for stacking charts
+				_usedNeg: [],
 				
 			}
 		},
@@ -249,9 +256,10 @@
 							ct = (center < yAxis._minVal) ? yAxis._minVal : center;
 							
 							px = Math.round(grapho.wox - mpxpdiff/2 + pad + barSpacing/2 + (pxp * innerWidth));
-							py = Math.round(grapho.woy + (((point[1] <= ct) ? ct : point[1]) - yAxis._minVal) / (yAxis._range) * grapho.wsh);
-							bh = Math.round(grapho.woy + (((point[1] > ct) ? ct : point[1]) - yAxis._minVal) / (yAxis._range) * grapho.wsh) - py;
+							py = Math.round(grapho.woy + (((point[1] <= ct) ? ct : point[3]) - yAxis._minVal) / (yAxis._range) * grapho.wsh);
+							bh = Math.round(((point[1]) - yAxis._minVal) / (yAxis._range) * grapho.wsh);
 
+							console.log(point[3]);
 							// Use strokestyle instead of fillstyle when height > lineWidth*2
 							if((heightflag = (Math.abs(bh)>dataset.lineWidth*2))) {
 								context.fillStyle = dataset.fillStyle;
@@ -504,6 +512,7 @@
 			xAxis = this.xAxises[dataset.x.axis],
 			i, j, 
 			tryindex,
+			compVal,
 			datasetLen = dataset.data.length,
 			cleanDataY = [],
 			cleanDataX = [];
@@ -515,42 +524,65 @@
 				cleanDataX[i] = i;
 				dataset.data[i] = [i, dataset.data[i]];
 			}
-		// If we got a double element array with strings , do some magic
-		} else if(typeof dataset.data[0][0] === 'string' || dataset.data[0][2] !== undefined) {
-			for (i = 0; i < datasetLen; i++) {
+		
+		}
 
-				// Restore eventual string to [i][0] for re-evaluation
-				if(dataset.data[i][2] !== undefined) {
-					dataset.data[i][0] = dataset.data[i][2];
-				}
+		// Do some magic
+		for (i = 0; i < datasetLen; i++) {
 
-				// Find out if this is an existing string
-				tryindex = -1;
-				for (j = 0; j < xAxis._labels.length; j++) {
-					if (xAxis._labels[j] === dataset.data[i][0]) {
-						tryindex = j;
-					}
-				}
-				dataset.data[i][2] = dataset.data[i][0];
-				if(tryindex > -1) {
-					dataset.data[i][0] = cleanDataX[i] = tryindex;
-					dataset.data[i][1] = cleanDataY[i] = dataset.data[i][1];
-				} else {
-					cleanDataY[i] = dataset.data[i][1];
-					tryindex = xAxis._labels.push(dataset.data[i][0])-1;
-					dataset.data[i][0] = cleanDataX[i] = tryindex;	
+			// Restore eventual string to [i][0] for re-evaluation
+			if(dataset.data[i][2] !== undefined) {
+				dataset.data[i][0] = dataset.data[i][2];
+			}
+
+			// Find out if this is an existing string
+			tryindex = -1;
+			for (j = 0; j < xAxis._labels.length; j++) {
+				if (xAxis._labels[j] === dataset.data[i][0]) {
+					tryindex = j;
 				}
 			}
-		} else {
-			for (i = 0 ; i < datasetLen; i++) {
+
+			dataset.data[i][2] = dataset.data[i][0];
+			if(tryindex > -1) {
+				dataset.data[i][0] = cleanDataX[i] = tryindex;
+				dataset.data[i][1] = cleanDataY[i] = dataset.data[i][1];
+			} else {
 				cleanDataY[i] = dataset.data[i][1];
-				cleanDataX[i] = dataset.data[i][0];
+				tryindex = xAxis._labels.push(dataset.data[i][0])-1;
+				dataset.data[i][0] = cleanDataX[i] = tryindex;	
 			}
+
+			// Add to 'used'
+			dataset.data[i][3] = 0;
+			if (yAxis._usedPos[tryindex] === undefined) { yAxis._usedPos[tryindex] = 0; }
+			if (yAxis._usedNeg[tryindex] === undefined) { yAxis._usedNeg[tryindex] = 0; }
+			if (yAxis.stacked) {
+				if (dataset.data[i][1]>yAxis.center) {
+					dataset._usedPos[tryindex] = dataset.data[i][3] = (yAxis._usedPos[tryindex] === undefined) ? 0 : yAxis._usedPos[tryindex];
+					yAxis._usedPos[tryindex] += dataset.data[i][1];
+				} else {
+					dataset._usedNeg[tryindex] = dataset.data[i][3] = (yAxis._usedNeg[tryindex] === undefined) ? 0 : yAxis._usedNeg[tryindex];
+					yAxis._usedNeg[tryindex] += dataset.data[i][1];
+				}
+			}
+
+			//
+		}
+
+		// Determine if this is a numerical axis or not
+		if (typeof dataset.data[0][0] === 'string') {
+			xAxis.numeric = true;
 		}
 
 		// Update axis min/max of axis, last dataset of axis has the control
-		yAxis._maxVal = yAxis.max !== 'auto' ? yAxis.max : Math.max(Math.max.apply(null, cleanDataY), yAxis._maxVal);
-		yAxis._minVal = yAxis.min !== 'auto' ? yAxis.min : Math.min(Math.min.apply(null, cleanDataY), yAxis._minVal);
+		if (yAxis.stacked) {
+			yAxis._maxVal = yAxis.max !== 'auto' ? yAxis.max : Math.max(Math.max.apply(null, yAxis._usedPos), yAxis._maxVal);
+			yAxis._minVal = yAxis.min !== 'auto' ? yAxis.min : Math.min(Math.min.apply(null, yAxis._usedNeg), yAxis._minVal);
+		} else {
+			yAxis._maxVal = yAxis.max !== 'auto' ? yAxis.max : Math.max(Math.max.apply(null, cleanDataY), yAxis._maxVal);
+			yAxis._minVal = yAxis.min !== 'auto' ? yAxis.min : Math.min(Math.min.apply(null, cleanDataY), yAxis._minVal);
+		}
 		xAxis._maxVal = xAxis.max !== 'auto' ? xAxis.max : Math.max(Math.max.apply(null, cleanDataX), xAxis._maxVal);
 		xAxis._minVal = xAxis.min !== 'auto' ? xAxis.min : Math.min(Math.min.apply(null, cleanDataX), xAxis._minVal);
 
@@ -566,7 +598,7 @@
 		dataset.data.sort(function(a, b){return a[0]-b[0];});
 		xAxis = this.calcMinStep(xAxis,dataset.data,0);
 		yAxis = this.calcMinStep(yAxis,dataset.data,1);
-		if (xAxis._labels.length > 0) {
+		if (xAxis.numeric !== true) {
 			xAxis._step = 1;
 			xAxis._steps = xAxis._labels.length - 1;
 		} else {
@@ -592,6 +624,8 @@
 		this.yAxises[dataset.y.axis]._values = [];
 		this.xAxises[dataset.x.axis]._labels = [];
 		this.yAxises[dataset.y.axis]._labels = [];
+		this.yAxises[dataset.y.axis]._usedPos = [];
+		this.yAxises[dataset.y.axis]._usedNeg = [];
 
 		// Loop through each dataset that uses these axises, and update the axises
 		for( d=0; d<this.datasets.length; d++)  {
@@ -899,7 +933,7 @@
 
 		// 3. Draw axises
 		for(a in this.yAxises) { if (this.yAxises.hasOwnProperty(a)) { this.drawAxis(c,this.yAxises[a],'x',(a % 2)); }}
-		for(a in this.xAxises) { if (this.xAxises.hasOwnProperty(a)) {this.drawAxis(c,this.xAxises[a],'y',(a % 2)); }}
+		for(a in this.xAxises) { if (this.xAxises.hasOwnProperty(a)) { this.drawAxis(c,this.xAxises[a],'y',(a % 2)); }}
 
 		// 4. Draw datasets
 		for(d in this.datasets) {

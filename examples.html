@@ -517,7 +517,7 @@ graphoObj5.addDataset({
                         </script>
 
                     </div>
-                    <!-- Example 2 - End -->
+                    <!-- Example 6 - End -->
                 </div>
             </article>
             <article>
@@ -531,9 +531,9 @@ function randomData() {
     // Generate random data
     var randomArray1 = [],randomArray2 = [],randomArray3 = [];
     for (var i = 0, l = 40; i < l; i++) {
-        randomArray1.push((Math.sin(iteratorSin/10+i/10) * 15)+15);
-        randomArray2.push(-(Math.cos(iteratorSin/10+i/15+Math.tan(i/5)) * 15)-15);
-        randomArray3.push((Math.cos(iteratorSin/10+i/20+Math.sin(i/2)) * 15)+15);
+        randomArray1.push(Math.round(((Math.sin(iteratorSin/10+i/10) * 15)+15)*100)/100);
+        randomArray2.push(Math.round((-(Math.cos(iteratorSin/10+i/15+Math.tan(i/5)) * 15)-15)*100)/100);
+        randomArray3.push(Math.round(((Math.cos(iteratorSin/10+i/20+Math.sin(i/2)) * 15)+15)*100)/100);
     }
     iteratorSin+=0.7;
     // Remove last dataset, if there is one
@@ -547,7 +547,8 @@ function randomData() {
         type: 'area',
         strokeStyle: '#F06666',
         fillStyle: 'rgba(192,64,64,0.3)',
-        y: {  showScale: true, scaleStyle: '#F0F066', showGridLines: true, name: "Primary axis", showLabels: true, showCenter: true, min: 0, max: 30 },
+        y: {  showScale: true, scaleStyle: '#F0F066', showGridLines: true, name: "Primary axis", showLabels: true },
+        x: {  showGridLines: true, showLabels: true},
         data: randomArray1
     });
     // Push a new dataset
@@ -555,8 +556,7 @@ function randomData() {
         type: 'area',
         strokeStyle: '#66F066',
         fillStyle: 'rgba(64,192,64,0.3)',
-        y: {  axis:2, showScale: true, scaleStyle: '#F0F066', showGridLines: true, name: "Yellow axis", showLabels: true, showCenter: true, min: -30, max: 0 },
-        x: {  showGridLines: true, showLabels: true},
+        y: {  axis:2, showScale: true, scaleStyle: '#F0F066', showLabels: true },
         data: randomArray2
     });
     // Push a new dataset
@@ -564,8 +564,6 @@ function randomData() {
         type: 'area',
         strokeStyle: '#6666F0',
         fillStyle: 'rgba(64,64,196,0.3)',
-        y: {  showScale: true, scaleStyle: '#F0F066', showGridLines: true, name: "Secondary axis", showLabels: true, showCenter: true, min: 0, max: 30 },
-        x: {  showGridLines: true, showLabels: true},
         data: randomArray3
     });
     // Iterate
@@ -573,6 +571,59 @@ function randomData() {
 }
 // Start the loop
 randomData();</code></pre>
+            </article>
+        </section>
+
+        <section>
+            <article>
+                <h3>
+                    <span class="secondary">Example 7 - </span>
+                    <span class="tertiary">Stacked bar chart </span>
+                </h3>
+                <div class="container w-100 h-1">
+
+                    <!-- Example 7 - Start -->
+                    <div id="example-7" class="box bw-100 h-100">
+
+                        <!-- example-7 javascript -->
+                        <script>
+
+                            // Create grapho object, pass a parameter pointing to the destination element
+
+                            var graphoObj7 = new Grapho( { place: 'example-7' } );
+
+                            graphoObj7.addDataset({
+                                type: 'bar',
+                                strokeStyle: '#F0F066',
+                                fillStyle: '#F0F066',
+                                y: {  showScale: true, scaleStyle: '#F0F066', showGridLines: true, name: "Yellow axis", showLabels: true, showCenter: true, stacked: true },
+                                x: {  showGridLines: true, showLabels: true},
+                                data: [7, 6, 5, 4, 2.5, 4, 4, 10, 4, 32, 0, 0, 4, 25, 3, 4, 5, 6, 7, 7, 2, 8, 5, 5, 4, 2]
+                            });
+
+                            graphoObj7.addDataset({
+                                type:'bar',
+                                strokeStyle: '#6666F0',
+                                fillStyle: '#6666F0',
+                                data: [6, 1, 3, 6, 2, 6, 3, 2, 4, 10, 2, 0, 0, 5, 3, 2, 2, 6, 6, 15, 17, 17, 15, 14, 13, 2]
+                            });
+
+                            graphoObj7.addDataset({
+                                type:'bar',
+                                strokeStyle: '#F06666',
+                                fillStyle: '#F06666',
+                                data: [6, 1, 3, 6, 2, 6, 3, 2, 4, 5, 2, 17, 0, 5, 3, 2, 2, 6, 6, 3, 3, 3, 3, 14, 13, 1]
+                            });
+
+                        </script>
+
+                    </div>
+                    <!-- Example 7 - End -->
+                </div>
+            </article>
+            <article>
+                <h3><span class="tertiary">Source code</span></h3>
+                <pre><code data-language="javascript"></code></pre>
             </article>
         </section>
 
