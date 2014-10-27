@@ -93,6 +93,7 @@
 				_steps: 0,
 				_minStepPrc: 1,
 				_range: 0,
+				_startMinVal: 0,			// Used as the starting point when drawing grid, ticks and stuff
 				_minVal: Infinity,
 				_maxVal: -Infinity,
 				_padded: false, 			// Padding adds a half step to the width, usable for bar charts
@@ -206,7 +207,7 @@
 					
 					if (dataset.type === 'area') {
 
-						cy = Math.round(((yAxis.center < yAxis._minVal ? yAxis._minVal : yAxis.center) - yAxis._minVal) / (yAxis._range) * grapho.wsw + grapho.woy)+0.5;
+						cy = Math.round(grapho.woy + ((yAxis.center < yAxis._minVal ? yAxis._minVal : (yAxis.center > yAxis._maxVal ? yAxis._maxVal : yAxis.center )) - yAxis._minVal) / (yAxis._range) * grapho.wsh)+0.5;
 
 						context.lineTo(px-1, cy); // Move to center at last col
 						context.lineTo(fpx, cy); // Move to center at first col
@@ -456,7 +457,8 @@
 			this.datasets.splice(dsIndex);
 		}
 
-	}
+	};
+
 	prot.addDataset = function (dataset) {
 		var datasetIsArray = helpers.array.is(dataset);
 
@@ -632,11 +634,10 @@
 		
 		newStepSize 	= msd * power;
 		if(newStepSize < oldStep) { newStepSize = oldStep; }
+		axis._startMinVal = axis._minVal - (axis._minVal % newStepSize);
 
 		newSteps 		= Math.round(Math.ceil((axis._range) / newStepSize)) ;
 		newRange 		= newStepSize * newSteps;
-
-		axis._maxVal 	= axis._minVal + newRange;
 		axis._step 		= newStepSize;
 		axis._steps		= newSteps;
 
@@ -705,7 +706,7 @@
 		dir=[+Math.abs(axis._step),-Math.abs(axis._step)];
 		for(i=0;i<dir.length;i++) {
 			
-			k=axis._minVal;
+			k=axis._startMinVal;
 
 			while(k<=axis._maxVal && k>=axis._minVal) {
 
