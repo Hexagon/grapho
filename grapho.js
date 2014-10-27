@@ -108,7 +108,6 @@
 			// Array helpers
 			array: {	
 				is: Array.isArray || function (it) {
-					// toString does not work if "Object.prototype." is removed!
 					return Object.prototype.toString.call(it) === '[object Array]';
 				},
 				unique: function(ain) {
@@ -137,14 +136,13 @@
 				
 					for (name in source) {
 						if (source[name] !== undefined) {
-							// toString Does not work if "Object.prototype." is removed!
 							if (target[name] && Object.prototype.toString.call(target[name]) === '[object Object]') {
 								// Changed to get a true deep copy
 								// From:
 								//   merge(target[name], source[name])
 								// To: 
 								target[name] = helpers.object.merge(helpers.object.merge({},target[name]), source[name],true);
-							} else if (Object.prototype.toString.call(source[name]) === '[object Array]') {
+							} else if (helpers.array.is(source[name]) === '[object Array]') {
 								target[name] = source[name].slice();
 							} else {
 								target[name] = source[name];
@@ -399,7 +397,7 @@
 	// Prototype shortcut, hopefully makes minified code more compact
 	prot = Grapho.prototype;
 	
-	prot.formats = formats;
+	Grapho.formats = prot.formats = formats;
 
 	// Place the grapho
 	prot.place = function (newDestination) { 
@@ -751,16 +749,6 @@
 					}
 					
 					context.translate(temp2,y);
-
-					context.beginPath();
-					context.moveTo(-2,-2);
-					context.lineTo(2,2);
-					context.stroke();
-
-					context.beginPath();
-					context.moveTo(2,-2);
-					context.lineTo(-2,2);
-					context.stroke();
 
 					context.rotate(lr*0.0174532925);
 					context.fillStyle = axis.scaleStyle;
