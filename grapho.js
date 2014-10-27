@@ -93,6 +93,7 @@
 				_steps: 0,
 				_minStepPrc: 1,
 				_range: 0,
+				_startMinVal: 0,			// Used as the starting point when drawing grid, ticks and stuff
 				_minVal: Infinity,
 				_maxVal: -Infinity,
 				_padded: false, 			// Padding adds a half step to the width, usable for bar charts
@@ -108,7 +109,6 @@
 			// Array helpers
 			array: {	
 				is: Array.isArray || function (it) {
-					// toString does not work if "Object.prototype." is removed!
 					return Object.prototype.toString.call(it) === '[object Array]';
 				},
 				unique: function(ain) {
@@ -137,14 +137,13 @@
 				
 					for (name in source) {
 						if (source[name] !== undefined) {
-							// toString Does not work if "Object.prototype." is removed!
 							if (target[name] && Object.prototype.toString.call(target[name]) === '[object Object]') {
 								// Changed to get a true deep copy
 								// From:
 								//   merge(target[name], source[name])
 								// To: 
 								target[name] = helpers.object.merge(helpers.object.merge({},target[name]), source[name],true);
-							} else if (Object.prototype.toString.call(source[name]) === '[object Array]') {
+							} else if (helpers.array.is(source[name]) === '[object Array]') {
 								target[name] = source[name].slice();
 							} else {
 								target[name] = source[name];
@@ -206,7 +205,7 @@
 					
 					if (dataset.type === 'area') {
 
-						cy = Math.round(((yAxis.center < yAxis._minVal ? yAxis._minVal : yAxis.center) - yAxis._minVal) / (yAxis._range) * grapho.wsw + grapho.woy)+0.5;
+						cy = Math.round(grapho.woy + ((yAxis.center < yAxis._minVal ? yAxis._minVal : (yAxis.center > yAxis._maxVal ? yAxis._maxVal : yAxis.center )) - yAxis._minVal) / (yAxis._range) * grapho.wsh)+0.5;
 
 						context.lineTo(px-1, cy); // Move to center at last col
 						context.lineTo(fpx, cy); // Move to center at first col
@@ -399,7 +398,7 @@
 	// Prototype shortcut, hopefully makes minified code more compact
 	prot = Grapho.prototype;
 	
-	prot.formats = formats;
+	Grapho.formats = prot.formats = formats;
 
 	// Place the grapho
 	prot.place = function (newDestination) { 
@@ -456,7 +455,8 @@
 			this.datasets.splice(dsIndex);
 		}
 
-	}
+	};
+
 	prot.addDataset = function (dataset) {
 		var datasetIsArray = helpers.array.is(dataset);
 
@@ -632,11 +632,10 @@
 		
 		newStepSize 	= msd * power;
 		if(newStepSize < oldStep) { newStepSize = oldStep; }
+		axis._startMinVal = axis._minVal - (axis._minVal % newStepSize);
 
 		newSteps 		= Math.round(Math.ceil((axis._range) / newStepSize)) ;
 		newRange 		= newStepSize * newSteps;
-
-		axis._maxVal 	= axis._minVal + newRange;
 		axis._step 		= newStepSize;
 		axis._steps		= newSteps;
 
@@ -705,7 +704,7 @@
 		dir=[+Math.abs(axis._step),-Math.abs(axis._step)];
 		for(i=0;i<dir.length;i++) {
 			
-			k=axis._minVal;
+			k=axis._startMinVal;
 
 			while(k<=axis._maxVal && k>=axis._minVal) {
 
@@ -751,16 +750,6 @@
 					}
 					
 					context.translate(temp2,y);
-
-					context.beginPath();
-					context.moveTo(-2,-2);
-					context.lineTo(2,2);
-					context.stroke();
-
-					context.beginPath();
-					context.moveTo(2,-2);
-					context.lineTo(-2,2);
-					context.stroke();
 
 					context.rotate(lr*0.0174532925);
 					context.fillStyle = axis.scaleStyle;
