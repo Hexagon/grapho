@@ -54,7 +54,7 @@
 				// type: 'line' or 'area'
 				lineWidth: 2,
 				lineSmooth: true,
-				strokeStyle: '#9494BA',
+				strokeStyle: '#454545',
 				fillStyle: '#343536',
 				lineDots: false,
 				shadow: true,
@@ -107,6 +107,13 @@
 				_usedPos: [],				// Used for stacking charts
 				_usedNeg: [],
 				
+			},
+			legend: {
+				position: 'bottom',
+				inside: false,
+				fillStyle: 'none',
+				strokeStyle: 'none',
+				font: '11px Droid Sans'
 			}
 		},
 
@@ -255,7 +262,6 @@
 							
 							ct = (center < yAxis._minVal) ? yAxis._minVal : center;
 							
-							console.log(point[1],point[3]);
 							px = Math.round(grapho.wox - mpxpdiff/2 + pad + barSpacing/2 + (pxp * innerWidth));
 							py = Math.round(grapho.woy + ((point[1] + point[3]) - yAxis._minVal) / (yAxis._range) * grapho.wsh);
 							bh = Math.round(grapho.woy + (point[3] - yAxis._minVal) / (yAxis._range) * grapho.wsh)-py;
@@ -301,6 +307,34 @@
 					     	context.fill();
 					    }
 					}
+				},
+				pie: function (grapho, context, dataset, xAxis, yAxis) {
+					var total=0,used=0,i;
+
+					function fillSegment(grapho, context, startAngle, endAngle, radiusPerc) {
+					    var centerX = (grapho.wsw/2) + grapho.wox
+					    	,centerY = (grapho.wsh/2) + grapho.woy
+					    	,radius = ((grapho.wsw > grapho.wsh) ? grapho.wsh/2: grapho.wsw/2) * radiusPerc
+					    	,startingAngle = startAngle*0.0174532925
+					    	,arcSize = endAngle*0.0174532925
+					    	,endingAngle = startingAngle + arcSize;
+
+					    context.beginPath();
+					    context.moveTo(centerX, centerY);
+					    context.arc(centerX, centerY, radius, startingAngle, endingAngle, false);
+					    context.closePath();
+
+					    context.fillStyle = dataset.fillStyle;
+					    context.fill();
+
+					    context.lineWidth = dataset.lineWidth;
+					    context.strokeStyle = dataset.strokeStyle;
+					    context.stroke();
+
+					}
+					for ( i=0; i < dataset.data.length; i++) {
+						fillSegment(grapho,context,dataset.data[i][3]/yAxis._usedPos[i]*360,dataset.data[i][1]/yAxis._usedPos[i]*360,1);
+					}
 				}
 			},
 
@@ -339,7 +373,7 @@
 
 	// The actal Grapho object
 	function Grapho (settings) {
-		var place;
+		var place, legend;
 
 		// Protect against forgotten `new` keyword.
 		if (!(this instanceof Grapho)) {
@@ -363,11 +397,21 @@
 			settings.place = undefined;
 		}
 
+		// Default settings
+		this.margin = 5;
+		//this.showLegend = false;
+
 		// Merge the user settings into `this`
 		if (settings) {
 			helpers.object.merge(this, settings);
 		}
-		
+
+		if(settings.showLegend !== undefined) {
+			this.showLegend = settings.showLegend;
+		}
+
+		this.legend = helpers.object.merge(defaults.legend, settings.legend);
+
 		// These aren't settings but needed properties.
 		this.id = graphos.push(this) - 1;
 
@@ -389,9 +433,6 @@
 		// Negative workspace offset x and y
 		this.nwox = 0;
 		this.nwoy = 0;
-
-		// Margin
-		this.margin = 5;
 
 		// Call the this.place() method if the user has specified an parent.
 		if (place) {
@@ -524,7 +565,6 @@
 				cleanDataX[i] = i;
 				dataset.data[i] = [i, dataset.data[i]];
 			}
-		
 		}
 
 		// Do some magic
@@ -557,7 +597,7 @@
 			dataset.data[i][3] = 0;
 			if (yAxis._usedPos[tryindex] === undefined) { yAxis._usedPos[tryindex] = 0; }
 			if (yAxis._usedNeg[tryindex] === undefined) { yAxis._usedNeg[tryindex] = 0; }
-			if (yAxis.stacked) {
+			if (yAxis.stacked || dataset.type == 'pie') {
 				if (dataset.data[i][1]>=yAxis.center) {
 					dataset._usedPos[tryindex] = dataset.data[i][3] = (yAxis._usedPos[tryindex] === undefined) ? 0 : yAxis._usedPos[tryindex];
 					yAxis._usedPos[tryindex] += dataset.data[i][1];
@@ -860,10 +900,80 @@
 
 	};
 
+	prot.drawLegend = function(legend) {
+		var legendSize = 0,
+			maxW = 0,
+			i,
+			curRow = 1,
+			rectMargin = 3,
+			rowHeight = parseInt(legend.font.split(' ')[0])*1.2,
+			fontHeight,textWidth,rowHeight,
+			additionalSpace = rowHeight; // Total space used for series color box, margins etc
+
+		this.ctx.font = legend.font;
+
+		// Measure legend
+		if (legend.position == 'bottom' || legend.position == 'top') {
+			// Check num of rows needed
+			for (i=0; i<this.datasets.length; i++) {
+				if (this.datasets[i].name === undefined) {
+					this.datasets[i].name = 'Series ' + (i+1);
+				}
+				if (maxW + this.ctx.measureText(this.datasets[i].name).width + additionalSpace + rowHeight > this.w - this.margin*2) {
+					curRow += 1;
+					maxW = 0;
+				}
+				maxW += this.ctx.measureText(this.datasets[i].name).width + additionalSpace + rowHeight;
+			}
+			legendSize = rowHeight * curRow;
+		} else {
+			// Determine widest label
+			for (i=0; i<this.datasets.length; i++) {
+				if (this.datasets[i].name === undefined) {
+					this.datasets[i].name = 'Series ' + (i+1);
+				}
+				if((textWidth = this.ctx.measureText(this.datasets[i].name).width) > maxW) {
+					maxW = textWidth;
+				}
+			}
+			legendSize = maxW + additionalSpace;
+		}
+		
+		// Draw legend
+		maxW = 0;
+		curRow = 1;
+		if (legend.position == 'bottom' || legend.position == 'top') {
+			for (i=0; i<this.datasets.length; i++) {
+				if (maxW + this.ctx.measureText(this.datasets[i].name).width + additionalSpace + rowHeight > this.w - this.margin*2) {
+					curRow += 1;
+					maxW = 0;
+				}
+				this.ctx.fillStyle = this.datasets[i].fillStyle;
+				this.ctx.strokeStyle = this.datasets[i].strokeStyle;
+				this.ctx.fillRect(maxW,(legend.position == 'bottom' ? this.h-legendSize-this.margin : 0) + (curRow-1) * rowHeight + rectMargin, rowHeight-rectMargin*2,rowHeight-rectMargin*2);
+				this.ctx.strokeRect(maxW,(legend.position == 'bottom' ? this.h-legendSize-this.margin : 0) + (curRow-1) * rowHeight + rectMargin, rowHeight-rectMargin*2,rowHeight-rectMargin*2);
+				this.ctx.fillText (this.datasets[i].name,maxW + rowHeight , (legend.position == 'bottom' ? this.h-legendSize-this.margin : 0) + (curRow-1) * rowHeight + rowHeight/1.35 );
+				maxW += this.ctx.measureText(this.datasets[i].name).width + additionalSpace + rowHeight;
+			}
+		} else {
+			for (i=0; i<this.datasets.length; i++) {
+				this.ctx.fillStyle = this.datasets[i].fillStyle;
+				this.ctx.strokeStyle = this.datasets[i].strokeStyle;
+				this.ctx.fillRect((legend.position == 'right' ? this.w-legendSize-this.margin : 0), (curRow-1) * rowHeight + rectMargin, rowHeight-rectMargin*2,rowHeight-rectMargin*2);
+				this.ctx.strokeRect((legend.position == 'right' ? this.w-legendSize-this.margin : 0), (curRow-1) * rowHeight + rectMargin, rowHeight-rectMargin*2,rowHeight-rectMargin*2);
+				this.ctx.fillText (this.datasets[i].name,(legend.position == 'right' ? this.w-this.margin-legendSize : 0) + rowHeight, (curRow-1) * rowHeight + rowHeight/1.35);
+				curRow += 1;
+			}
+		}
+
+		return legendSize;
+	};
+
 	prot.redraw = function() {
 
 		var a, c,
 			d, ds, mw, i, tw, th,
+			lh,
 			calcAxis = function(axis,ctx,dir) {
 				axis._textSize = (axis.font !== undefined) ? parseInt(axis.font.split(' ')[0]) : 0;
 				axis._h = 0;
@@ -897,8 +1007,35 @@
 		this.wox = this.margin; this.woy = this.margin;
 		this.nwox = this.margin; this.nwoy = this.margin;
 
-		// 1. Calculate axis 'heights', workpace width, and workspace offset
-		for(a in this.yAxises) {
+		// 1. Setup matrix
+		c = this.ctx;
+		c.clearRect(0, 0, this.w, this.h);	// Clear workspace
+
+		// 2. Calculate legend space requirement
+		if (this.showLegend && !this.legend.inside) {
+			lh = this.drawLegend(this.legend) + this.margin;
+			if (this.legend.position == 'bottom') {
+				this.woy += lh;
+				this.wsh -= lh;
+			} else if (this.legend.position == 'top') {
+				this.nwoy += lh;
+				this.wsh -= lh;
+			} else if (this.legend.position == 'left') {
+				this.wox += lh;
+				this.wsw -= lh;
+			} else if (this.legend.position == 'right') {
+				this.nwox += lh;
+				this.wsw -= lh;
+			}
+		}
+
+		c.save();							// Save matrix
+		c.translate(0.5,0.5);				// Translate 0.5 px i X and Y to get crisp lines
+		c.scale(1,-1);						// Flip matrix to make lower left corner 0,0
+		c.translate(0,-this.h);				// Move pointer from old 0,0 (upper left corner) to new 0,0 (lower left corner)
+
+		// 3. Calculate axis 'heights', workpace width, and workspace offset
+		for (a in this.yAxises) {
 			if (this.yAxises.hasOwnProperty(a)) {
 				this.yAxises[a] = calcAxis(this.yAxises[a],this.ctx,'y');
 
@@ -911,7 +1048,7 @@
 				else 		{ this.nwox += this.yAxises[a]._h; }
 			}
 		}
-		for(a in this.xAxises) {
+		for (a in this.xAxises) {
 			if (this.xAxises.hasOwnProperty(a)) {
 				this.xAxises[a] = calcAxis(this.xAxises[a],this.ctx,'x');
 
@@ -923,44 +1060,34 @@
 			}
 		}
 
-		// 2. Setup matrix
-		c = this.ctx;
-		c.clearRect(0, 0, this.w, this.h);	// Clear workspace
-		c.save();							// Save matrix
-		c.translate(0.5,0.5);				// Translate 0.5 px i X and Y to get crisp lines
-		c.scale(1,-1);						// Flip matrix to make lower left corner 0,0
-		c.translate(0,-this.h);				// Move pointer from old 0,0 (upper left corner) to new 0,0 (lower left corner)
-
-		// 3. Draw axises
+		// 4. Draw axises
 		for(a in this.yAxises) { if (this.yAxises.hasOwnProperty(a)) { this.drawAxis(c,this.yAxises[a],'x',(a % 2)); }}
 		for(a in this.xAxises) { if (this.xAxises.hasOwnProperty(a)) { this.drawAxis(c,this.xAxises[a],'y',(a % 2)); }}
 
-		// 4. Draw datasets
-		for(d in this.datasets) {
-			if (this.datasets.hasOwnProperty(d)) {
-				ds = this.datasets[d];
-				if (helpers.renderers[ds.type]!==undefined || ds.type === 'area') {
+		// 5. Draw datasets (in reverse from added order, to get stacked stuff right)
+		for(d=this.datasets.length-1; d>=0; d--) {
+			ds = this.datasets[d];
+			if (helpers.renderers[ds.type]!==undefined || ds.type === 'area') {
 
-					// Call renderer, first a special case for line and area
-					if (ds.type === 'line' || ds.type === 'area') {
-						helpers.renderers.line(this, c, ds, this.xAxises[ds.x.axis], this.yAxises[ds.y.axis]);
-					// ... then the general fallback
-					} else {
-						helpers.renderers[ds.type](this, c, ds, this.xAxises[ds.x.axis], this.yAxises[ds.y.axis]);
-					}
-
-					if (ds.lineDots) {
-						helpers.renderers.scatter(this, c, ds, this.xAxises[ds.x.axis], this.yAxises[ds.y.axis]);
-					}
-
+				// Call renderer, first a special case for line and area
+				if (ds.type === 'line' || ds.type === 'area') {
+					helpers.renderers.line(this, c, ds, this.xAxises[ds.x.axis], this.yAxises[ds.y.axis]);
+				// ... then the general fallback
 				} else {
-					// Missing renderer
-					console.error('Grapho: Missing renderer "' + ds.type + '", cannot render dataset.');
+					helpers.renderers[ds.type](this, c, ds, this.xAxises[ds.x.axis], this.yAxises[ds.y.axis]);
 				}
+
+				if (ds.lineDots) {
+					helpers.renderers.scatter(this, c, ds, this.xAxises[ds.x.axis], this.yAxises[ds.y.axis]);
+				}
+
+			} else {
+				// Missing renderer
+				console.error('Grapho: Missing renderer "' + ds.type + '", cannot render dataset.');
 			}
 		}
 
-		// 5. Restore matrix
+		// 6. Restore matrix
 		c.restore();
 
 	};
