@@ -3,6 +3,8 @@ Grapho
 
 Grapho is a simple, dependency free data visualisation library for JavaScript.
 
+![Grapho real time example](example.png)
+
 Features
 ======
   * Single file, only 15KB minified
