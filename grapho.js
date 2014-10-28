@@ -309,15 +309,15 @@
 					}
 				},
 				pie: function (grapho, context, dataset, xAxis, yAxis) {
-					var total=0,used=0,i;
+					var i;
 
 					function fillSegment(grapho, context, startAngle, endAngle, radiusPerc) {
-					    var centerX = (grapho.wsw/2) + grapho.wox
-					    	,centerY = (grapho.wsh/2) + grapho.woy
-					    	,radius = ((grapho.wsw > grapho.wsh) ? grapho.wsh/2: grapho.wsw/2) * radiusPerc
-					    	,startingAngle = startAngle*0.0174532925
-					    	,arcSize = endAngle*0.0174532925
-					    	,endingAngle = startingAngle + arcSize;
+					    var centerX = (grapho.wsw/2) + grapho.wox,
+					    	centerY = (grapho.wsh/2) + grapho.woy,
+					    	radius = ((grapho.wsw > grapho.wsh) ? grapho.wsh/2: grapho.wsw/2) * radiusPerc,
+					    	startingAngle = startAngle*0.0174532925,
+					    	arcSize = endAngle*0.0174532925,
+					    	endingAngle = startingAngle + arcSize;
 
 					    context.beginPath();
 					    context.moveTo(centerX, centerY);
@@ -373,7 +373,7 @@
 
 	// The actal Grapho object
 	function Grapho (settings) {
-		var place, legend;
+		var place;
 
 		// Protect against forgotten `new` keyword.
 		if (!(this instanceof Grapho)) {
@@ -553,7 +553,6 @@
 			xAxis = this.xAxises[dataset.x.axis],
 			i, j, 
 			tryindex,
-			compVal,
 			datasetLen = dataset.data.length,
 			cleanDataY = [],
 			cleanDataX = [];
@@ -597,7 +596,7 @@
 			dataset.data[i][3] = 0;
 			if (yAxis._usedPos[tryindex] === undefined) { yAxis._usedPos[tryindex] = 0; }
 			if (yAxis._usedNeg[tryindex] === undefined) { yAxis._usedNeg[tryindex] = 0; }
-			if (yAxis.stacked || dataset.type == 'pie') {
+			if (yAxis.stacked || dataset.type === 'pie') {
 				if (dataset.data[i][1]>=yAxis.center) {
 					dataset._usedPos[tryindex] = dataset.data[i][3] = (yAxis._usedPos[tryindex] === undefined) ? 0 : yAxis._usedPos[tryindex];
 					yAxis._usedPos[tryindex] += dataset.data[i][1];
@@ -901,68 +900,79 @@
 	};
 
 	prot.drawLegend = function(legend) {
-		var legendSize = 0,
+		var legendSize = 0,					// Accumulates up to the total width or height of the legend
 			maxW = 0,
-			i,
 			curRow = 1,
-			rectMargin = 3,
+			rectMargin = 3,					// Space around the series color rectangle
 			rowHeight = parseInt(legend.font.split(' ')[0])*1.2,
-			fontHeight,textWidth,rowHeight,
-			additionalSpace = rowHeight; // Total space used for series color box, margins etc
+			additionalSpace = rowHeight,	// Vertical margin for each legend item
+			i, lx, textWidth; 
 
 		this.ctx.font = legend.font;
 
-		// Measure legend
-		if (legend.position == 'bottom' || legend.position == 'top') {
-			// Check num of rows needed
-			for (i=0; i<this.datasets.length; i++) {
-				if (this.datasets[i].name === undefined) {
-					this.datasets[i].name = 'Series ' + (i+1);
-				}
+		// Measure total legend size (nned to do this once before drawing anything)
+		for (i=0; i<this.datasets.length; i++) {
+
+			// Set series name, if not existing
+			if (this.datasets[i].name === undefined) {
+				this.datasets[i].name = 'Series ' + (i+1);
+			}
+
+			// Measure current entry, different procedure depending on legend location
+			if (legend.position === 'bottom' || legend.position === 'top') {
 				if (maxW + this.ctx.measureText(this.datasets[i].name).width + additionalSpace + rowHeight > this.w - this.margin*2) {
 					curRow += 1;
 					maxW = 0;
 				}
 				maxW += this.ctx.measureText(this.datasets[i].name).width + additionalSpace + rowHeight;
-			}
-			legendSize = rowHeight * curRow;
-		} else {
-			// Determine widest label
-			for (i=0; i<this.datasets.length; i++) {
-				if (this.datasets[i].name === undefined) {
-					this.datasets[i].name = 'Series ' + (i+1);
-				}
+				legendSize = rowHeight * curRow;
+			} else {
+				// Determine widest label
 				if((textWidth = this.ctx.measureText(this.datasets[i].name).width) > maxW) {
 					maxW = textWidth;
 				}
+				legendSize = maxW + additionalSpace;
 			}
-			legendSize = maxW + additionalSpace;
 		}
-		
+
 		// Draw legend
 		maxW = 0;
 		curRow = 1;
-		if (legend.position == 'bottom' || legend.position == 'top') {
-			for (i=0; i<this.datasets.length; i++) {
-				if (maxW + this.ctx.measureText(this.datasets[i].name).width + additionalSpace + rowHeight > this.w - this.margin*2) {
+		for (i=0; i<this.datasets.length; i++) {
+
+			// Set the same fillStyle and strokeStyle as the actual series, at the legend entry
+			this.ctx.fillStyle = this.datasets[i].fillStyle;
+			this.ctx.strokeStyle = this.datasets[i].strokeStyle;
+
+			if (legend.position === 'bottom' || legend.position === 'top') {
+
+					// Check if it's time to move on to next row
+					if (maxW + this.ctx.measureText(this.datasets[i].name).width + additionalSpace + rowHeight > this.w - this.margin*2) {
+						curRow += 1;
+						maxW = 0;
+					}
+					
+					// Calc x position
+					lx = (legend.position === 'bottom' ? this.h-legendSize-this.margin : 0) + (curRow-1) * rowHeight + rectMargin;
+
+					// Draw rectangle in series color
+					this.ctx.fillRect(maxW,lx, rowHeight-rectMargin*2,rowHeight-rectMargin*2);
+					this.ctx.strokeRect(maxW,lx, rowHeight-rectMargin*2,rowHeight-rectMargin*2);
+
+					// Draw series text
+					this.ctx.fillText (this.datasets[i].name,maxW + rowHeight , lx + rowHeight/1.35 );
+					maxW += this.ctx.measureText(this.datasets[i].name).width + additionalSpace + rowHeight;
+			} else {
+
+					// (Same comments as above ...)
+					lx = (legend.position === 'right' ? this.w-this.margin-legendSize : 0);
+					this.ctx.fillRect(lx, (curRow-1) * rowHeight + rectMargin, rowHeight-rectMargin*2,rowHeight-rectMargin*2);
+					this.ctx.strokeRect(lx, (curRow-1) * rowHeight + rectMargin, rowHeight-rectMargin*2,rowHeight-rectMargin*2);
+					this.ctx.fillText (this.datasets[i].name,lx + rowHeight, (curRow-1) * rowHeight + rowHeight/1.35);
+
+					// Move to next rows
 					curRow += 1;
-					maxW = 0;
-				}
-				this.ctx.fillStyle = this.datasets[i].fillStyle;
-				this.ctx.strokeStyle = this.datasets[i].strokeStyle;
-				this.ctx.fillRect(maxW,(legend.position == 'bottom' ? this.h-legendSize-this.margin : 0) + (curRow-1) * rowHeight + rectMargin, rowHeight-rectMargin*2,rowHeight-rectMargin*2);
-				this.ctx.strokeRect(maxW,(legend.position == 'bottom' ? this.h-legendSize-this.margin : 0) + (curRow-1) * rowHeight + rectMargin, rowHeight-rectMargin*2,rowHeight-rectMargin*2);
-				this.ctx.fillText (this.datasets[i].name,maxW + rowHeight , (legend.position == 'bottom' ? this.h-legendSize-this.margin : 0) + (curRow-1) * rowHeight + rowHeight/1.35 );
-				maxW += this.ctx.measureText(this.datasets[i].name).width + additionalSpace + rowHeight;
-			}
-		} else {
-			for (i=0; i<this.datasets.length; i++) {
-				this.ctx.fillStyle = this.datasets[i].fillStyle;
-				this.ctx.strokeStyle = this.datasets[i].strokeStyle;
-				this.ctx.fillRect((legend.position == 'right' ? this.w-legendSize-this.margin : 0), (curRow-1) * rowHeight + rectMargin, rowHeight-rectMargin*2,rowHeight-rectMargin*2);
-				this.ctx.strokeRect((legend.position == 'right' ? this.w-legendSize-this.margin : 0), (curRow-1) * rowHeight + rectMargin, rowHeight-rectMargin*2,rowHeight-rectMargin*2);
-				this.ctx.fillText (this.datasets[i].name,(legend.position == 'right' ? this.w-this.margin-legendSize : 0) + rowHeight, (curRow-1) * rowHeight + rowHeight/1.35);
-				curRow += 1;
+
 			}
 		}
 
@@ -1014,16 +1024,16 @@
 		// 2. Calculate legend space requirement
 		if (this.showLegend && !this.legend.inside) {
 			lh = this.drawLegend(this.legend) + this.margin;
-			if (this.legend.position == 'bottom') {
+			if (this.legend.position === 'bottom') {
 				this.woy += lh;
 				this.wsh -= lh;
-			} else if (this.legend.position == 'top') {
+			} else if (this.legend.position === 'top') {
 				this.nwoy += lh;
 				this.wsh -= lh;
-			} else if (this.legend.position == 'left') {
+			} else if (this.legend.position === 'left') {
 				this.wox += lh;
 				this.wsw -= lh;
-			} else if (this.legend.position == 'right') {
+			} else if (this.legend.position === 'right') {
 				this.nwox += lh;
 				this.wsw -= lh;
 			}
