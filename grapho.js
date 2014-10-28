@@ -187,7 +187,7 @@
 							pxp = (point[0] - xAxis._minVal) / (xAxis._range);
 
 							px = Math.round(grapho.wox + pad + ((innerWidth) * pxp));
-							py = Math.round(grapho.woy + (point[1] - yAxis._minVal) / (yAxis._range) * grapho.wsh);
+							py = Math.round(grapho.woy + ((point[1] + point[3]) - yAxis._minVal) / (yAxis._range) * grapho.wsh);
 
 							if (!i) {
 								// Keep track of first pixel, for later use by area charts
@@ -255,11 +255,11 @@
 							
 							ct = (center < yAxis._minVal) ? yAxis._minVal : center;
 							
+							console.log(point[1],point[3]);
 							px = Math.round(grapho.wox - mpxpdiff/2 + pad + barSpacing/2 + (pxp * innerWidth));
-							py = Math.round(grapho.woy + (((point[1] <= ct) ? ct : point[3]) - yAxis._minVal) / (yAxis._range) * grapho.wsh);
-							bh = Math.round(((point[1]) - yAxis._minVal) / (yAxis._range) * grapho.wsh);
+							py = Math.round(grapho.woy + ((point[1] + point[3]) - yAxis._minVal) / (yAxis._range) * grapho.wsh);
+							bh = Math.round(grapho.woy + (point[3] - yAxis._minVal) / (yAxis._range) * grapho.wsh)-py;
 
-							console.log(point[3]);
 							// Use strokestyle instead of fillstyle when height > lineWidth*2
 							if((heightflag = (Math.abs(bh)>dataset.lineWidth*2))) {
 								context.fillStyle = dataset.fillStyle;
@@ -271,7 +271,7 @@
 							if (dataset.lineWidth > 0 && heightflag) {
 								context.strokeStyle = dataset.strokeStyle;
 								context.lineWidth = dataset.lineWidth;
-								context.strokeRect(px+context.lineWidth/2-0.5, py-context.lineWidth/2-0.5, barWidth-context.lineWidth+1, bh+context.lineWidth+1);
+								context.strokeRect(Math.round(px+context.lineWidth/2), Math.round(py-context.lineWidth/2), barWidth-context.lineWidth-0.5, bh+context.lineWidth-1);
 							}
 
 						}
@@ -292,7 +292,7 @@
 							context.beginPath();
 					     	context.arc(
 					     		Math.round(grapho.wox + pad + ((innerWidth) * pxp)), // The x-coordinate of the center of the circle
-					     		Math.round(grapho.woy + ((point[1] - yAxis._minVal) / yAxis._range) * grapho.wsh), // The y-coordinate of the center of the circle
+					     		Math.round(grapho.woy + (((point[1] + point[3]) - yAxis._minVal) / yAxis._range) * grapho.wsh), // The y-coordinate of the center of the circle
 					     		dataset.dotWidth, // The radius of the circle
 					     		0, // The starting angle, in radians (0 is at the 3 o'clock position of the arc's circle)
 					     		Math.PI * 2 // The ending angle, in radians
@@ -558,7 +558,7 @@
 			if (yAxis._usedPos[tryindex] === undefined) { yAxis._usedPos[tryindex] = 0; }
 			if (yAxis._usedNeg[tryindex] === undefined) { yAxis._usedNeg[tryindex] = 0; }
 			if (yAxis.stacked) {
-				if (dataset.data[i][1]>yAxis.center) {
+				if (dataset.data[i][1]>=yAxis.center) {
 					dataset._usedPos[tryindex] = dataset.data[i][3] = (yAxis._usedPos[tryindex] === undefined) ? 0 : yAxis._usedPos[tryindex];
 					yAxis._usedPos[tryindex] += dataset.data[i][1];
 				} else {
