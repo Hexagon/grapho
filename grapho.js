@@ -15,6 +15,8 @@
 	var 
 		// A collection of all instantiated Grapho's
 		graphos = [],
+
+		// Label formatters, used through Grapho.formats.x
 		formats = {
 			default: function (l) {
 				// Check if we got a number, else just return
@@ -44,6 +46,8 @@
 				return helpers.math.isNumber(l) ? new Date(l*1000).toLocaleTimeString() : l;
 			}
 		},
+
+		// Reasonable defaults for everything
 		defaults = {
 			dataset: {
 				type: 'line', // line || scatter || area || bar
@@ -141,24 +145,28 @@
 			// Object helpers
 			object: {
 				merge: function(target, source, recurse) {
+					var name;
 
-					// Added to always get a true deep copy
+					// Make sure we get a true deep copy
 					if(recurse === undefined) { 
 						target = helpers.object.merge({},target,true);
 					}
 
-					var name;
-				
 					for (name in source) {
+
+						// Why don't we copy undefineds? I don't know, but the code is here :)
 						if (source[name] !== undefined) {
+
+							// Recurse into objects
 							if (target[name] && Object.prototype.toString.call(target[name]) === '[object Object]') {
-								// Changed to get a true deep copy
-								// From:
-								//   merge(target[name], source[name])
-								// To: 
 								target[name] = helpers.object.merge(helpers.object.merge({},target[name]), source[name],true);
+
+							// Special handling for arrays, .slice() makes a deep copy of the array.
+							// A potential pitfall here is if the array contains child objects. Ignored for now.
 							} else if (helpers.array.is(source[name]) === '[object Array]') {
 								target[name] = source[name].slice();
+
+							// Regular parameters is copied as-is
 							} else {
 								target[name] = source[name];
 							}
@@ -315,8 +323,8 @@
 					    var centerX = (grapho.wsw/2) + grapho.wox,
 					    	centerY = (grapho.wsh/2) + grapho.woy,
 					    	radius = ((grapho.wsw > grapho.wsh) ? grapho.wsh/2: grapho.wsw/2) * radiusPerc,
-					    	startingAngle = startAngle*0.0174532925,
-					    	arcSize = endAngle*0.0174532925,
+					    	startingAngle = startAngle*helpers.math.degToRad,
+					    	arcSize = endAngle*helpers.math.degToRad,
 					    	endingAngle = startingAngle + arcSize;
 
 					    context.beginPath();
@@ -340,6 +348,7 @@
 
 			// Math helpers
 			math: {
+				degToRad: 0.0174532925,
 				log10: function(x) {
 				  return Math.log(x) / Math.LN10;
 				},
@@ -351,7 +360,7 @@
 				},
 				bboxrot: function(w,h,deg) {
 
-					var theta = 0.0174532925 * deg,w2,h2,w3,h3;
+					var theta = helpers.math.degToRad * deg,w2,h2,w3,h3;
 
 					w=w/2; h=h/2;
 					w2 = w*Math.cos(theta)+h*Math.sin(theta);
@@ -659,6 +668,7 @@
 	prot.pushDataset = function (dataset) {
 		var d;
 
+		// Reset certain stuff connected to the axises of our new dataset
 		this.xAxises[dataset.x.axis]._values = [];
 		this.yAxises[dataset.y.axis]._values = [];
 		this.xAxises[dataset.x.axis]._labels = [];
@@ -673,9 +683,7 @@
 			}
 		}
 
-		// Add this dataset
 		this.updateAxises(dataset);
-
 		this.datasets.push(dataset);
 
 		// Chain
@@ -716,6 +724,7 @@
 
 	};
 
+	// Calculate the smallest existing step in current axis
 	prot.calcMinStep = function (axis,data,xy) {
 		var i,minstep = axis._minStepPrc,lpxp,pxp,point;
 		for ( i=0; i < data.length; i++) {
@@ -737,18 +746,17 @@
 			y,
 			h, w,
 			dir,
-			i,
-			k,
+			i, k,		// Iterators
 			labeldim,
-			lwsw, lwsh,
-			lwox, lwoy,
+			lwsw, lwsh,	// Local workspace width/height
+			lwox, lwoy,	// Local workspace offset x/y
 			text,
 			mpxpdiff, innerWidth, pad, lr;
 
 		context.lineWidth = 1;
 		context.strokeStyle = axis.gridStyle;
 
-		// Rotate workspace, if working on a y axises
+		// Rotate workspace, if working on a y axises, 
 		h = (orientation==='x') ? this.w : this.h;
 		w = (orientation==='x') ? this.h : this.w;
 		if (orientation==='x') {
@@ -773,7 +781,10 @@
 		pad = (axis._padded)?mpxpdiff/2:0;
 		innerWidth = (lwsw-pad*2);
 
-		// Draw grid and ticks
+		// Set font
+		context.font = axis.font;
+
+		// Draw grid and ticks, start out from axis _startMinVal and work up from there
 		dir=[+Math.abs(axis._step),-Math.abs(axis._step)];
 		for(i=0;i<dir.length;i++) {
 			
@@ -795,6 +806,7 @@
 				// Render labels
 				if(axis.showLabels) {
 
+					context.save();
 					context.beginPath();
 
 					lr = axis.labelRotation+90+((orientation==='y')?90:0);
@@ -807,7 +819,6 @@
 					
 					labeldim = helpers.math.bboxrot(context.measureText(text).width,axis._textSize,lr);
 
-					context.save();
 					if (orientation==='y') {
 						context.scale(-1,1);
 						context.translate(-this.w,0);
@@ -816,30 +827,31 @@
 						temp2 = temp;
 					}	
 
-					if (primary) {
-						y = axis._offset+axis._h-labeldim.height/2-(axis.showScale?axis.majorTickHeight+1:0)-2;
-					} else {
-						y = h-(axis._offset+axis._h-labeldim.height/2-(axis.showScale?axis.majorTickHeight+1:0)-2);
+					y = axis._offset+axis._h-labeldim.height/2-(axis.showScale?axis.majorTickHeight+1:0)-2;
+					if (!primary) {
+						y = h-y;
 					}
 					
 					context.translate(temp2,y);
-
-					context.rotate(lr*0.0174532925);
-					context.fillStyle = axis.scaleStyle;
+					context.rotate(lr*helpers.math.degToRad);
 					context.translate(-context.measureText(text).width/2,axis._textSize/3);
+
+					context.fillStyle = axis.scaleStyle;
 					context.fillText(text,0,0);
+
 					context.restore();
 				}
 
 				// Render ticks
 				if (axis.showScale) {
 					context.beginPath();
+					temp2 = axis._offset+axis._h-1;
 					if (primary) {
-						context.moveTo(temp,axis._offset+axis._h-1);
-						context.lineTo(temp,axis._offset+axis._h-axis.majorTickHeight-1);
+						context.moveTo(temp,temp2);
+						context.lineTo(temp,temp2-axis.majorTickHeight);
 					} else {
-						context.moveTo(temp,h-axis._offset-axis._h+1);
-						context.lineTo(temp,h-axis._offset-axis._h+axis.majorTickHeight+1);
+						context.moveTo(temp,h-temp2);
+						context.lineTo(temp,h-temp2+axis.majorTickHeight);
 					}
 					context.strokeStyle = axis.scaleStyle;
 					context.stroke();
@@ -1008,11 +1020,11 @@
 					}
 					axis._h += mw;
 				}
-				// To get the label width, we need to loop throug them all
+				// To get the label width, we need to loop through them all
 				return axis;
 			};
 
-		// Reset workspace width,height and offset
+		// Reset workspace width, height and offset
 		this.wsw = this.w-this.margin*2; this.wsh = this.h-this.margin*2;
 		this.wox = this.margin; this.woy = this.margin;
 		this.nwox = this.margin; this.nwoy = this.margin;
