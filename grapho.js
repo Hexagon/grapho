@@ -68,7 +68,7 @@
 				// Internal stuff
 				_labels: [],
 				_usedPos: [],				// Used for stacking charts
-				_usedNeg: [],
+				_usedNeg: []
 			},
 			axis: {
 				min: 'auto',
@@ -105,7 +105,7 @@
 				_values: [],
 				_labels: [],
 				_usedPos: [],				// Used for stacking charts
-				_usedNeg: [],
+				_usedNeg: []
 				
 			},
 			legend: {
