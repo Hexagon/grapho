@@ -75,6 +75,12 @@
 
                             // Create grapho object, pass a parameter pointing to the destination element
                             var graphoObj11 = new Grapho( { place: 'example-1' } );
+                            
+                            graphoObj11.addDataset({
+                                type:'line',
+                                strokeStyle: '#F0F066',
+                                data: [7, 6, 5, 4, 2.5, 4, 4, 10, 0, 12,14]
+                            });
 
                             graphoObj11.addDataset({
                                 type:'bar',
@@ -82,12 +88,6 @@
                                 y: { scaleStyle: '#F0F066', showGridLines: true, name: "Yellow axis", showLabels: true },
                                 x: { showLabels: true},
                                 data: [7, 6, 5, 4, 2.5, 4, 4, 10, 0, 12, 14]
-                            });
-                            
-                            graphoObj11.addDataset({
-                                type:'line',
-                                strokeStyle: '#F0F066',
-                                data: [7, 6, 5, 4, 2.5, 4, 4, 10, 0, 12,14]
                             });
 
                         </script>
@@ -99,19 +99,19 @@
             <article>
                 <h3><span class="tertiary">Source code</span></h3>
                 <pre><code data-language="javascript">var graphoObj11 = new Grapho( { place: 'example-1' } );
+                            
+graphoObj11.addDataset({
+    type:'line',
+    strokeStyle: '#F0F066',
+    data: [7, 6, 5, 4, 2.5, 4, 4, 10, 0, 12,14]
+});
 
 graphoObj11.addDataset({
     type:'bar',
     strokeStyle: '#F0F066',
     y: { scaleStyle: '#F0F066', showGridLines: true, name: "Yellow axis", showLabels: true },
-    x: { showGridLines: true, showLabels: true},
+    x: { showLabels: true},
     data: [7, 6, 5, 4, 2.5, 4, 4, 10, 0, 12, 14]
-});
-
-graphoObj11.addDataset({
-    type:'line',
-    strokeStyle: '#F0F066',
-    data: [7, 6, 5, 4, 2.5, 4, 4, 10, 0, 12,14]
 });</code></pre>
             </article>
         </section>
@@ -724,6 +724,129 @@ graphoObj8.addDataset({
             </article>
         </section>
 
+        <section>
+            <article>
+                <h3>
+                    <span class="secondary">Example 9 - </span>
+                    <span class="tertiary">Stacked area chart </span>
+                </h3>
+                <div class="container w-100 h-1">
+
+                    <!-- Example 9 - Start -->
+                    <div id="example-9" class="box bw-100 h-100">
+
+                        <!-- example-9 javascript -->
+                        <script>
+
+                            // Create grapho object, pass a parameter pointing to the destination element
+                            var graphoObj9 = new Grapho( { place: 'example-9', showLegend: true, legend: {position: 'bottom'} } );
+
+                            graphoObj9.addDataset({
+                                type: 'area',
+                                strokeStyle: '#F0F066',
+                                lineSmooth: false,
+                                fillStyle: '#F0F066',
+                                y: {  showScale: true, scaleStyle: '#F0F066', showGridLines: true, name: "Yellow axis", showLabels: true, showCenter: true, stacked: true },
+                                x: {  showGridLines: true, showLabels: true},
+                                data: [7, 6, 5, 4, 5, 5, 4, 5, 5, 5, 4, 7, 3, 4, 5, 6, 7,  5, 5, 4]
+                            });
+
+                            graphoObj9.addDataset({
+                                type: 'area',
+                                strokeStyle: '#6666F0',
+                                fillStyle: '#6666F0',
+                                lineSmooth: false,
+                                data: [6, 1,  6, 3, 2, 4, 10, 2, 5, 5, 5, 3, 2, 2, 6, 6, 15, 17, 13, 2]
+                            });
+
+                            graphoObj9.addDataset({
+                                type: 'area',
+                                strokeStyle: '#F06666',
+                                fillStyle: '#F06666',
+                                lineSmooth: false,
+                                data: [6, 2, 6, 3, 2, 4, 5, 2, 10, 0, 5, 3, 2, 2, 6, 6, 3, 3, 3, 3]
+                            });
+
+                        </script>
+
+                    </div>
+                    <!-- Example 9 - End -->
+                </div>
+            </article>
+            <article>
+                <h3><span class="tertiary">Source code</span></h3>
+                <pre><code data-language="javascript">var graphoObj9 = new Grapho( { place: 'example-9', showLegend: true, legend: {position: 'bottom'} } );
+
+                            graphoObj9.addDataset({
+                                type: 'area',
+                                strokeStyle: '#F0F066',
+                                lineSmooth: false,
+                                fillStyle: '#F0F066',
+                                y: {  showScale: true, scaleStyle: '#F0F066', showGridLines: true, name: "Yellow axis", showLabels: true, showCenter: true, stacked: true },
+                                x: {  showGridLines: true, showLabels: true},
+                                data: [7, 6, 5, 4, 5, 5, 4, 5, 5, 5, 4, 7, 3, 4, 5, 6, 7,  5, 5, 4]
+                            });
+
+                            graphoObj9.addDataset({
+                                type: 'area',
+                                strokeStyle: '#6666F0',
+                                fillStyle: '#6666F0',
+                                lineSmooth: false,
+                                data: [6, 1,  6, 3, 2, 4, 10, 2, 5, 5, 5, 3, 2, 2, 6, 6, 15, 17, 13, 2]
+                            });
+
+                            graphoObj9.addDataset({
+                                type: 'area',
+                                strokeStyle: '#F06666',
+                                fillStyle: '#F06666',
+                                lineSmooth: false,
+                                data: [6, 2, 6, 3, 2, 4, 5, 2, 10, 0, 5, 3, 2, 2, 6, 6, 3, 3, 3, 3]
+                            });</code></pre>
+            </article>
+        </section>
+
+        <section>
+            <article>
+                <h3>
+                    <span class="secondary">Example 10 - </span>
+                    <span class="tertiary">Pie chart </span>
+                </h3>
+                <div class="container w-100 h-1">
+
+                    <!-- Example 10 - Start -->
+                    <div id="example-10" class="box bw-100 h-100">
+
+                        <!-- example-10 javascript -->
+                        <script>
+
+                            // Create grapho object, pass a parameter pointing to the destination element
+                            var graphoObj10 = new Grapho( { place: 'example-10', showLegend: true, legend: {position: 'right'} } );
+
+                            // Each slice want its own dataset
+                            graphoObj10.addDataset({ type: 'pie', fillStyle: '#66F066', data: [3] });
+                            graphoObj10.addDataset({ type: 'pie', fillStyle: '#66F0F0', data: [2] });
+                            graphoObj10.addDataset({ type: 'pie', fillStyle: '#F0F066', data: [3] });
+                            graphoObj10.addDataset({ type: 'pie', fillStyle: '#F06666', data: [4] });
+                            graphoObj10.addDataset({ type: 'pie', fillStyle: '#6666F0', data: [6] });
+
+                        </script>
+
+                    </div>
+                    <!-- Example 9 - End -->
+                </div>
+            </article>
+            <article>
+                <h3><span class="tertiary">Source code</span></h3>
+                <pre><code data-language="javascript">var graphoObj10 = new Grapho( { place: 'example-10', showLegend: true, legend: {position: 'bottom'} } );
+
+// Each slice want its own dataset
+graphoObj10.addDataset({ type: 'pie', fillStyle: '#66F066', data: [3] });
+graphoObj10.addDataset({ type: 'pie', fillStyle: '#66F0F0', data: [2] });
+graphoObj10.addDataset({ type: 'pie', fillStyle: '#F0F066', data: [3] });
+graphoObj10.addDataset({ type: 'pie', fillStyle: '#F06666', data: [4] });
+graphoObj10.addDataset({ type: 'pie', fillStyle: '#6666F0', data: [6] });</code></pre>
+            </article>
+        </section>
 
         <div class="clear"><!-- --></div>
     </body>
