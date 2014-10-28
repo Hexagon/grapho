@@ -578,7 +578,7 @@ randomData();</code></pre>
             <article>
                 <h3>
                     <span class="secondary">Example 7 - </span>
-                    <span class="tertiary">Stacked bar chart </span>
+                    <span class="tertiary">Stacked line chart </span>
                 </h3>
                 <div class="container w-100 h-1">
 
@@ -589,30 +589,29 @@ randomData();</code></pre>
                         <script>
 
                             // Create grapho object, pass a parameter pointing to the destination element
-
                             var graphoObj7 = new Grapho( { place: 'example-7' } );
 
                             graphoObj7.addDataset({
-                                type: 'bar',
                                 strokeStyle: '#F0F066',
+                                lineSmooth: false,
                                 fillStyle: '#F0F066',
                                 y: {  showScale: true, scaleStyle: '#F0F066', showGridLines: true, name: "Yellow axis", showLabels: true, showCenter: true, stacked: true },
                                 x: {  showGridLines: true, showLabels: true},
-                                data: [7, 6, 5, 4, 2.5, 4, 4, 10, 4, 32, 0, 0, 4, 25, 3, 4, 5, 6, 7, 7, 2, 8, 5, 5, 4, 2]
+                                data: [7, 6, 5, 4, 5, 5, 4, 5, 5, 5, 4, 7, 3, 4, 5, 6, 7,  5, 5, 4]
                             });
 
                             graphoObj7.addDataset({
-                                type:'bar',
                                 strokeStyle: '#6666F0',
                                 fillStyle: '#6666F0',
-                                data: [6, 1, 3, 6, 2, 6, 3, 2, 4, 10, 2, 0, 0, 5, 3, 2, 2, 6, 6, 15, 17, 17, 15, 14, 13, 2]
+                                lineSmooth: false,
+                                data: [6, 1,  6, 3, 2, 4, 10, 2, 5, 5, 5, 3, 2, 2, 6, 6, 15, 17, 13, 2]
                             });
 
                             graphoObj7.addDataset({
-                                type:'bar',
                                 strokeStyle: '#F06666',
                                 fillStyle: '#F06666',
-                                data: [6, 1, 3, 6, 2, 6, 3, 2, 4, 5, 2, 17, 0, 5, 3, 2, 2, 6, 6, 3, 3, 3, 3, 14, 13, 1]
+                                lineSmooth: false,
+                                data: [6, 2, 6, 3, 2, 4, 5, 2, 10, 0, 5, 3, 2, 2, 6, 6, 3, 3, 3, 3]
                             });
 
                         </script>
@@ -623,9 +622,108 @@ randomData();</code></pre>
             </article>
             <article>
                 <h3><span class="tertiary">Source code</span></h3>
-                <pre><code data-language="javascript"></code></pre>
+                <pre><code data-language="javascript">var graphoObj8 = new Grapho( { place: 'example-8' } );
+
+graphoObj8.addDataset({
+    strokeStyle: '#F0F066',
+    lineSmooth: false,
+    fillStyle: '#F0F066',
+    y: {  showScale: true, scaleStyle: '#F0F066', showGridLines: true, name: "Yellow axis", showLabels: true, showCenter: true, stacked: true },
+    x: {  showGridLines: true, showLabels: true},
+    data: [7, 6, 5, 4, 5, 5, 4, 5, 5, 5, 4, 10, 3, 4, 5, 6, 7,  5, 5, 4]
+});
+
+graphoObj8.addDataset({
+    strokeStyle: '#6666F0',
+    fillStyle: '#6666F0',
+    lineSmooth: false,
+    data: [6, 1,  6, 3, 2, 4, 10, 2, 5, 5, 5, 3, 2, 2, 6, 6, 15, 17, 13, 2]
+});
+
+graphoObj8.addDataset({
+    strokeStyle: '#F06666',
+    fillStyle: '#F06666',
+    lineSmooth: false,
+    data: [6, 2, 6, 3, 2, 4, 5, 2, 10, 0, 5, 3, 2, 2, 6, 6, 3, 3, 3, 3]
+});</code></pre>
             </article>
         </section>
+
+        <section>
+            <article>
+                <h3>
+                    <span class="secondary">Example 8 - </span>
+                    <span class="tertiary">Stacked bar chart with negative entries</span>
+                </h3>
+                <div class="container w-100 h-1">
+
+                    <!-- Example 8 - Start -->
+                    <div id="example-8" class="box bw-100 h-100">
+
+                        <!-- example-8 javascript -->
+                        <script>
+
+                            // Create grapho object, pass a parameter pointing to the destination element
+                            var graphoObj8 = new Grapho( { place: 'example-8' } );
+
+                            graphoObj8.addDataset({
+                                type: 'bar',
+                                strokeStyle: '#F0F066',
+                                fillStyle: '#F0F066',
+                                y: {  showScale: true, scaleStyle: '#F0F066', showGridLines: true, name: "Yellow axis", showLabels: true, showCenter: true, stacked: true },
+                                x: {  showGridLines: true, showLabels: true},
+                                data: [7, 6, 5, 4, -2.5, -4, -4, 10, 4, 32, 0, 0, 4, 25, 3, 4, 5, 6, 7, -7, -2, -8, 5, 5, 4, 2]
+                            });
+
+                            graphoObj8.addDataset({
+                                type:'bar',
+                                strokeStyle: '#6666F0',
+                                fillStyle: '#6666F0',
+                                data: [6, 1, -3, -6, -2, 6, 3, 2, 4, 10, 2, 0, 0, 5, 3, 2, 2, 6, 6, 15, 17, -17, -15, -14, 13, 2]
+                            });
+
+                            graphoObj8.addDataset({
+                                type:'bar',
+                                strokeStyle: '#F06666',
+                                fillStyle: '#F06666',
+                                data: [-6, -1, -3, 6, 2, 6, 3, 2, 4, 5, 2, 17, 0, 5, 3, 2, 2, 6, 6, 3, 3, 3, 3, -14, -13, -1]
+                            });
+
+                        </script>
+
+                    </div>
+                    <!-- Example 8 - End -->
+                </div>
+            </article>
+            <article>
+                <h3><span class="tertiary">Source code</span></h3>
+                <pre><code data-language="javascript">var graphoObj8 = new Grapho( { place: 'example-8' } );
+
+graphoObj8.addDataset({
+    type: 'bar',
+    strokeStyle: '#F0F066',
+    fillStyle: '#F0F066',
+    y: {  showScale: true, scaleStyle: '#F0F066', showGridLines: true, name: "Yellow axis", showLabels: true, showCenter: true, stacked: true },
+    x: {  showGridLines: true, showLabels: true},
+    data: [7, 6, 5, 4, -2.5, -4, -4, 10, 4, 32, 0, 0, 4, 25, 3, 4, 5, 6, 7, -7, -2, -8, 5, 5, 4, 2]
+});
+
+graphoObj8.addDataset({
+    type:'bar',
+    strokeStyle: '#6666F0',
+    fillStyle: '#6666F0',
+    data: [6, 1, -3, -6, -2, 6, 3, 2, 4, 10, 2, 0, 0, 5, 3, 2, 2, 6, 6, 15, 17, -17, -15, -14, 13, 2]
+});
+
+graphoObj8.addDataset({
+    type:'bar',
+    strokeStyle: '#F06666',
+    fillStyle: '#F06666',
+    data: [-6, -1, -3, 6, 2, 6, 3, 2, 4, 5, 2, 17, 0, 5, 3, 2, 2, 6, 6, 3, 3, 3, 3, -14, -13, -1]
+});</code></pre>
+            </article>
+        </section>
+
 
         <div class="clear"><!-- --></div>
     </body>
