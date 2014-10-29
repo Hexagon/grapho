@@ -74,6 +74,18 @@ SOFTWARE.
 
 		// Reasonable defaults for everything
 		defaults = {
+			settings: {
+				// Used for all chart types
+				margin: 5,
+				showLegend: false,
+				fillStyle: 'rgb(0,0,0,0)', // Only used for pie right now, but could be used for all
+
+				// Used for pie
+				startAngle: 90,
+				sizePercent: 1,
+				relative: true,
+				innerMargin: 3
+			},
 			dataset: {
 				type: 'line', // line || scatter || area || bar
 
@@ -342,31 +354,39 @@ SOFTWARE.
 					}
 				},
 				pie: function (grapho, context, dataset, xAxis, yAxis) {
-					var i;
+					var i,outerBound = 1, innerBound = 1-grapho.settings.sizePercent, step;
 
-					function fillSegment(grapho, context, startAngle, endAngle, radiusPerc) {
+					function fillSegment(grapho, context, startAngle, endAngle, outerRadiusPerc, innerRadiusPerc, fill) {
 					    var centerX = (grapho.wsw/2) + grapho.wox,
 					    	centerY = (grapho.wsh/2) + grapho.woy,
-					    	radius = ((grapho.wsw > grapho.wsh) ? grapho.wsh/2: grapho.wsw/2) * radiusPerc,
-					    	startingAngle = startAngle*helpers.math.degToRad,
-					    	arcSize = endAngle*helpers.math.degToRad,
+					    	radiusOuter = ((grapho.wsw > grapho.wsh) ? grapho.wsh/2: grapho.wsw/2) * outerRadiusPerc,
+					    	radiusInner = ((grapho.wsw > grapho.wsh) ? grapho.wsh/2: grapho.wsw/2) * innerRadiusPerc + grapho.settings.innerMargin,
+					    	startingAngle = (startAngle+grapho.settings.startAngle)*helpers.math.degToRad,
+					    	arcSize = (endAngle+0.5)*helpers.math.degToRad,
 					    	endingAngle = startingAngle + arcSize;
 
+					    fill = fill === undefined ? true : fill;
+
 					    context.beginPath();
-					    context.moveTo(centerX, centerY);
-					    context.arc(centerX, centerY, radius, startingAngle, endingAngle, false);
+					    context.arc(centerX, centerY, radiusOuter, startingAngle, endingAngle, false);
+						context.arc(centerX, centerY, radiusInner, endingAngle ,startingAngle, true);
 					    context.closePath();
 
-					    context.fillStyle = dataset.fillStyle;
 					    context.fill();
 
-					    context.lineWidth = dataset.lineWidth;
-					    context.strokeStyle = dataset.strokeStyle;
-					    context.stroke();
-
 					}
+					// Fill segments
 					for ( i=0; i < dataset.data.length; i++) {
-						fillSegment(grapho,context,dataset.data[i][3]/yAxis._usedPos[i]*360,dataset.data[i][1]/yAxis._usedPos[i]*360,1);
+						step = outerBound-(i/(dataset.data.length))*(outerBound-innerBound);
+						context.fillStyle = dataset.fillStyle;
+						fillSegment(
+							grapho,
+							context,
+							dataset.data[i][3]/yAxis._usedPos[i]*360,
+							dataset.data[i][1]/yAxis._usedPos[i]*360,
+							step+0.01,
+							step-(1/(dataset.data.length))*(outerBound-innerBound)
+						);
 					}
 				}
 			},
@@ -424,24 +444,11 @@ SOFTWARE.
 			height: 'auto'
 		};
 
-		// If the user has defined a parent element in the settings object,
-		// save it and remove it from the settings so that it won't be merged into `this`.
-		if (settings.place) {
-			place = settings.place;
-			settings.place = undefined;
-		}
-
-		// Default settings
-		this.margin = 5;
-		//this.showLegend = false;
+		this.settings = defaults.settings;
 
 		// Merge the user settings into `this`
-		if (settings) {
-			helpers.object.merge(this, settings);
-		}
-
-		if(settings.showLegend !== undefined) {
-			this.showLegend = settings.showLegend;
+		if (settings!==undefined) {
+			this.settings = helpers.object.merge(this.settings, settings);
 		}
 
 		this.legend = helpers.object.merge(defaults.legend, settings.legend);
@@ -469,8 +476,8 @@ SOFTWARE.
 		this.nwoy = 0;
 
 		// Call the this.place() method if the user has specified an parent.
-		if (place) {
-			this.place(place);
+		if (settings.place) {
+			this.place(settings.place);
 		}
 
 		// Init done
@@ -630,7 +637,7 @@ SOFTWARE.
 			dataset.data[i][3] = 0;
 			if (yAxis._usedPos[tryindex] === undefined) { yAxis._usedPos[tryindex] = 0; }
 			if (yAxis._usedNeg[tryindex] === undefined) { yAxis._usedNeg[tryindex] = 0; }
-			if (yAxis.stacked || dataset.type === 'pie') {
+			if (yAxis.stacked || dataset.type === 'pie' || dataset.type === 'progress') {
 				if (dataset.data[i][1]>=yAxis.center) {
 					dataset._usedPos[tryindex] = dataset.data[i][3] = (yAxis._usedPos[tryindex] === undefined) ? 0 : yAxis._usedPos[tryindex];
 					yAxis._usedPos[tryindex] += dataset.data[i][1];
@@ -957,7 +964,7 @@ SOFTWARE.
 
 			// Measure current entry, different procedure depending on legend location
 			if (legend.position === 'bottom' || legend.position === 'top') {
-				if (maxW + this.ctx.measureText(this.datasets[i].name).width + additionalSpace + rowHeight > this.w - this.margin*2) {
+				if (maxW + this.ctx.measureText(this.datasets[i].name).width + additionalSpace + rowHeight > this.w - this.settings.margin*2) {
 					curRow += 1;
 					maxW = 0;
 				}
@@ -984,13 +991,13 @@ SOFTWARE.
 			if (legend.position === 'bottom' || legend.position === 'top') {
 
 					// Check if it's time to move on to next row
-					if (maxW + this.ctx.measureText(this.datasets[i].name).width + additionalSpace + rowHeight > this.w - this.margin*2) {
+					if (maxW + this.ctx.measureText(this.datasets[i].name).width + additionalSpace + rowHeight > this.w - this.settings.margin*2) {
 						curRow += 1;
 						maxW = 0;
 					}
 					
 					// Calc x position
-					lx = (legend.position === 'bottom' ? this.h-legendSize-this.margin : 0) + (curRow-1) * rowHeight + rectMargin;
+					lx = (legend.position === 'bottom' ? this.h-legendSize-this.settings.margin : 0) + (curRow-1) * rowHeight + rectMargin;
 
 					// Draw rectangle in series color
 					this.ctx.fillRect(maxW,lx, rowHeight-rectMargin*2,rowHeight-rectMargin*2);
@@ -1002,7 +1009,7 @@ SOFTWARE.
 			} else {
 
 					// (Same comments as above ...)
-					lx = (legend.position === 'right' ? this.w-this.margin-legendSize : 0);
+					lx = (legend.position === 'right' ? this.w-this.settings.margin-legendSize : 0);
 					this.ctx.fillRect(lx, (curRow-1) * rowHeight + rectMargin, rowHeight-rectMargin*2,rowHeight-rectMargin*2);
 					this.ctx.strokeRect(lx, (curRow-1) * rowHeight + rectMargin, rowHeight-rectMargin*2,rowHeight-rectMargin*2);
 					this.ctx.fillText (this.datasets[i].name,lx + rowHeight, (curRow-1) * rowHeight + rowHeight/1.35);
@@ -1050,17 +1057,17 @@ SOFTWARE.
 			};
 
 		// Reset workspace width, height and offset
-		this.wsw = this.w-this.margin*2; this.wsh = this.h-this.margin*2;
-		this.wox = this.margin; this.woy = this.margin;
-		this.nwox = this.margin; this.nwoy = this.margin;
+		this.wsw = this.w-this.settings.margin*2; this.wsh = this.h-this.settings.margin*2;
+		this.wox = this.settings.margin; this.woy = this.settings.margin;
+		this.nwox = this.settings.margin; this.nwoy = this.settings.margin;
 
 		// 1. Setup matrix
 		c = this.ctx;
 		c.clearRect(0, 0, this.w, this.h);	// Clear workspace
 
 		// 2. Calculate legend space requirement
-		if (this.showLegend && !this.legend.inside) {
-			lh = this.drawLegend(this.legend) + this.margin;
+		if (this.settings.showLegend && !this.legend.inside) {
+			lh = this.drawLegend(this.legend) + this.settings.margin;
 			if (this.legend.position === 'bottom') {
 				this.woy += lh;
 				this.wsh -= lh;

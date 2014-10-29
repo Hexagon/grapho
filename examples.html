@@ -808,7 +808,7 @@ graphoObj8.addDataset({
             <article>
                 <h3>
                     <span class="secondary">Example 10 - </span>
-                    <span class="tertiary">Pie chart </span>
+                    <span class="tertiary">Stacked pie chart </span>
                 </h3>
                 <div class="container w-100 h-1">
 
@@ -819,14 +819,14 @@ graphoObj8.addDataset({
                         <script>
 
                             // Create grapho object, pass a parameter pointing to the destination element
-                            var graphoObj10 = new Grapho( { place: 'example-10', showLegend: true, legend: {position: 'right'} } );
+                            var graphoObj10 = new Grapho( { place: 'example-10', showLegend: true, sizePercent: 0.5, innerMargin: 4, legend: {position: 'right'} } );
 
                             // Each slice want its own dataset
-                            graphoObj10.addDataset({ type: 'pie', fillStyle: '#66F066', data: [3] });
-                            graphoObj10.addDataset({ type: 'pie', fillStyle: '#66F0F0', data: [2] });
-                            graphoObj10.addDataset({ type: 'pie', fillStyle: '#F0F066', data: [3] });
-                            graphoObj10.addDataset({ type: 'pie', fillStyle: '#F06666', data: [4] });
-                            graphoObj10.addDataset({ type: 'pie', fillStyle: '#6666F0', data: [6] });
+                            graphoObj10.addDataset({ type: 'pie', name: 'Green', fillStyle: '#66F066', data: [3,2,4] });
+                            graphoObj10.addDataset({ type: 'pie', name: 'Uh?', fillStyle: '#66F0F0', data: [2,5,5] });
+                            graphoObj10.addDataset({ type: 'pie', name: 'Yellow', fillStyle: '#F0F066', data: [3,1,2] });
+                            graphoObj10.addDataset({ type: 'pie', name: 'Red', fillStyle: '#F06666', data: [4,1,9] });
+                            graphoObj10.addDataset({ type: 'pie', name: 'Blue', fillStyle: '#6666F0', data: [6,6,5] });
 
                         </script>
 
@@ -836,14 +836,51 @@ graphoObj8.addDataset({
             </article>
             <article>
                 <h3><span class="tertiary">Source code</span></h3>
-                <pre><code data-language="javascript">var graphoObj10 = new Grapho( { place: 'example-10', showLegend: true, legend: {position: 'bottom'} } );
+                <pre><code data-language="javascript">var graphoObj10 = new Grapho( { place: 'example-10', showLegend: true, sizePercent: 0.5, innerMargin: 4, legend: {position: 'right'} } );
 
 // Each slice want its own dataset
-graphoObj10.addDataset({ type: 'pie', fillStyle: '#66F066', data: [3] });
-graphoObj10.addDataset({ type: 'pie', fillStyle: '#66F0F0', data: [2] });
-graphoObj10.addDataset({ type: 'pie', fillStyle: '#F0F066', data: [3] });
-graphoObj10.addDataset({ type: 'pie', fillStyle: '#F06666', data: [4] });
-graphoObj10.addDataset({ type: 'pie', fillStyle: '#6666F0', data: [6] });</code></pre>
+graphoObj10.addDataset({ type: 'pie', name: 'Green', fillStyle: '#66F066', data: [3,2,4] });
+graphoObj10.addDataset({ type: 'pie', name: 'Uh?', fillStyle: '#66F0F0', data: [2,5,5] });
+graphoObj10.addDataset({ type: 'pie', name: 'Yellow', fillStyle: '#F0F066', data: [3,1,2] });
+graphoObj10.addDataset({ type: 'pie', name: 'Red', fillStyle: '#F06666', data: [4,1,9] });
+graphoObj10.addDataset({ type: 'pie', name: 'Blue', fillStyle: '#6666F0', data: [6,6,5] });</code></pre>
+            </article>
+        </section>
+
+        <section>
+            <article>
+                <h3>
+                    <span class="secondary">Example 11 - </span>
+                    <span class="tertiary">Pie chart progress bar </span>
+                </h3>
+                <div class="container w-100 h-1">
+
+                    <!-- Example 11 - Start -->
+                    <div id="example-11" class="box bw-100 h-100">
+
+                        <!-- example-11 javascript -->
+                        <script>
+
+                            // Create grapho object, pass a parameter pointing to the destination element
+                            var graphoObj11 = new Grapho( { place: 'example-11', startAngle: 90, sizePercent: 0.1, relative: true} );
+
+                            // Each slice want its own dataset
+                            graphoObj11.addDataset({ type: 'pie', fillStyle: '#66F066', data: [0.7] });
+                            graphoObj11.addDataset({ type: 'pie', fillStyle: '#454545', data: [0.3] });
+
+                        </script>
+
+                    </div>
+                    <!-- Example 10 - End -->
+                </div>
+            </article>
+            <article>
+                <h3><span class="tertiary">Source code</span></h3>
+                <pre><code data-language="javascript">var graphoObj11 = new Grapho( { place: 'example-11', startAngle: 90, sizePercent: 0.1, relative: true} );
+
+// Each slice want its own dataset
+graphoObj11.addDataset({ type: 'pie', fillStyle: '#66F066', data: [0.7] });
+graphoObj11.addDataset({ type: 'pie', fillStyle: '#454545', data: [0.3] });</code></pre>
             </article>
         </section>
 
