@@ -738,7 +738,7 @@ graphoObj8.addDataset({
                         <script>
 
                             // Create grapho object, pass a parameter pointing to the destination element
-                            var graphoObj9 = new Grapho( { place: 'example-9', showLegend: true, legend: {position: 'bottom'} } );
+                            var graphoObj9 = new Grapho( { place: 'example-9', showLegend: true, legend: {position: 'left', inside: true} } );
 
                             graphoObj9.addDataset({
                                 type: 'area',
@@ -774,33 +774,33 @@ graphoObj8.addDataset({
             </article>
             <article>
                 <h3><span class="tertiary">Source code</span></h3>
-                <pre><code data-language="javascript">var graphoObj9 = new Grapho( { place: 'example-9', showLegend: true, legend: {position: 'bottom'} } );
+                <pre><code data-language="javascript">var graphoObj9 = new Grapho( { place: 'example-9', showLegend: true, legend: {position: 'left', inside: true} } );
 
-                            graphoObj9.addDataset({
-                                type: 'area',
-                                strokeStyle: '#F0F066',
-                                lineSmooth: false,
-                                fillStyle: '#F0F066',
-                                y: {  showScale: true, scaleStyle: '#F0F066', showGridLines: true, name: "Yellow axis", showLabels: true, showCenter: true, stacked: true },
-                                x: {  showGridLines: true, showLabels: true},
-                                data: [7, 6, 5, 4, 5, 5, 4, 5, 5, 5, 4, 7, 3, 4, 5, 6, 7,  5, 5, 4]
-                            });
+graphoObj9.addDataset({
+    type: 'area',
+    strokeStyle: '#F0F066',
+    lineSmooth: false,
+    fillStyle: '#F0F066',
+    y: {  showScale: true, scaleStyle: '#F0F066', showGridLines: true, name: "Yellow axis", showLabels: true, showCenter: true, stacked: true },
+    x: {  showGridLines: true, showLabels: true},
+    data: [7, 6, 5, 4, 5, 5, 4, 5, 5, 5, 4, 7, 3, 4, 5, 6, 7,  5, 5, 4]
+});
 
-                            graphoObj9.addDataset({
-                                type: 'area',
-                                strokeStyle: '#6666F0',
-                                fillStyle: '#6666F0',
-                                lineSmooth: false,
-                                data: [6, 1,  6, 3, 2, 4, 10, 2, 5, 5, 5, 3, 2, 2, 6, 6, 15, 17, 13, 2]
-                            });
+graphoObj9.addDataset({
+    type: 'area',
+    strokeStyle: '#6666F0',
+    fillStyle: '#6666F0',
+    lineSmooth: false,
+    data: [6, 1,  6, 3, 2, 4, 10, 2, 5, 5, 5, 3, 2, 2, 6, 6, 15, 17, 13, 2]
+});
 
-                            graphoObj9.addDataset({
-                                type: 'area',
-                                strokeStyle: '#F06666',
-                                fillStyle: '#F06666',
-                                lineSmooth: false,
-                                data: [6, 2, 6, 3, 2, 4, 5, 2, 10, 0, 5, 3, 2, 2, 6, 6, 3, 3, 3, 3]
-                            });</code></pre>
+graphoObj9.addDataset({
+    type: 'area',
+    strokeStyle: '#F06666',
+    fillStyle: '#F06666',
+    lineSmooth: false,
+    data: [6, 2, 6, 3, 2, 4, 5, 2, 10, 0, 5, 3, 2, 2, 6, 6, 3, 3, 3, 3]
+});</code></pre>
             </article>
         </section>
 

@@ -943,18 +943,23 @@ SOFTWARE.
 
 	};
 
-	prot.drawLegend = function(legend) {
+	prot.drawLegend = function(legend, dry) {
 		var legendSize = 0,					// Accumulates up to the total width or height of the legend
 			maxW = 0,
 			curRow = 1,
 			rectMargin = 3,					// Space around the series color rectangle
 			rowHeight = parseInt(legend.font.split(' ')[0])*1.2,
 			additionalSpace = rowHeight,	// Vertical margin for each legend item
-			i, lx, textWidth; 
-
+			i, lx, textWidth,
+			lwoy = this.legend.inside ? this.nwoy  : this.settings.margin,
+			lwox = this.legend.inside ? this.wox + 5 : this.settings.margin,
+			lwidth = this.legend.inside ? this.wsw : this.w,
+			lheight = this.legend.inside ? this.wsh : this.h;
+			console.log(lwoy,lwox,lwidth,lheight);
 		this.ctx.font = legend.font;
 
 		// Measure total legend size (nned to do this once before drawing anything)
+
 		for (i=0; i<this.datasets.length; i++) {
 
 			// Set series name, if not existing
@@ -964,7 +969,7 @@ SOFTWARE.
 
 			// Measure current entry, different procedure depending on legend location
 			if (legend.position === 'bottom' || legend.position === 'top') {
-				if (maxW + this.ctx.measureText(this.datasets[i].name).width + additionalSpace + rowHeight > this.w - this.settings.margin*2) {
+				if (maxW + this.ctx.measureText(this.datasets[i].name).width + additionalSpace + rowHeight > lwidth ) {
 					curRow += 1;
 					maxW = 0;
 				}
@@ -980,43 +985,47 @@ SOFTWARE.
 		}
 
 		// Draw legend
-		maxW = 0;
-		curRow = 1;
-		for (i=0; i<this.datasets.length; i++) {
+		if( !dry ) {
+			maxW = 0;
+			curRow = 1;
+			for (i=0; i<this.datasets.length; i++) {
 
-			// Set the same fillStyle and strokeStyle as the actual series, at the legend entry
-			this.ctx.fillStyle = this.datasets[i].fillStyle;
-			this.ctx.strokeStyle = this.datasets[i].strokeStyle;
+				// Set the same fillStyle and strokeStyle as the actual series, at the legend entry
+				this.ctx.fillStyle = this.datasets[i].fillStyle;
+				this.ctx.strokeStyle = this.datasets[i].strokeStyle;
 
-			if (legend.position === 'bottom' || legend.position === 'top') {
+				if (legend.position === 'bottom' || legend.position === 'top') {
 
-					// Check if it's time to move on to next row
-					if (maxW + this.ctx.measureText(this.datasets[i].name).width + additionalSpace + rowHeight > this.w - this.settings.margin*2) {
+						// Check if it's time to move on to next row
+						if (maxW + this.ctx.measureText(this.datasets[i].name).width + additionalSpace + rowHeight > lwidth ) {
+							curRow += 1;
+							maxW = 0;
+						}
+
+						console.log(curRow);
+						
+						// Calc x position
+						lx = (legend.position === 'bottom' ? lheight+lwoy-legendSize : lwoy) + (curRow-1) * rowHeight + rectMargin;
+
+						// Draw rectangle in series color
+						this.ctx.fillRect(maxW+lwox,lx, rowHeight-rectMargin*2,rowHeight-rectMargin*2);
+						this.ctx.strokeRect(maxW+lwox,lx, rowHeight-rectMargin*2,rowHeight-rectMargin*2);
+
+						// Draw series text
+						this.ctx.fillText (this.datasets[i].name,maxW + rowHeight + lwox , lx + rowHeight/1.35 );
+						maxW += this.ctx.measureText(this.datasets[i].name).width + additionalSpace + rowHeight;
+				} else {
+
+						// (Same comments as above ...)
+						lx = (legend.position === 'right' ? lwidth+lwox-legendSize : lwox);
+						this.ctx.fillRect(lx, lwoy + (curRow-1) * rowHeight + rectMargin, rowHeight-rectMargin*2,rowHeight-rectMargin*2);
+						this.ctx.strokeRect(lx, lwoy + (curRow-1) * rowHeight + rectMargin, rowHeight-rectMargin*2,rowHeight-rectMargin*2);
+						this.ctx.fillText (this.datasets[i].name,lx + rowHeight, lwoy + (curRow-1) * rowHeight + rowHeight/1.35);
+
+						// Move to next rows
 						curRow += 1;
-						maxW = 0;
-					}
-					
-					// Calc x position
-					lx = (legend.position === 'bottom' ? this.h-legendSize-this.settings.margin : 0) + (curRow-1) * rowHeight + rectMargin;
 
-					// Draw rectangle in series color
-					this.ctx.fillRect(maxW,lx, rowHeight-rectMargin*2,rowHeight-rectMargin*2);
-					this.ctx.strokeRect(maxW,lx, rowHeight-rectMargin*2,rowHeight-rectMargin*2);
-
-					// Draw series text
-					this.ctx.fillText (this.datasets[i].name,maxW + rowHeight , lx + rowHeight/1.35 );
-					maxW += this.ctx.measureText(this.datasets[i].name).width + additionalSpace + rowHeight;
-			} else {
-
-					// (Same comments as above ...)
-					lx = (legend.position === 'right' ? this.w-this.settings.margin-legendSize : 0);
-					this.ctx.fillRect(lx, (curRow-1) * rowHeight + rectMargin, rowHeight-rectMargin*2,rowHeight-rectMargin*2);
-					this.ctx.strokeRect(lx, (curRow-1) * rowHeight + rectMargin, rowHeight-rectMargin*2,rowHeight-rectMargin*2);
-					this.ctx.fillText (this.datasets[i].name,lx + rowHeight, (curRow-1) * rowHeight + rowHeight/1.35);
-
-					// Move to next rows
-					curRow += 1;
-
+				}
 			}
 		}
 
@@ -1061,13 +1070,9 @@ SOFTWARE.
 		this.wox = this.settings.margin; this.woy = this.settings.margin;
 		this.nwox = this.settings.margin; this.nwoy = this.settings.margin;
 
-		// 1. Setup matrix
-		c = this.ctx;
-		c.clearRect(0, 0, this.w, this.h);	// Clear workspace
-
 		// 2. Calculate legend space requirement
 		if (this.settings.showLegend && !this.legend.inside) {
-			lh = this.drawLegend(this.legend) + this.settings.margin;
+			lh = this.drawLegend(this.legend, true) + this.settings.margin;
 			if (this.legend.position === 'bottom') {
 				this.woy += lh;
 				this.wsh -= lh;
@@ -1082,11 +1087,6 @@ SOFTWARE.
 				this.wsw -= lh;
 			}
 		}
-
-		c.save();							// Save matrix
-		c.translate(0.5,0.5);				// Translate 0.5 px i X and Y to get crisp lines
-		c.scale(1,-1);						// Flip matrix to make lower left corner 0,0
-		c.translate(0,-this.h);				// Move pointer from old 0,0 (upper left corner) to new 0,0 (lower left corner)
 
 		// 3. Calculate axis 'heights', workpace width, and workspace offset
 		for (a in this.yAxises) {
@@ -1113,6 +1113,15 @@ SOFTWARE.
 				else 		{ this.nwoy += this.xAxises[a]._h;  }
 			}
 		}
+		
+		// 1. Setup matrix
+		c = this.ctx;
+		c.clearRect(0, 0, this.w, this.h);	// Clear workspace
+
+		c.save();							// Save matrix
+		c.translate(0.5,0.5);				// Translate 0.5 px i X and Y to get crisp lines
+		c.scale(1,-1);						// Flip matrix to make lower left corner 0,0
+		c.translate(0,-this.h);				// Move pointer from old 0,0 (upper left corner) to new 0,0 (lower left corner)
 
 		// 4. Draw axises
 		for(a in this.yAxises) { if (this.yAxises.hasOwnProperty(a)) { this.drawAxis(c,this.yAxises[a],'x',(a % 2)); }}
@@ -1144,6 +1153,9 @@ SOFTWARE.
 		// 6. Restore matrix
 		c.restore();
 
+		if (this.settings.showLegend) {
+			this.drawLegend(this.legend, false);
+		}
 	};
 
 	// Handle resize event
