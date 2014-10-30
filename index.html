@@ -508,7 +508,7 @@ graphoObj5.addDataset({
                                     data: randomArray3
                                 });
                                 // Iterate
-                                requestAnimationFrame(randomData);
+                                //requestAnimationFrame(randomData);
                             }
                             // Start the loop
                             randomData();
@@ -881,6 +881,122 @@ graphoObj10.addDataset({ type: 'pie', name: 'Blue', fillStyle: '#6666F0', data: 
 // Each slice want its own dataset
 graphoObj11.addDataset({ type: 'pie', fillStyle: '#66F066', data: [0.7] });
 graphoObj11.addDataset({ type: 'pie', fillStyle: '#454545', data: [0.3] });</code></pre>
+            </article>
+        </section>
+
+        <section>
+            <article>
+                <h3>
+                    <span class="secondary">Example 12 - </span>
+                    <span class="tertiary">Bands and line </span>
+                </h3>
+                <div class="container w-100 h-1">
+
+                    <!-- Example 12 - Start -->
+                    <div id="example-12" class="box bw-100 h-100">
+
+                        <!-- example-12 javascript -->
+                        <script>
+
+                            var graphoObj12 = new Grapho( { place: 'example-12' } );
+
+                            // Bands uses a array of [x,[high,low]]
+                            graphoObj12.addDataset({
+                                type: 'band',
+                                fillStyle: 'rgba(0,255,255,0.1)',
+                                y: {  showScale: true, scaleStyle: '#8888FF', showGridLines: true, showLabels: true, showCenter: true, min: 0, max: 6.5 },
+                                x: {  showGridLines: true, showLabels: true},
+                                data: [
+                                    [0,[4,3]],
+                                    [1,[4,1]],
+                                    [2,[3,1]],
+                                    [3,[4,1]],
+                                    [4,[5,3]],
+                                    [5,[5,4]],
+                                    [6,[6,5]],
+                                    [7,[6,5]],
+                                    [8,[6,5]],
+                                    [9,[5,3]]
+                                ]
+                            });
+
+                            graphoObj12.addDataset({
+                                type: 'line',
+                                fillStyle: '#6666F0',
+                                strokeStyle: '#6666F0',
+                                data: [3.3,3.4,2.3,3.5,3.6,4.2,5.2,5.9,5.5,3.5]
+                            });
+                        </script>
+
+                    </div>
+                    <!-- Example 12 - End -->
+                </div>
+            </article>
+            <article>
+                <h3><span class="tertiary">Source code</span></h3>
+                <pre><code data-language="javascript"></code></pre>
+            </article>
+        </section>
+
+        <section>
+            <article>
+                <h3>
+                    <span class="secondary">Example 13 - </span>
+                    <span class="tertiary">Bar and error </span>
+                </h3>
+                <div class="container w-100 h-1">
+
+                    <!-- Example 13 - Start -->
+                    <div id="example-13" class="box bw-100 h-100">
+
+                        <!-- example-13 javascript -->
+                        <script>
+
+                            var graphoObj13 = new Grapho( { place: 'example-13', showLegend: true, legend: { inside: true, position:'top', font: '10px Droid Sans' } } );
+
+                            graphoObj13.addDataset({
+                                type:'error',
+                                name:'Uncertainty',
+                                strokeStyle: '#FFFFFF',
+                                fillStyle: '#FFFFFF',
+                                barWidthPrc: 15,
+                                data: [
+                                    [0,[7.2,6.8]],
+                                    [1,[6.1,5.5]],
+                                    [2,[4.1,5.5]],
+                                    [3,[3.1,4.6]],
+                                    [4,[2.1,3.6]],
+                                    [5,[3.3,4.6]],
+                                    [6,[3.1,5.6]],
+                                    [7,[9.1,10.2]],
+                                    [8,[0,0.3]],
+                                    [9,[11,13]],
+                                    [10,[11,15]],
+                                ]
+                            });
+
+                            graphoObj13.addDataset({
+                                type:'bar',
+                                name:'Data value',
+                                fillStyle: 'rgba(64,64,255,0.8)',
+                                lineWidth: 1,
+                                strokestyle: '#FFFFFF',
+                                barWidthPrc: 50,
+                                y: { scaleStyle: '#F0F066', showGridLines: true, showLabels: true },
+                                x: { showLabels: true},
+                                data: [7, 6, 5, 4, 2.5, 4, 4, 10, 0, 12,14]
+                            });
+
+
+                        </script>
+
+                    </div>
+                    <!-- Example 12 - End -->
+                </div>
+            </article>
+            <article>
+                <h3><span class="tertiary">Source code</span></h3>
+                <pre><code data-language="javascript"></code></pre>
             </article>
         </section>
 

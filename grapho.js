@@ -109,7 +109,8 @@ SOFTWARE.
 				// Internal stuff
 				_labels: [],
 				_usedPos: [],				// Used for stacking charts
-				_usedNeg: []
+				_usedNeg: [],
+				_data: [] 					// Internal representation of the data
 			},
 			axis: {
 				min: 'auto',
@@ -276,6 +277,129 @@ SOFTWARE.
 						// Fill the area
 						context.fillStyle = dataset.fillStyle;	
 						context.fill();
+					}
+				},
+				band: function(grapho, context, dataset, xAxis, yAxis) {
+					var point, i,
+						next, npxp, mpxpdiff, pad, innerWidth,
+						px, // Current X-pixel
+						py, // Current Y-pixel
+						cy, // Center Y-pixel
+						fpx, // First X-pixel
+						fpy, // First Y-pixel
+						pxp; // Pixel percentage
+
+					context.beginPath();
+
+					mpxpdiff = xAxis._minStepPrc;
+					mpxpdiff = mpxpdiff * (grapho.wsw-(mpxpdiff*grapho.wsw*((xAxis._padded)?1:0)));
+					pad = (xAxis._padded)?mpxpdiff/2:0;
+					innerWidth = (grapho.wsw-pad*2);
+
+					// High line
+					for ( i = 0; i < dataset.data.length; i++) {
+						if ((point = dataset.data[i])) {
+
+							pxp = (point[0] - xAxis._minVal) / (xAxis._range);
+
+							px = Math.round(grapho.wox + pad + ((innerWidth) * pxp));
+							py = Math.round(grapho.woy + ((point[1][0]) - yAxis._minVal) / (yAxis._range) * grapho.wsh);
+
+							if (!i) {
+								// Keep track of first pixel, for later use by area charts
+								context.moveTo((fpx = px+1), (fpy = py));
+							} else if (dataset.lineSmooth && i < dataset.data.length - 1) {
+								next = dataset.data[i + 1];
+								npxp = (next[0] - xAxis._minVal) / (xAxis._range);
+								context.quadraticCurveTo(
+									px, // The x-coordinate of the Bézier control point
+									py, // The y-coordinate of the Bézier control point
+									(px+(!next ? 0 : Math.round(grapho.wox + pad + ((innerWidth) * npxp)))) / 2, // The x-coordinate of the ending point
+									(py+(!next ? 0 : Math.round(grapho.woy + (next[1][0] - yAxis._minVal) / (yAxis._range) * grapho.wsh))) / 2 // The y-coordinate of the ending point
+								);
+							} else {
+								context.lineTo(px-1, py);
+							}
+						}
+					}
+					// Low line
+					for ( i = dataset.data.length-1; i >= 0; i--) {
+						if ((point = dataset.data[i])) {
+
+							pxp = (point[0] - xAxis._minVal) / (xAxis._range);
+
+							px = Math.round(grapho.wox + pad + ((innerWidth) * pxp));
+							py = Math.round(grapho.woy + ((point[1][1]) - yAxis._minVal) / (yAxis._range) * grapho.wsh);
+							if (i==dataset.data.length-1) {
+								// Keep track of first pixel, for later use by area charts
+								context.lineTo((px+1), py);
+							} else if (dataset.lineSmooth && i >= 1 ) {
+								next = dataset.data[i - 1];
+								npxp = (next[0] - xAxis._minVal) / (xAxis._range);
+								context.quadraticCurveTo(
+									px, // The x-coordinate of the Bézier control point
+									py, // The y-coordinate of the Bézier control point
+									(px+(!next ? 0 : Math.round(grapho.wox + pad + ((innerWidth) * npxp)))) / 2, // The x-coordinate of the ending point
+									(py+(!next ? 0 : Math.round(grapho.woy + (next[1][1] - yAxis._minVal) / (yAxis._range) * grapho.wsh))) / 2 // The y-coordinate of the ending point
+								);
+							} else {
+								context.lineTo(px-1, py);
+							}
+						}
+					}
+
+					cy = Math.round(grapho.woy + ((yAxis.center < yAxis._minVal ? yAxis._minVal : (yAxis.center > yAxis._maxVal ? yAxis._maxVal : yAxis.center )) - yAxis._minVal) / (yAxis._range) * grapho.wsh)+0.5;
+
+					context.moveTo(fpx, fpy); // Move to center at first col
+
+					// Fill the area
+					context.fillStyle = dataset.fillStyle;	
+					context.fill();
+				},
+				error: function(grapho, context, dataset, xAxis, yAxis) {
+					var point, i,
+						next, npxp, mpxpdiff, pad, innerWidth, barWidth, barSpacing, center, ct,
+						px, // Current X-pixel
+						pyh, // Current Y-pixel high
+						pyl, // Current Y-pixel low;
+
+					mpxpdiff = xAxis._minStepPrc;
+					mpxpdiff = mpxpdiff * (grapho.wsw-(mpxpdiff*grapho.wsw*((xAxis._padded)?1:0)));
+					pad = (xAxis._padded)?mpxpdiff/2:0;
+					innerWidth = (grapho.wsw-pad*2);
+
+					barSpacing 	= mpxpdiff*(100-dataset.barWidthPrc)/100;
+					barWidth 	= mpxpdiff-barSpacing;
+
+					context.strokeStyle = dataset.strokeStyle;
+
+					for ( i = 0; i < dataset.data.length; i++) {
+						if ((point = dataset.data[i])) {
+							
+							ct = (center < yAxis._minVal) ? yAxis._minVal : center;
+							
+							px = Math.round(grapho.wox - mpxpdiff/2 + pad + barSpacing/2 + ((point[0] - xAxis._minVal) / (xAxis._range) * innerWidth));
+							pyh = Math.round(grapho.woy + (point[1][0] - yAxis._minVal) / (yAxis._range) * grapho.wsh);
+							pyl = Math.round(grapho.woy + (point[1][1] - yAxis._minVal) / (yAxis._range) * grapho.wsh);
+
+							// High line
+							context.beginPath();
+							context.moveTo(px,pyh);
+							context.lineTo(px+barWidth,pyh);
+							context.stroke();
+
+							// Connecting line
+							context.beginPath();
+							context.moveTo(Math.round(px+barWidth/2),pyh);
+							context.lineTo(Math.round(px+barWidth/2),pyl);
+							context.stroke();
+
+							// Low line
+							context.beginPath();
+							context.moveTo(px,pyl);
+							context.lineTo(px+barWidth,pyl);
+							context.stroke();
+						}
 					}
 				},
 				bar: function (grapho, context, dataset, xAxis, yAxis) {
@@ -626,28 +750,35 @@ SOFTWARE.
 			dataset.data[i][2] = dataset.data[i][0];
 			if(tryindex > -1) {
 				dataset.data[i][0] = cleanDataX[i] = tryindex;
-				dataset.data[i][1] = cleanDataY[i] = dataset.data[i][1];
 			} else {
-				cleanDataY[i] = dataset.data[i][1];
 				tryindex = xAxis._labels.push(dataset.data[i][0])-1;
 				dataset.data[i][0] = cleanDataX[i] = tryindex;	
 			}
 
-			// Add to 'used'
+			if(!helpers.array.is(dataset.data[i][1])) {
+				cleanDataY[i] = dataset.data[i][1];
+			} else {
+				cleanDataY = cleanDataY.concat(dataset.data[i][1]);
+			}
+
+			// Add to 'used', if not of multiple value type (bands, ohlc etc)
 			dataset.data[i][3] = 0;
-			if (yAxis._usedPos[tryindex] === undefined) { yAxis._usedPos[tryindex] = 0; }
-			if (yAxis._usedNeg[tryindex] === undefined) { yAxis._usedNeg[tryindex] = 0; }
-			if (yAxis.stacked || dataset.type === 'pie' || dataset.type === 'progress') {
-				if (dataset.data[i][1]>=yAxis.center) {
-					dataset._usedPos[tryindex] = dataset.data[i][3] = (yAxis._usedPos[tryindex] === undefined) ? 0 : yAxis._usedPos[tryindex];
-					yAxis._usedPos[tryindex] += dataset.data[i][1];
-				} else {
-					dataset._usedNeg[tryindex] = dataset.data[i][3] = (yAxis._usedNeg[tryindex] === undefined) ? 0 : yAxis._usedNeg[tryindex];
-					yAxis._usedNeg[tryindex] += dataset.data[i][1];
-				}
+			if (!helpers.array.is(dataset.data[i][1])) {
+				if (yAxis._usedPos[tryindex] === undefined) { yAxis._usedPos[tryindex] = 0; }
+				if (yAxis._usedNeg[tryindex] === undefined) { yAxis._usedNeg[tryindex] = 0; }
+				if (yAxis.stacked || dataset.type === 'pie' || dataset.type === 'progress') {
+					if (dataset.data[i][1]>=yAxis.center) {
+						dataset._usedPos[tryindex] = dataset.data[i][3] = (yAxis._usedPos[tryindex] === undefined) ? 0 : yAxis._usedPos[tryindex];
+						yAxis._usedPos[tryindex] += dataset.data[i][1];
+					} else {
+						dataset._usedNeg[tryindex] = dataset.data[i][3] = (yAxis._usedNeg[tryindex] === undefined) ? 0 : yAxis._usedNeg[tryindex];
+						yAxis._usedNeg[tryindex] += dataset.data[i][1];
+					}
+				}	
 			}
 
 			//
+
 		}
 
 		// Determine if this is a numerical axis or not
@@ -955,7 +1086,7 @@ SOFTWARE.
 			lwox = this.legend.inside ? this.wox + 5 : this.settings.margin,
 			lwidth = this.legend.inside ? this.wsw : this.w,
 			lheight = this.legend.inside ? this.wsh : this.h;
-			console.log(lwoy,lwox,lwidth,lheight);
+
 		this.ctx.font = legend.font;
 
 		// Measure total legend size (nned to do this once before drawing anything)
@@ -1001,8 +1132,6 @@ SOFTWARE.
 							curRow += 1;
 							maxW = 0;
 						}
-
-						console.log(curRow);
 						
 						// Calc x position
 						lx = (legend.position === 'bottom' ? lheight+lwoy-legendSize : lwoy) + (curRow-1) * rowHeight + rectMargin;
