@@ -109,20 +109,29 @@
             <article>
                 <h3><span class="tertiary">Source code</span></h3>
                 <pre><code data-language="javascript">var graphoObj11 = new Grapho( { place: 'example-1' } );
-                            
+
 graphoObj11.addDataSet({
     type:'line',
     strokeStyle: '#F0F066',
+    y: { 
+        scaleStyle: '#F0F066',
+        showGridLines: true,
+        name: "Yellow axis",
+        labelFont: '11px Droid Sans',
+        nameFont: '20px Droid Sans',
+        labelStyle: '#FF0000',
+        labels: true
+    },
+    x: { 
+        labels: true
+    },
     data: [7, 6, 5, 4, 2.5, 4, 4, 10, 0, 12,14]
 });
 
 graphoObj11.addDataSet({
     type:'bar',
     strokeStyle: '#F0F066',
-    y: {    scaleStyle: '#F0F066', showGridLines: true, 
-            name: "Yellow axis", labels: true },
-    x: {    labels: true},
-    data:   [7, 6, 5, 4, 2.5, 4, 4, 10, 0, 12, 14]
+    data: [7, 6, 5, 4, 2.5, 4, 4, 10, 0, 12, 14]
 });</code></pre>
             </article>
         </section>
@@ -150,14 +159,16 @@ graphoObj11.addDataSet({
                                 strokeStyle: '#F0F066',
                                 y: {  showScale: true, scaleStyle: '#F0F066', showGridLines: true, name: "Yellow axis", labels: true, showCenter: true },
                                 x: {  showGridLines: true, labels: true},
-                                data: [7, 6, 5, 4, 2.5, 4, 4, 10, -7, 57, 0, 0, -41, 25, 3, 4, 5, 6, 7, 7, 2, 8, 5, 5, 4, 2]
+                                data: [ 7, 6, 5, 4, 2.5, 4, 4, 10, -7, 57, 0, 0, 
+                                        -41, 25, 3, 4, 5, 6, 7, 7, 2, 8, 5, 5, 4, 2]
                             });
 
                             // Dots
                             graphoObj10.addDataSet({
                                 type: 'scatter',
                                 fillStyle: '#F0F066',
-                                data: [7, 6, 5, 4, 2.5, 4, 4, 10, -7, 57, 0, 0, -41, 25, 3, 4, 5, 6, 7, 7, 2, 8, 5, 5, 4, 2]
+                                data: [ 7, 6, 5, 4, 2.5, 4, 4, 10, -7, 57, 0, 0, 
+                                        -41, 25, 3, 4, 5, 6, 7, 7, 2, 8, 5, 5, 4, 2]
                             });
 
                             // Line
@@ -166,7 +177,8 @@ graphoObj11.addDataSet({
                                 lineSmooth: false,
                                 strokeStyle: '#6666F0',
                                 y: { axis: 2,  scaleStyle: '#6666F0', name: "Blue axis", showCenter: true, showScale: true},
-                                data: [6, 1, 3, 6, 2, 6, 3, 2, -7, 9, 2, 0, 0, 5, 3, 2, 2, 6, 6, 15, 17, 17, 15, 14, 13, 2]
+                                data: [ 6, 1, 3, 6, 2, 6, 3, 2, -7, 9, 2, 0, 0, 
+                                        5, 3, 2, 2, 6, 6, 15, 17, 17, 15, 14, 13, 2]
                             });
 
                             // Dots
@@ -174,7 +186,8 @@ graphoObj11.addDataSet({
                                 type: 'scatter',
                                 fillStyle: '#6666F0',
                                 y: { axis: 2},
-                                data: [6, 1, 3, 6, 2, 6, 3, 2, -7, 9, 2, 0, 0, 5, 3, 2, 2, 6, 6, 15, 17, 17, 15, 14, 13, 2]
+                                data: [ 6, 1, 3, 6, 2, 6, 3, 2, -7, 9, 2, 0, 0, 5, 
+                                        3, 2, 2, 6, 6, 15, 17, 17, 15, 14, 13, 2]
                             });
 
                         </script>
@@ -191,10 +204,9 @@ graphoObj11.addDataSet({
 graphoObj10.addDataSet({
     lineSmooth: false,
     strokeStyle: '#F0F066',
-    y: {    showScale: true, scaleStyle: '#F0F066', showGridLines: true, 
-            name: "Yellow axis", labels: true, showCenter: true },
-    x: {    showGridLines: true, labels: true},
-    data: [ 7, 6, 5, 4, 2.5, 4, 4, 10, -7, 57, 0, 0,
+    y: {  showScale: true, scaleStyle: '#F0F066', showGridLines: true, name: "Yellow axis", labels: true, showCenter: true },
+    x: {  showGridLines: true, labels: true},
+    data: [ 7, 6, 5, 4, 2.5, 4, 4, 10, -7, 57, 0, 0, 
             -41, 25, 3, 4, 5, 6, 7, 7, 2, 8, 5, 5, 4, 2]
 });
 
@@ -211,8 +223,7 @@ graphoObj10.addDataSet({
     type: 'line',
     lineSmooth: false,
     strokeStyle: '#6666F0',
-    y: {    axis: 2,  scaleStyle: '#6666F0', 
-            name: "Blue axis", showCenter: true, showScale: true},
+    y: { axis: 2,  scaleStyle: '#6666F0', name: "Blue axis", showCenter: true, showScale: true},
     data: [ 6, 1, 3, 6, 2, 6, 3, 2, -7, 9, 2, 0, 0, 
             5, 3, 2, 2, 6, 6, 15, 17, 17, 15, 14, 13, 2]
 });
@@ -221,9 +232,9 @@ graphoObj10.addDataSet({
 graphoObj10.addDataSet({
     type: 'scatter',
     fillStyle: '#6666F0',
-    y: {    axis: 2},
-    data: [ 6, 1, 3, 6, 2, 6, 3, 2, -7, 9, 2, 0, 0, 
-            5, 3, 2, 2, 6, 6, 15, 17, 17, 15, 14, 13, 2]
+    y: { axis: 2},
+    data: [ 6, 1, 3, 6, 2, 6, 3, 2, -7, 9, 2, 0, 0, 5, 
+            3, 2, 2, 6, 6, 15, 17, 17, 15, 14, 13, 2]
 });</code></pre>
             </article>
         </section>
@@ -292,14 +303,16 @@ graphoObj12.addDataSet({
     fillStyle: 'rgba(196,96,96,0.4)',
     lineWidth: 1,
     y: { 
+        name: 'Big font axis',
         scaleStyle: '#F0F066', 
         showGridLines: true, 
         labels: true,
-        showCenter: true
+        showCenter: true,
+        font: '20px Droid Sans'
     },
     x: { 
         labels: true,
-        labelRotation: 90
+        font: '15px Tahoma'
     },
     data: [["First",-9],["Second",-1],["Baz",-3]]
 });
@@ -378,7 +391,7 @@ graphoObj13.addDataSet({
     },
     x: { 
         labels: true,
-        labelRotation: -45,
+        labelRotation: 45,
         labelFormat: Grapho.formats.time
     },
     data: [[1420188000,1],[1420248000,2],[1420308000,3],[1420368000,4]]
