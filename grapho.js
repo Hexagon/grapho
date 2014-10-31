@@ -127,7 +127,7 @@ SOFTWARE.
 				gridLines: false,
 				gridStyle: '#353637',
 				name: undefined,
-				font: '10px Droid Sans',
+				font: '11px Droid Sans',
 				labelFormat: formats.default,
 				labelRotation: 0,
 				showlabels: false,
