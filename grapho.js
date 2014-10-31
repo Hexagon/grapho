@@ -126,11 +126,17 @@ SOFTWARE.
 				scaleStyle: '#FFFFFF',
 				gridLines: false,
 				gridStyle: '#353637',
+
 				name: undefined,
-				font: '11px Droid Sans',
+				nameFont: 'auto',			// Uses labelFont if 'auto'
+				nameStyle: 'auto',			// Uses scaleStyle if 'auto'
+
+				labels: false,
+				labelFont: '11px Droid Sans',
+				labelStyle: 'auto',			// Uses scaleStyle if 'auto'
 				labelFormat: formats.default,
 				labelRotation: 0,
-				showlabels: false,
+
 				showCenter: false,
 				majorTickHeight: 4,
 				center: 0,
@@ -139,7 +145,8 @@ SOFTWARE.
 				numeric: true,				// Handle this as an numerical (continouos) axis, or a text-axis
 				
 				// Used internaly
-				_textSize: 0,				// Parsed height of font in pixels
+				_nameTextSize: 0,				// Parsed height of font in pixels
+				_labelTextSize: 0,				// Parsed height of font in pixels
 				_h: undefined,
 				_step: Infinity,
 				_steps: 0,
@@ -894,8 +901,8 @@ SOFTWARE.
 		pad = (axis._padded)?mpxpdiff/2:0;
 		innerWidth = (lwsw-pad*2);
 
-		// Set font
-		context.font = axis.font;
+		// Set font for labels
+		context.font = axis.labelFont;
 
 		// Draw grid and ticks, start out from axis _startMinVal and work up from there
 		dir=[+Math.abs(axis._step),-Math.abs(axis._step)];
@@ -917,7 +924,9 @@ SOFTWARE.
 				}
 
 				// Render labels
-				if(axis.showLabels) {
+				if(axis.labels) {
+
+					context.font = axis.labelFont;
 
 					context.save();
 					context.beginPath();
@@ -930,7 +939,7 @@ SOFTWARE.
 						text = axis.labelFormat(k);	
 					}
 					
-					labeldim = helpers.math.bboxrot(context.measureText(text).width,axis._textSize,lr);
+					labeldim = helpers.math.bboxrot(context.measureText(text).width,axis._labelTextSize,lr);
 
 					if (orientation==='y') {
 						context.scale(-1,1);
@@ -947,9 +956,9 @@ SOFTWARE.
 					
 					context.translate(temp2,y);
 					context.rotate(lr*helpers.math.degToRad);
-					context.translate(-context.measureText(text).width/2,axis._textSize/3);
+					context.translate(-context.measureText(text).width/2,axis._labelTextSize/3);
 
-					context.fillStyle = axis.scaleStyle;
+					context.fillStyle = (axis.labelStyle === 'auto') ? axis.scaleStyle : axis.labelStyle;
 					context.fillText(text,0,0);
 
 					context.restore();
@@ -999,19 +1008,22 @@ SOFTWARE.
 		}
 
 		// Render names
+		context.font = axis.nameFont;
 		if (axis.name) {
-			context.font=axis.font;
-			context.fillStyle=axis.scaleStyle;
+			
+			context.font = (axis.nameFont === 'auto') ? axis.labelFont : axis.nameFont;
+			context.fillStyle = (axis.nameStyle === 'auto') ? axis.scaleStyle : axis.nameStyle;
+
 			if (primary) {
-				temp = axis._offset+axis._textSize/1.2;
+				temp = axis._offset+axis._nameTextSize/1.2;
 			} else {
-				temp = h-axis._offset-axis._textSize/2.2;
+				temp = h-axis._offset-axis._nameTextSize/2.2;
 			}
 			context.save();
 			if (orientation==='y') {
 				context.scale(1,-1);
 				context.translate(0,-this.h);
-				temp2 = h-temp+axis._textSize/1.9;
+				temp2 = h-temp+axis._nameTextSize/1.9;
 			} else {
 				temp2 = temp;
 			}
@@ -1113,22 +1125,22 @@ SOFTWARE.
 
 	prot.calcAxisSpace = function(axis,ctx,dir) {
 		var mw, i, tw, th;
-		axis._textSize = (axis.font !== undefined) ? parseInt(axis.font.split(' ')[0]) : 0;
+		axis._labelTextSize = (axis.labels) ? parseInt(axis.labelFont.split(' ')[0]) : 0;
+		axis._nameTextSize = (axis.name !== undefined) ? ((axis.nameFont !== 'auto') ? parseInt(axis.nameFont.split(' ')[0]) : parseInt(axis.labelFont.split(' ')[0])) : 0;
 		axis._h = 0;
 		axis._h += (axis.showScale) ? 1 : 0;					// Add one pixel for scale
 		axis._h += (axis.showScale) ? axis.majorTickHeight : 0;	// Add n pixels for major ticks
-		axis._h += (axis.name) ? axis._textSize * 1.7 : 0; 		// Add font size + 30% pixels for name
-
-		if (axis.showLabels) {
+		axis._h += (axis.name) ? axis._nameTextSize * 1.7 : 0; 		// Add font size + 30% pixels for name
+		if (axis.labels) {
+			ctx.font = axis.labelFont;
 			mw = 0;
 			for (i=axis._minVal; i<=axis._maxVal; i+=axis._step) {
-
 				if (axis._labels && axis._labels[i] !== undefined) {
 					tw = ctx.measureText(axis.labelFormat(axis._labels[i])).width;
 				} else {
 					tw = ctx.measureText(axis.labelFormat(i)).width;
 				}
-				th = axis._textSize;
+				th = axis._labelTextSize;
 
 				// Rot 0 is different in x and y
 

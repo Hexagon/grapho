@@ -83,10 +83,13 @@
                                     scaleStyle: '#F0F066',
                                     showGridLines: true,
                                     name: "Yellow axis",
-                                    showLabels: true
+                                    labelFont: '11px Droid Sans',
+                                    nameFont: '20px Droid Sans',
+                                    labelStyle: '#FF0000',
+                                    labels: true
                                 },
                                 x: { 
-                                    showLabels: true
+                                    labels: true
                                 },
                                 data: [7, 6, 5, 4, 2.5, 4, 4, 10, 0, 12,14]
                             });
@@ -117,8 +120,8 @@ graphoObj11.addDataSet({
     type:'bar',
     strokeStyle: '#F0F066',
     y: {    scaleStyle: '#F0F066', showGridLines: true, 
-            name: "Yellow axis", showLabels: true },
-    x: {    showLabels: true},
+            name: "Yellow axis", labels: true },
+    x: {    labels: true},
     data:   [7, 6, 5, 4, 2.5, 4, 4, 10, 0, 12, 14]
 });</code></pre>
             </article>
@@ -145,8 +148,8 @@ graphoObj11.addDataSet({
                             graphoObj10.addDataSet({
                                 lineSmooth: false,
                                 strokeStyle: '#F0F066',
-                                y: {  showScale: true, scaleStyle: '#F0F066', showGridLines: true, name: "Yellow axis", showLabels: true, showCenter: true },
-                                x: {  showGridLines: true, showLabels: true},
+                                y: {  showScale: true, scaleStyle: '#F0F066', showGridLines: true, name: "Yellow axis", labels: true, showCenter: true },
+                                x: {  showGridLines: true, labels: true},
                                 data: [7, 6, 5, 4, 2.5, 4, 4, 10, -7, 57, 0, 0, -41, 25, 3, 4, 5, 6, 7, 7, 2, 8, 5, 5, 4, 2]
                             });
 
@@ -189,8 +192,8 @@ graphoObj10.addDataSet({
     lineSmooth: false,
     strokeStyle: '#F0F066',
     y: {    showScale: true, scaleStyle: '#F0F066', showGridLines: true, 
-            name: "Yellow axis", showLabels: true, showCenter: true },
-    x: {    showGridLines: true, showLabels: true},
+            name: "Yellow axis", labels: true, showCenter: true },
+    x: {    showGridLines: true, labels: true},
     data: [ 7, 6, 5, 4, 2.5, 4, 4, 10, -7, 57, 0, 0,
             -41, 25, 3, 4, 5, 6, 7, 7, 2, 8, 5, 5, 4, 2]
 });
@@ -252,12 +255,12 @@ graphoObj10.addDataSet({
                                     name: 'Big font axis',
                                     scaleStyle: '#F0F066', 
                                     showGridLines: true, 
-                                    showLabels: true,
+                                    labels: true,
                                     showCenter: true,
                                     font: '20px Droid Sans'
                                 },
                                 x: { 
-                                    showLabels: true,
+                                    labels: true,
                                     font: '15px Tahoma'
                                 },
                                 data: [["First",-9],["Second",-1],["Baz",-3]]
@@ -291,11 +294,11 @@ graphoObj12.addDataSet({
     y: { 
         scaleStyle: '#F0F066', 
         showGridLines: true, 
-        showLabels: true,
+        labels: true,
         showCenter: true
     },
     x: { 
-        showLabels: true,
+        labels: true,
         labelRotation: 90
     },
     data: [["First",-9],["Second",-1],["Baz",-3]]
@@ -339,11 +342,11 @@ graphoObj12.addDataSet({
                                 y: { 
                                     scaleStyle: '#F0F066', 
                                     showGridLines: true, 
-                                    showLabels: true,
+                                    labels: true,
                                     min: 0
                                 },
                                 x: { 
-                                    showLabels: true,
+                                    labels: true,
                                     labelRotation: 45,
                                     labelFormat: Grapho.formats.time
                                 },
@@ -370,11 +373,11 @@ graphoObj13.addDataSet({
     y: { 
         scaleStyle: '#F0F066', 
         showGridLines: true, 
-        showLabels: true,
+        labels: true,
         min: 0
     },
     x: { 
-        showLabels: true,
+        labels: true,
         labelRotation: -45,
         labelFormat: Grapho.formats.time
     },
@@ -531,8 +534,8 @@ graphoObj5.addDataSet({
                                     type: 'area',
                                     strokeStyle: '#F06666',
                                     fillStyle: 'rgba(192,64,64,0.3)',
-                                    y: {  showScale: true, scaleStyle: '#F0F066', showGridLines: true, name: "Primary axis", showLabels: true },
-                                    x: {  showGridLines: true, showLabels: true},
+                                    y: {  showScale: true, scaleStyle: '#F0F066', showGridLines: true, name: "Primary axis", labels: true },
+                                    x: {  showGridLines: true, labels: true},
                                     data: randomArray1
                                 });
                                 // Push a new dataset
@@ -540,7 +543,7 @@ graphoObj5.addDataSet({
                                     type: 'area',
                                     strokeStyle: '#66F066',
                                     fillStyle: 'rgba(64,192,64,0.3)',
-                                    y: {  axis:2, showScale: true, scaleStyle: '#F0F066', showLabels: true },
+                                    y: {  axis:2, showScale: true, scaleStyle: '#F0F066', labels: true },
                                     data: randomArray2
                                 });
                                 // Push a new dataset
@@ -589,8 +592,8 @@ function randomData() {
         type: 'area',
         strokeStyle: '#F06666',
         fillStyle: 'rgba(192,64,64,0.3)',
-        y: {  showScale: true, scaleStyle: '#F0F066', showGridLines: true, name: "Primary axis", showLabels: true },
-        x: {  showGridLines: true, showLabels: true},
+        y: {  showScale: true, scaleStyle: '#F0F066', showGridLines: true, name: "Primary axis", labels: true },
+        x: {  showGridLines: true, labels: true},
         data: randomArray1
     });
     // Push a new dataset
@@ -598,7 +601,7 @@ function randomData() {
         type: 'area',
         strokeStyle: '#66F066',
         fillStyle: 'rgba(64,192,64,0.3)',
-        y: {  axis:2, showScale: true, scaleStyle: '#F0F066', showLabels: true },
+        y: {  axis:2, showScale: true, scaleStyle: '#F0F066', labels: true },
         data: randomArray2
     });
     // Push a new dataset
@@ -637,8 +640,8 @@ randomData();</code></pre>
                                 strokeStyle: '#F0F066',
                                 lineSmooth: false,
                                 fillStyle: '#F0F066',
-                                y: {  showScale: true, scaleStyle: '#F0F066', showGridLines: true, name: "Yellow axis", showLabels: true, showCenter: true, stacked: true },
-                                x: {  showGridLines: true, showLabels: true},
+                                y: {  showScale: true, scaleStyle: '#F0F066', showGridLines: true, name: "Yellow axis", labels: true, showCenter: true, stacked: true },
+                                x: {  showGridLines: true, labels: true},
                                 data: [7, 6, 5, 4, 5, 5, 4, 5, 5, 5, 4, 7, 3, 4, 5, 6, 7,  5, 5, 4]
                             });
 
@@ -670,8 +673,8 @@ graphoObj8.addDataSet({
     strokeStyle: '#F0F066',
     lineSmooth: false,
     fillStyle: '#F0F066',
-    y: {  showScale: true, scaleStyle: '#F0F066', showGridLines: true, name: "Yellow axis", showLabels: true, showCenter: true, stacked: true },
-    x: {  showGridLines: true, showLabels: true},
+    y: {  showScale: true, scaleStyle: '#F0F066', showGridLines: true, name: "Yellow axis", labels: true, showCenter: true, stacked: true },
+    x: {  showGridLines: true, labels: true},
     data: [7, 6, 5, 4, 5, 5, 4, 5, 5, 5, 4, 10, 3, 4, 5, 6, 7,  5, 5, 4]
 });
 
@@ -712,8 +715,8 @@ graphoObj8.addDataSet({
                                 type: 'bar',
                                 strokeStyle: '#F0F066',
                                 fillStyle: '#F0F066',
-                                y: {  showScale: true, scaleStyle: '#F0F066', showGridLines: true, name: "Yellow axis", showLabels: true, showCenter: true, stacked: true },
-                                x: {  showGridLines: true, showLabels: true},
+                                y: {  showScale: true, scaleStyle: '#F0F066', showGridLines: true, name: "Yellow axis", labels: true, showCenter: true, stacked: true },
+                                x: {  showGridLines: true, labels: true},
                                 data: [7, 6, 5, 4, -2.5, -4, -4, 10, 4, 32, 0, 0, 4, 25, 3, 4, 5, 6, 7, -7, -2, -8, 5, 5, 4, 2]
                             });
 
@@ -745,8 +748,8 @@ graphoObj8.addDataSet({
     type: 'bar',
     strokeStyle: '#F0F066',
     fillStyle: '#F0F066',
-    y: {  showScale: true, scaleStyle: '#F0F066', showGridLines: true, name: "Yellow axis", showLabels: true, showCenter: true, stacked: true },
-    x: {  showGridLines: true, showLabels: true},
+    y: {  showScale: true, scaleStyle: '#F0F066', showGridLines: true, name: "Yellow axis", labels: true, showCenter: true, stacked: true },
+    x: {  showGridLines: true, labels: true},
     data: [7, 6, 5, 4, -2.5, -4, -4, 10, 4, 32, 0, 0, 4, 25, 3, 4, 5, 6, 7, -7, -2, -8, 5, 5, 4, 2]
 });
 
@@ -788,8 +791,8 @@ graphoObj8.addDataSet({
                                 strokeStyle: '#F0F066',
                                 lineSmooth: false,
                                 fillStyle: '#F0F066',
-                                y: {  showScale: true, scaleStyle: '#F0F066', showGridLines: true, name: "Yellow axis", showLabels: true, showCenter: true, stacked: true },
-                                x: {  showGridLines: true, showLabels: true},
+                                y: {  showScale: true, scaleStyle: '#F0F066', showGridLines: true, name: "Yellow axis", labels: true, showCenter: true, stacked: true },
+                                x: {  showGridLines: true, labels: true},
                                 data: [7, 6, 5, 4, 5, 5, 4, 5, 5, 5, 4, 7, 3, 4, 5, 6, 7,  5, 5, 4]
                             });
 
@@ -824,8 +827,8 @@ graphoObj9.addDataSet({
     strokeStyle: '#F0F066',
     lineSmooth: false,
     fillStyle: '#F0F066',
-    y: {  showScale: true, scaleStyle: '#F0F066', showGridLines: true, name: "Yellow axis", showLabels: true, showCenter: true, stacked: true },
-    x: {  showGridLines: true, showLabels: true},
+    y: {  showScale: true, scaleStyle: '#F0F066', showGridLines: true, name: "Yellow axis", labels: true, showCenter: true, stacked: true },
+    x: {  showGridLines: true, labels: true},
     data: [7, 6, 5, 4, 5, 5, 4, 5, 5, 5, 4, 7, 3, 4, 5, 6, 7,  5, 5, 4]
 });
 
@@ -947,8 +950,8 @@ graphoObj11.addDataSet({ type: 'pie', fillStyle: '#454545', data: [0.3] });</cod
                             graphoObj12.addDataSet({
                                 type: 'band',
                                 fillStyle: 'rgba(0,255,255,0.1)',
-                                y: {  showScale: true, scaleStyle: '#8888FF', showGridLines: true, showLabels: true, showCenter: true, min: 0, max: 6.5 },
-                                x: {  showGridLines: true, showLabels: true},
+                                y: {  showScale: true, scaleStyle: '#8888FF', showGridLines: true, labels: true, showCenter: true, min: 0, max: 6.5 },
+                                x: {  showGridLines: true, labels: true},
                                 data: [
                                     [0,[4,3]],
                                     [1,[4,1]],
@@ -983,8 +986,8 @@ graphoObj11.addDataSet({ type: 'pie', fillStyle: '#454545', data: [0.3] });</cod
 graphoObj12.addDataSet({
     type: 'band',
     fillStyle: 'rgba(0,255,255,0.1)',
-    y: {  showScale: true, scaleStyle: '#8888FF', showGridLines: true, showLabels: true, showCenter: true, min: 0, max: 6.5 },
-    x: {  showGridLines: true, showLabels: true},
+    y: {  showScale: true, scaleStyle: '#8888FF', showGridLines: true, labels: true, showCenter: true, min: 0, max: 6.5 },
+    x: {  showGridLines: true, labels: true},
     data: [
         [0,[4,3]],
         [1,[4,1]],
@@ -1052,8 +1055,8 @@ graphoObj12.addDataSet({
                                 lineWidth: 1,
                                 strokestyle: '#FFFFFF',
                                 widthPrc: 50,
-                                y: { scaleStyle: '#F0F066', showGridLines: true, showLabels: true },
-                                x: { showLabels: true},
+                                y: { scaleStyle: '#F0F066', showGridLines: true, labels: true },
+                                x: { labels: true},
                                 data: [7, 6, 5, 4, 2.5, 4, 4, 10, 0, 12,14]
                             });
 
@@ -1096,8 +1099,8 @@ graphoObj13.addDataSet({
     lineWidth: 1,
     strokestyle: '#FFFFFF',
     widthPrc: 50,
-    y: { scaleStyle: '#F0F066', showGridLines: true, showLabels: true },
-    x: { showLabels: true},
+    y: { scaleStyle: '#F0F066', showGridLines: true, labels: true },
+    x: { labels: true},
     data: [7, 6, 5, 4, 2.5, 4, 4, 10, 0, 12,14]
 });</code></pre>
             </article>
@@ -1125,8 +1128,8 @@ graphoObj13.addDataSet({
                                 fillStyle: '#333333',
                                 lineWidth: 1,
                                 widthPrc: 50,
-                                y: {  showScale: true, scaleStyle: '#8888FF', showGridLines: false, showLabels: true, showCenter: true },
-                                x: {  showGridLines: false, showLabels: true, showScale: true },
+                                y: {  showScale: true, scaleStyle: '#8888FF', showGridLines: false, labels: true, showCenter: true },
+                                x: {  showGridLines: false, labels: true, showScale: true },
                                 data: [
                                     // Order is max min high low median
                                     [0,[5,1,4,2,3]],
@@ -1158,8 +1161,8 @@ graphoObj14.addDataSet({
     fillStyle: '#333333',
     lineWidth: 1,
     widthPrc: 50,
-    y: {  showScale: true, scaleStyle: '#8888FF', showGridLines: false, showLabels: true, showCenter: true },
-    x: {  showGridLines: false, showLabels: true, showScale: true },
+    y: {  showScale: true, scaleStyle: '#8888FF', showGridLines: false, labels: true, showCenter: true },
+    x: {  showGridLines: false, labels: true, showScale: true },
     data: [
         // Order is max min high low median
         [0,[5,1,4,2,3]],
@@ -1199,8 +1202,8 @@ graphoObj14.addDataSet({
                                 fillStyle: '#333333',
                                 lineWidth: 1,
                                 widthPrc: 50,
-                                y: {  showScale: true, scaleStyle: '#8888FF', showGridLines: false, showLabels: true, showCenter: true },
-                                x: {  showGridLines: false, showLabels: true, showScale: true },
+                                y: {  showScale: true, scaleStyle: '#8888FF', showGridLines: false, labels: true, showCenter: true },
+                                x: {  showGridLines: false, labels: true, showScale: true },
                                 data: [
                                     // NOTE! Order is HLOC
                                     [0,[5,1,4,2]],
@@ -1232,8 +1235,8 @@ graphoObj15.addDataSet({
     fillStyle: '#333333',
     lineWidth: 1,
     widthPrc: 50,
-    y: {  showScale: true, scaleStyle: '#8888FF', showGridLines: false, showLabels: true, showCenter: true },
-    x: {  showGridLines: false, showLabels: true, showScale: true },
+    y: {  showScale: true, scaleStyle: '#8888FF', showGridLines: false, labels: true, showCenter: true },
+    x: {  showGridLines: false, labels: true, showScale: true },
     data: [
         // NOTE! Order is HLOC
         [0,[5,1,4,2]],
@@ -1273,8 +1276,8 @@ graphoObj15.addDataSet({
                                 fillStyle: '#333333',
                                 lineWidth: 1,
                                 widthPrc: 50,
-                                y: {  showScale: true, scaleStyle: '#8888FF', showGridLines: false, showLabels: true, showCenter: true },
-                                x: {  showGridLines: false, showLabels: true, showScale: true },
+                                y: {  showScale: true, scaleStyle: '#8888FF', showGridLines: false, labels: true, showCenter: true },
+                                x: {  showGridLines: false, labels: true, showScale: true },
                                 data: [
                                     // NOTE! Order is HLOC
                                     [0,[5,1,4,2]],
@@ -1306,8 +1309,8 @@ graphoObj16.addDataSet({
     fillStyle: '#333333',
     lineWidth: 1,
     widthPrc: 50,
-    y: {  showScale: true, scaleStyle: '#8888FF', showGridLines: false, showLabels: true, showCenter: true },
-    x: {  showGridLines: false, showLabels: true, showScale: true },
+    y: {  showScale: true, scaleStyle: '#8888FF', showGridLines: false, labels: true, showCenter: true },
+    x: {  showGridLines: false, labels: true, showScale: true },
     data: [
         // NOTE! Order is HLOC
         [0,[5,1,4,2]],
