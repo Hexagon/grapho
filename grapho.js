@@ -97,11 +97,9 @@ SOFTWARE.
 				lineSmooth: true,
 				strokeStyle: '#454545',
 				fillStyle: '#343536',
-				lineDots: false,
 				shadow: true,
 
-				// type: scatter || lineDots: true
-				dotWidth: 4,
+				dotWidth: 4,		// type: scatter
 
 				// type: 'bar'
 				barWidthPrc: 90,
@@ -270,21 +268,18 @@ SOFTWARE.
 						context.lineTo(px-1, cy); // Move to center at last col
 						context.lineTo(fpx, cy); // Move to center at first col
 
-						// Empty stroke, as we just want to move the cursor
+						// Empty stroke, as we just want to move the cursor, then fill
 						context.strokeStyle = 'rgba(0,0,0,0)';
 						context.stroke();
-
-						// Fill the area
 						context.fillStyle = dataset.fillStyle;	
 						context.fill();
 					}
 				},
 				band: function(grapho, context, dataset, xAxis, yAxis) {
-					var point, i,
+					var point, i, j, k,
 						next, npxp, mpxpdiff, pad, innerWidth,
 						px, // Current X-pixel
 						py, // Current Y-pixel
-						cy, // Center Y-pixel
 						fpx, // First X-pixel
 						fpy, // First Y-pixel
 						pxp; // Pixel percentage
@@ -296,61 +291,35 @@ SOFTWARE.
 					pad = (xAxis._padded)?mpxpdiff/2:0;
 					innerWidth = (grapho.wsw-pad*2);
 
-					// High line
-					for ( i = 0; i < dataset.data.length; i++) {
-						if ((point = dataset.data[i])) {
+					// Do drawing in two passes, first pass uses index 0 (high), next pass uses index 1 (low) and go over the datapoints in reverse
+					for ( j=0; j < 2; j++) {
+						for ( i=0; i < dataset.data.length; i++) {
+							// On second pass, we want to go from right to left
+							k = (j===0) ? i : dataset.data.length - i -1;
+							if ((point = dataset.data[k])) {
+								pxp = (point[0] - xAxis._minVal) / (xAxis._range);
 
-							pxp = (point[0] - xAxis._minVal) / (xAxis._range);
+								px = Math.round(grapho.wox + pad + ((innerWidth) * pxp));
+								py = Math.round(grapho.woy + ((point[1][j]) - yAxis._minVal) / (yAxis._range) * grapho.wsh);
 
-							px = Math.round(grapho.wox + pad + ((innerWidth) * pxp));
-							py = Math.round(grapho.woy + ((point[1][0]) - yAxis._minVal) / (yAxis._range) * grapho.wsh);
-
-							if (!i) {
-								// Keep track of first pixel, for later use by area charts
-								context.moveTo((fpx = px+1), (fpy = py));
-							} else if (dataset.lineSmooth && i < dataset.data.length - 1) {
-								next = dataset.data[i + 1];
-								npxp = (next[0] - xAxis._minVal) / (xAxis._range);
-								context.quadraticCurveTo(
-									px, // The x-coordinate of the Bézier control point
-									py, // The y-coordinate of the Bézier control point
-									(px+(!next ? 0 : Math.round(grapho.wox + pad + ((innerWidth) * npxp)))) / 2, // The x-coordinate of the ending point
-									(py+(!next ? 0 : Math.round(grapho.woy + (next[1][0] - yAxis._minVal) / (yAxis._range) * grapho.wsh))) / 2 // The y-coordinate of the ending point
-								);
-							} else {
-								context.lineTo(px-1, py);
+								if (!k && j === 0) {
+									// Keep track of first pixel, for later use by area charts
+									context.moveTo((fpx = px+1), (fpy = py));
+								} else if (dataset.lineSmooth && k < dataset.data.length - 1 && k > 0) {
+									next = dataset.data[k + (!j ? 1 : -1)];
+									npxp = (next[0] - xAxis._minVal) / (xAxis._range);
+									context.quadraticCurveTo(
+										px, // The x-coordinate of the Bézier control point
+										py, // The y-coordinate of the Bézier control point
+										(px+(!next ? 0 : Math.round(grapho.wox + pad + ((innerWidth) * npxp)))) / 2, // The x-coordinate of the ending point
+										(py+(!next ? 0 : Math.round(grapho.woy + (next[1][j] - yAxis._minVal) / (yAxis._range) * grapho.wsh))) / 2 // The y-coordinate of the ending point
+									);
+								} else {
+									context.lineTo(px-1, py);
+								}
 							}
 						}
 					}
-					// Low line
-					for ( i = dataset.data.length-1; i >= 0; i--) {
-						if ((point = dataset.data[i])) {
-
-							pxp = (point[0] - xAxis._minVal) / (xAxis._range);
-
-							px = Math.round(grapho.wox + pad + ((innerWidth) * pxp));
-							py = Math.round(grapho.woy + ((point[1][1]) - yAxis._minVal) / (yAxis._range) * grapho.wsh);
-							if (i==dataset.data.length-1) {
-								// Keep track of first pixel, for later use by area charts
-								context.lineTo((px+1), py);
-							} else if (dataset.lineSmooth && i >= 1 ) {
-								next = dataset.data[i - 1];
-								npxp = (next[0] - xAxis._minVal) / (xAxis._range);
-								context.quadraticCurveTo(
-									px, // The x-coordinate of the Bézier control point
-									py, // The y-coordinate of the Bézier control point
-									(px+(!next ? 0 : Math.round(grapho.wox + pad + ((innerWidth) * npxp)))) / 2, // The x-coordinate of the ending point
-									(py+(!next ? 0 : Math.round(grapho.woy + (next[1][1] - yAxis._minVal) / (yAxis._range) * grapho.wsh))) / 2 // The y-coordinate of the ending point
-								);
-							} else {
-								context.lineTo(px-1, py);
-							}
-						}
-					}
-
-					cy = Math.round(grapho.woy + ((yAxis.center < yAxis._minVal ? yAxis._minVal : (yAxis.center > yAxis._maxVal ? yAxis._maxVal : yAxis.center )) - yAxis._minVal) / (yAxis._range) * grapho.wsh)+0.5;
-
-					context.moveTo(fpx, fpy); // Move to center at first col
 
 					// Fill the area
 					context.fillStyle = dataset.fillStyle;	
@@ -358,17 +327,17 @@ SOFTWARE.
 				},
 				error: function(grapho, context, dataset, xAxis, yAxis) {
 					var point, i,
-						next, npxp, mpxpdiff, pad, innerWidth, barWidth, barSpacing, center, ct,
+						mpxpdiff, pad, innerWidth, barWidth, barSpacing, center, ct,
 						px, // Current X-pixel
 						pyh, // Current Y-pixel high
-						pyl, // Current Y-pixel low;
+						pyl; // Current Y-pixel low;
 
 					mpxpdiff = xAxis._minStepPrc;
 					mpxpdiff = mpxpdiff * (grapho.wsw-(mpxpdiff*grapho.wsw*((xAxis._padded)?1:0)));
 					pad = (xAxis._padded)?mpxpdiff/2:0;
 					innerWidth = (grapho.wsw-pad*2);
 
-					barSpacing 	= mpxpdiff*(100-dataset.barWidthPrc)/100;
+					barSpacing 	= mpxpdiff*(100-dataset.widthPrc)/100;
 					barWidth 	= mpxpdiff-barSpacing;
 
 					context.strokeStyle = dataset.strokeStyle;
@@ -420,7 +389,7 @@ SOFTWARE.
 					pad = (xAxis._padded)?mpxpdiff/2:0;
 					innerWidth = (grapho.wsw-pad*2);
 
-					barSpacing 	= mpxpdiff*(100-dataset.barWidthPrc)/100;
+					barSpacing 	= mpxpdiff*(100-dataset.widthPrc)/100;
 					barWidth 	= mpxpdiff-barSpacing;
 
 					for ( i=0; i < dataset.data.length; i++) {
@@ -551,7 +520,6 @@ SOFTWARE.
 
 	// The actal Grapho object
 	function Grapho (settings) {
-		var place;
 
 		// Protect against forgotten `new` keyword.
 		if (!(this instanceof Grapho)) {
@@ -1267,10 +1235,6 @@ SOFTWARE.
 				// ... then the general fallback
 				} else {
 					helpers.renderers[ds.type](this, c, ds, this.xAxises[ds.x.axis], this.yAxises[ds.y.axis]);
-				}
-
-				if (ds.lineDots) {
-					helpers.renderers.scatter(this, c, ds, this.xAxises[ds.x.axis], this.yAxises[ds.y.axis]);
 				}
 
 			} else {

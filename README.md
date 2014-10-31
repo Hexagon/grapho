@@ -1,7 +1,7 @@
 Grapho
 ======
 
-Grapho is a simple, dependency free data visualisation library for JavaScript.
+Grapho is a dependency free data visualisation library for JavaScript, written with the KISS principle in mind.
 
 ![Grapho real time example](example.png)
 
@@ -20,7 +20,9 @@ Features
     * Line (Stacked, Fixed)
     * Area (Stacked, Fixed)
     * Scatter
-    * Pie
+    * Pie (Stacked, Regular)
+    * Bands
+    * Error bars
   * MIT licensed, free to use everywhere, everytime.
 
 Contributing
