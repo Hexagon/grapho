@@ -622,7 +622,7 @@ SOFTWARE.
 
 	};
 
-	prot.addDataset = function (dataset) {
+	prot.addDataSet = function (dataset) {
 		var datasetIsArray = helpers.array.is(dataset);
 
 		// Check that we got some type of valid object as parameter
