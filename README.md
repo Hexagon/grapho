@@ -15,6 +15,10 @@ Features
   * Reizable - automically adapts to parent div dimensions
   * Capable of rendering graphs in real time, 60fps if you like
   * Works great on mobile devices
+  * Custom themes
+  * Predefined themes
+   * Dark
+   * Light
   * Chart types
     * Bar (Stacked, Fixed)
     * Line (Stacked, Fixed)
@@ -23,6 +27,9 @@ Features
     * Pie (Stacked, Regular)
     * Bands
     * Error bars
+    * Box plot
+    * Candle
+    * OHLC
   * MIT licensed, free to use everywhere, everytime.
 
 Contributing
