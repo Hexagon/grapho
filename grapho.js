@@ -81,13 +81,9 @@ SOFTWARE.
 				// Used for all chart types
 				margin: 5,
 				showLegend: false,
-				fillStyle: 'rgb(0,0,0,0)', // Only used for pie right now, but could be used for all
 				legend: {
 					position: 'bottom',
-					inside: false,
-					fillStyle: 'none',
-					strokeStyle: 'none',
-					font: '11px Droid Sans'
+					inside: false
 				},
 
 				// Used for pie
@@ -105,8 +101,6 @@ SOFTWARE.
 				// type: 'line' or 'area'
 				lineWidth: 2,
 				lineSmooth: true,
-				strokeStyle: '#454545',
-				fillStyle: '#343536',
 
 				dotWidth: 4,		// type: scatter
 
@@ -123,17 +117,11 @@ SOFTWARE.
 				min: 'auto',
 				max: 'auto',
 				showscale: false,
-				scaleStyle: '#FFFFFF',
 				gridLines: false,
-				gridStyle: '#353637',
 
 				name: undefined,
-				nameFont: 'auto',			// Uses labelFont if 'auto'
-				nameStyle: 'auto',			// Uses scaleStyle if 'auto'
 
 				labels: false,
-				labelFont: '11px Droid Sans',
-				labelStyle: 'auto',			// Uses scaleStyle if 'auto'
 				labelFormat: formats.default,
 				labelRotation: 0,
 
@@ -165,6 +153,54 @@ SOFTWARE.
 			}
 		},
 
+		// Themes
+		themes = {
+			dark: {
+				settings: {
+					fillStyle: 'rgb(0,0,0,0)',
+					legend: {
+						fillStyle: 'none',
+						strokeStyle: 'none',
+						font: '11px Droid Sans'
+					}
+				},
+				dataset: {
+					strokeStyle: '#454545',
+					fillStyle: '#343536'
+				},
+				axis: {
+					scaleStyle: '#FFFFFF',
+					gridStyle: '#353637',
+					nameFont: 'auto',
+					nameStyle: 'auto',
+					labelFont: '11px Droid Sans',
+					labelStyle: 'auto'
+				}
+			},
+			light: {
+				settings: {
+					fillStyle: 'rgb(0,0,0,0)',
+					legend: {
+						fillStyle: 'none',
+						strokeStyle: 'none',
+						font: '11px Droid Sans'
+					}
+				},
+				dataset: {
+					strokeStyle: '#AAAAAA',
+					fillStyle: '#F0F099'
+				},
+				axis: {
+					scaleStyle: '#AAAAAA',
+					gridStyle: '#BBBBBB',
+					nameFont: 'auto',
+					nameStyle: 'auto',
+					labelFont: '11px Droid Sans',
+					labelStyle: 'auto'
+				}
+			}
+		},
+
 		// Grapho helper functions
 		helpers = {
 
@@ -188,6 +224,9 @@ SOFTWARE.
 
 			// Object helpers
 			object: {
+				is: function (it) {
+					return Object.prototype.toString.call(it) === '[object Object]';
+				},
 				merge: function (target, source, recurse) {
 					var name;
 
@@ -556,19 +595,40 @@ SOFTWARE.
 			return new Grapho(settings);
 		}
 
+		// Make a local copy of defaults
+		this.defs = helpers.object.merge({}, defaults);
+
+		// Theme support
+		if (settings.theme !== undefined) {
+			// Check for user supplied theme
+			if (helpers.object.is(settings.theme)) {
+				this.defs = helpers.object.merge(this.defs,helpers.object.merge(themes.dark, settings.theme));
+			// This is supposed to be a theme name
+			} else {
+				if (themes[settings.theme] !== undefined ){
+					this.defs = helpers.object.merge(this.defs,themes[settings.theme]);
+				} else {
+					console.error('Grapho: Theme not found (' + settings.theme + ')');
+				}
+			}
+		} else {
+			this.defs = helpers.object.merge(this.defs,themes.dark);
+		}
+
 		// Setup default settings
 		this.yAxises = [];
 		this.xAxises = [];
 		this.datasets = [];
 
-		this.container = defaults.container;
-		this.settings = helpers.object.merge(defaults.settings, settings);
+		this.container = this.defs.container;
+		this.settings = helpers.object.merge(this.defs.settings, settings);
 
 		// These aren't settings but needed properties.
 		this.id = graphos.push(this) - 1;
 
 		this.canvas = document.createElement('canvas');
 		this.ctx = this.canvas.getContext('2d');
+
 
 		// Element width and height
 		this.w = 0;
@@ -640,7 +700,7 @@ SOFTWARE.
 		}
 
 		// Define some reasonable defaults for each dataset
-		var def = defaults.dataset;
+		var def = this.defs.dataset;
 
 		// `dataset` can be either an array or an object.
 		if (datasetIsArray) {
@@ -656,8 +716,8 @@ SOFTWARE.
 
 		// Merge suppied axis settings, with current axis settings with the default axis settings
 		// This both initiate axis values for new axises, and reuses current values for existing
-		this.yAxises[def.y.axis] = helpers.object.merge(defaults.axis, helpers.object.merge(this.yAxises[def.y.axis], def.y));
-		this.xAxises[def.x.axis] = helpers.object.merge(defaults.axis, helpers.object.merge(this.xAxises[def.x.axis], def.x));
+		this.yAxises[def.y.axis] = helpers.object.merge(this.defs.axis, helpers.object.merge(this.yAxises[def.y.axis], def.y));
+		this.xAxises[def.x.axis] = helpers.object.merge(this.defs.axis, helpers.object.merge(this.xAxises[def.x.axis], def.x));
 
 		// Push dataset to axis
 		this.pushDataset(def);
@@ -733,9 +793,6 @@ SOFTWARE.
 					}
 				}	
 			}
-
-			//
-
 		}
 
 		// Determine if this is a numerical axis or not
