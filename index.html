@@ -1340,6 +1340,198 @@ graphoObj16.addDataSet({
             </article>
         </section>
 
+        <section>
+            <article>
+                <h3>
+                    <span class="secondary">Example 17 - </span>
+                    <span class="tertiary">Barchart and line using predefined theme 'light'</span>
+                </h3>
+                <div class="container w-100 h-1">
+
+                    <!-- Example 17 - Start -->
+                    <div id="example-17" class="box bw-100 h-100">
+
+                        <!-- example-17 javascript -->
+                        <script>
+
+                            // The theme can either be prefined and entered as a string, like below. Or like a custom object, like in the next example
+                            var graphoObj17 = new Grapho( { place: 'example-17', theme: 'light' } );
+                            
+                            graphoObj17.addDataSet({
+                                type:'line',
+                                strokeStyle: '#F0F066',
+                                y: { 
+                                    showGridLines: true,
+                                    name: "Yellow axis",
+                                    labels: true
+                                },
+                                x: { 
+                                    labels: true
+                                },
+                                data: [7, 6, 5, 4, 2.5, 4, 4, 10, 0, 12,14]
+                            });
+
+                            graphoObj17.addDataSet({
+                                type:'bar',
+                                strokeStyle: '#F0F066',
+                                data: [7, 6, 5, 4, 2.5, 4, 4, 10, 0, 12, 14]
+                            });
+
+                        </script>
+
+                    </div>
+                    <!-- Example 17 - End -->
+                </div>
+            </article>
+            <article>
+                <h3><span class="tertiary">Source code</span></h3>
+                <pre><code data-language="javascript">// The theme can either be prefined and entered as a string, like below. Or like a custom object, like in the next example
+var graphoObj17 = new Grapho( { place: 'example-17', theme: 'light' } );
+
+graphoObj17.addDataSet({
+    type:'line',
+    strokeStyle: '#F0F066',
+    y: { 
+        showGridLines: true,
+        name: "Yellow axis",
+        labels: true
+    },
+    x: { 
+        labels: true
+    },
+    data: [7, 6, 5, 4, 2.5, 4, 4, 10, 0, 12,14]
+});
+
+graphoObj17.addDataSet({
+    type:'bar',
+    strokeStyle: '#F0F066',
+    data: [7, 6, 5, 4, 2.5, 4, 4, 10, 0, 12, 14]
+});</code></pre>
+            </article>
+        </section>
+
+        <section>
+            <article>
+                <h3>
+                    <span class="secondary">Example 18 - </span>
+                    <span class="tertiary">Barchart and line using custom theme</span>
+                </h3>
+                <div class="container w-100 h-1">
+
+                    <!-- Example 18 - Start -->
+                    <div id="example-18" class="box bw-100 h-100">
+
+                        <!-- example-18 javascript -->
+                        <script>
+
+                            // Create a custom theme
+
+                            // You can override all defaults available in grapho, including axis min/max values, axis names or legend position.
+                            // Here though, we will just focus on colors and fonts.
+                            var myCoolTheme = {
+                                settings: {
+                                    fillStyle: 'rgb(0,0,0,0)',
+                                    legend: {
+                                        fillStyle: 'none',
+                                        strokeStyle: 'none',
+                                        font: '20px Droid Sans'
+                                    },
+                                },
+                                dataset: {
+                                    strokeStyle: '#773344',
+                                    fillStyle: '#343488',
+                                },
+                                axis: {
+                                    scaleStyle: '#666666',
+                                    gridStyle: '#222222',
+                                    nameFont: '30px Droid Sans',
+                                    nameStyle: '#4242FF',
+                                    labelFont: '15px Droid Sans',
+                                    labelStyle: 'auto',
+                                }
+                            };
+
+                            var graphoObj18 = new Grapho( { place: 'example-18', theme: myCoolTheme } );
+                            
+                            graphoObj18.addDataSet({
+                                type:'line',
+                                strokeStyle: '#F0F066',
+                                y: { 
+                                    showGridLines: true,
+                                    name: "Yellow axis",
+                                    labels: true
+                                },
+                                x: { 
+                                    labels: true
+                                },
+                                data: [7, 6, 5, 4, 2.5, 4, 4, 10, 0, 12,14]
+                            });
+
+                            graphoObj18.addDataSet({
+                                type:'bar',
+                                strokeStyle: '#F0F066',
+                                data: [7, 6, 5, 4, 2.5, 4, 4, 10, 0, 12, 14]
+                            });
+
+                        </script>
+
+                    </div>
+                    <!-- Example 18 - End -->
+                </div>
+            </article>
+            <article>
+                <h3><span class="tertiary">Source code</span></h3>
+                <pre><code data-language="javascript">// Create a custom theme
+
+// You can override all defaults available in grapho, including axis min/max values, axis names or legend position.
+// Here though, we will just focus on colors and fonts.
+var myCoolTheme = {
+    settings: {
+        fillStyle: 'rgb(0,0,0,0)',
+        legend: {
+            fillStyle: 'none',
+            strokeStyle: 'none',
+            font: '20px Droid Sans'
+        },
+    },
+    dataset: {
+        strokeStyle: '#773344',
+        fillStyle: '#343488',
+    },
+    axis: {
+        scaleStyle: '#666666',
+        gridStyle: '#222222',
+        nameFont: '30px Droid Sans',
+        nameStyle: '#4242FF',
+        labelFont: '15px Droid Sans',
+        labelStyle: 'auto',
+    }
+};
+
+var graphoObj18 = new Grapho( { place: 'example-18', theme: myCoolTheme } );
+
+graphoObj18.addDataSet({
+    type:'line',
+    strokeStyle: '#F0F066',
+    y: { 
+        showGridLines: true,
+        name: "Yellow axis",
+        labels: true
+    },
+    x: { 
+        labels: true
+    },
+    data: [7, 6, 5, 4, 2.5, 4, 4, 10, 0, 12,14]
+});
+
+graphoObj18.addDataSet({
+    type:'bar',
+    strokeStyle: '#F0F066',
+    data: [7, 6, 5, 4, 2.5, 4, 4, 10, 0, 12, 14]
+});</code></pre>
+            </article>
+        </section>
+
         <div class="clear"><!-- --></div>
     </body>
 </html>
