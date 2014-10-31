@@ -79,8 +79,15 @@
                             graphoObj11.addDataSet({
                                 type:'line',
                                 strokeStyle: '#F0F066',
-                                y: { scaleStyle: '#F0F066', showGridLines: true, name: "Yellow axis", showLabels: true },
-                                x: { showLabels: true },
+                                y: { 
+                                    scaleStyle: '#F0F066',
+                                    showGridLines: true,
+                                    name: "Yellow axis",
+                                    showLabels: true
+                                },
+                                x: { 
+                                    showLabels: true
+                                },
                                 data: [7, 6, 5, 4, 2.5, 4, 4, 10, 0, 12,14]
                             });
 
@@ -222,7 +229,7 @@ graphoObj10.addDataSet({
             <article>
                 <h3>
                     <span class="secondary">Example 3 - </span>
-                    <span class="tertiary">Barchart with "joined" text x-axies</span>
+                    <span class="tertiary">Barchart with "joined" text x-axies and custom fonts</span>
                 </h3>
                 <div class="container w-100 h-1">
 
@@ -242,13 +249,16 @@ graphoObj10.addDataSet({
                                 fillStyle: 'rgba(196,96,96,0.4)',
                                 lineWidth: 1,
                                 y: { 
+                                    name: 'Big font axis',
                                     scaleStyle: '#F0F066', 
                                     showGridLines: true, 
                                     showLabels: true,
-                                    showCenter: true
+                                    showCenter: true,
+                                    font: '20px Droid Sans'
                                 },
                                 x: { 
-                                    showLabels: true
+                                    showLabels: true,
+                                    font: '15px Tahoma'
                                 },
                                 data: [["First",-9],["Second",-1],["Baz",-3]]
                             });
