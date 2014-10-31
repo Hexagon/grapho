@@ -74,11 +74,22 @@ SOFTWARE.
 
 		// Reasonable defaults for everything
 		defaults = {
+			container: {
+				width: 'auto',
+				height: 'auto'
+			},
 			settings: {
 				// Used for all chart types
 				margin: 5,
 				showLegend: false,
 				fillStyle: 'rgb(0,0,0,0)', // Only used for pie right now, but could be used for all
+				legend: {
+					position: 'bottom',
+					inside: false,
+					fillStyle: 'none',
+					strokeStyle: 'none',
+					font: '11px Droid Sans'
+				},
 
 				// Used for pie
 				startAngle: 90,
@@ -97,7 +108,6 @@ SOFTWARE.
 				lineSmooth: true,
 				strokeStyle: '#454545',
 				fillStyle: '#343536',
-				shadow: true,
 
 				dotWidth: 4,		// type: scatter
 
@@ -108,7 +118,7 @@ SOFTWARE.
 				_labels: [],
 				_usedPos: [],				// Used for stacking charts
 				_usedNeg: [],
-				_data: [] 					// Internal representation of the data
+				_data: []
 			},
 			axis: {
 				min: 'auto',
@@ -124,7 +134,6 @@ SOFTWARE.
 				showlabels: false,
 				showCenter: false,
 				majorTickHeight: 4,
-				minorTickHeight: 2,
 				center: 0,
 				padded: false,
 				stacked: false,
@@ -147,13 +156,6 @@ SOFTWARE.
 				_usedPos: [],				// Used for stacking charts
 				_usedNeg: []
 				
-			},
-			legend: {
-				position: 'bottom',
-				inside: false,
-				fillStyle: 'none',
-				strokeStyle: 'none',
-				font: '11px Droid Sans'
 			}
 		},
 
@@ -180,11 +182,11 @@ SOFTWARE.
 
 			// Object helpers
 			object: {
-				merge: function(target, source, recurse) {
+				merge: function (target, source, recurse) {
 					var name;
 
 					// Make sure we get a true deep copy
-					if(recurse === undefined) { 
+					if(recurse === undefined) {
 						target = helpers.object.merge({},target,true);
 					}
 
@@ -260,7 +262,7 @@ SOFTWARE.
 					context.lineWidth = dataset.lineWidth;
 					context.strokeStyle = dataset.strokeStyle;
 					context.stroke();
-					
+
 					if (dataset.type === 'area') {
 
 						cy = Math.round(grapho.woy + ((yAxis.center < yAxis._minVal ? yAxis._minVal : (yAxis.center > yAxis._maxVal ? yAxis._maxVal : yAxis.center )) - yAxis._minVal) / (yAxis._range) * grapho.wsh)+0.5;
@@ -345,8 +347,6 @@ SOFTWARE.
 					for ( i = 0; i < dataset.data.length; i++) {
 						if ((point = dataset.data[i])) {
 							
-							ct = (center < yAxis._minVal) ? yAxis._minVal : center;
-							
 							px = Math.round(grapho.wox - mpxpdiff/2 + pad + barSpacing/2 + ((point[0] - xAxis._minVal) / (xAxis._range) * innerWidth));
 							pyh = Math.round(grapho.woy + (point[1][0] - yAxis._minVal) / (yAxis._range) * grapho.wsh);
 							pyl = Math.round(grapho.woy + (point[1][1] - yAxis._minVal) / (yAxis._range) * grapho.wsh);
@@ -355,18 +355,15 @@ SOFTWARE.
 							context.beginPath();
 							context.moveTo(px,pyh);
 							context.lineTo(px+barWidth,pyh);
-							context.stroke();
 
-							// Connecting line
-							context.beginPath();
+							// Connector line
 							context.moveTo(Math.round(px+barWidth/2),pyh);
 							context.lineTo(Math.round(px+barWidth/2),pyl);
-							context.stroke();
 
 							// Low line
-							context.beginPath();
 							context.moveTo(px,pyl);
 							context.lineTo(px+barWidth,pyl);
+
 							context.stroke();
 						}
 					}
@@ -380,7 +377,6 @@ SOFTWARE.
 						bh,
 						heightflag,
 						innerWidth,
-						ct, // Center temp
 						center = yAxis.center;
 					
 
@@ -397,8 +393,6 @@ SOFTWARE.
 						if ((point = dataset.data[i])) {
 
 							pxp = (point[0] - xAxis._minVal) / (xAxis._range);
-							
-							ct = (center < yAxis._minVal) ? yAxis._minVal : center;
 							
 							px = Math.round(grapho.wox - mpxpdiff/2 + pad + barSpacing/2 + (pxp * innerWidth));
 							py = Math.round(grapho.woy + ((point[1] + point[3]) - yAxis._minVal) / (yAxis._range) * grapho.wsh);
@@ -464,7 +458,6 @@ SOFTWARE.
 					    context.arc(centerX, centerY, radiusOuter, startingAngle, endingAngle, false);
 						context.arc(centerX, centerY, radiusInner, endingAngle ,startingAngle, true);
 					    context.closePath();
-
 					    context.fill();
 
 					}
@@ -496,20 +489,12 @@ SOFTWARE.
 				isInt: function(n) {
 				   return n % 1 === 0;
 				},
-				bboxrot: function(w,h,deg) {
-
-					var theta = helpers.math.degToRad * deg,w2,h2,w3,h3;
-
-					w=w/2; h=h/2;
-					w2 = w*Math.cos(theta)+h*Math.sin(theta);
-					h2 = -w*Math.sin(theta)+h*Math.cos(theta);
-
-					w3 = w*Math.cos(theta)-h*Math.sin(theta);
-					h3 = -w*Math.sin(theta)-h*Math.cos(theta);
-
+				// Calculates the bounding box dimensions of a rotatated rectangle
+				bboxrot: function(w,h,theta) {
+					theta = helpers.math.degToRad * theta;
 					return {
-						width: Math.round(Math.max(Math.abs(w2*2),Math.abs(w3*2))),
-						height: Math.round(Math.max(Math.abs(h2*2),Math.abs(h3*2)))
+						width: Math.max(Math.abs(w*Math.cos(theta)+h*Math.sin(theta)),Math.abs(w*Math.cos(theta)-h*Math.sin(theta))),
+						height: Math.max(Math.abs(-w*Math.sin(theta)+h*Math.cos(theta)),Math.abs(-w*Math.sin(theta)-h*Math.cos(theta)))
 					};
 				}
 			}
@@ -531,19 +516,8 @@ SOFTWARE.
 		this.xAxises = [];
 		this.datasets = [];
 
-		this.container = {
-			width: 'auto',
-			height: 'auto'
-		};
-
-		this.settings = defaults.settings;
-
-		// Merge the user settings into `this`
-		if (settings!==undefined) {
-			this.settings = helpers.object.merge(this.settings, settings);
-		}
-
-		this.legend = helpers.object.merge(defaults.legend, settings.legend);
+		this.container = defaults.container;
+		this.settings = helpers.object.merge(defaults.settings, settings);
 
 		// These aren't settings but needed properties.
 		this.id = graphos.push(this) - 1;
@@ -599,35 +573,6 @@ SOFTWARE.
 		return this;
 	};
 
-	prot.initAxis = function (props,dest) {
-		var def = defaults.axis,
-			index = props.axis;
-
-		if (typeof index === 'number' && isFinite(index) && index % 1 ===0) {
-
-			if (dest[index] === undefined) {
-
-				// Merge properties, if passed
-				if (typeof props === 'object') {
-					def = helpers.object.merge(def, props);
-				}
-
-				dest[index] = def;
-
-			} else {
-				// Merge current with new settings, if passed
-				if (typeof props === 'object') {
-
-					def = helpers.object.merge(dest[index], props);
-					dest[index] = def;
-
-				}
-			}
-		}
-
-		return this;
-	};
-
 	prot.removeDataset = function(dataset) {
 		var dsIndex;
 
@@ -664,17 +609,16 @@ SOFTWARE.
 			def.lineWidth = 0;
 		}
 
-		// Make sure the axis exists
-		this.initAxis(def.y,this.yAxises);
-		this.initAxis(def.x,this.xAxises);
+		// Merge suppied axis settings, with current axis settings with the default axis settings
+		// This both initiate axis values for new axises, and reuses current values for existing
+		this.yAxises[def.y.axis] = helpers.object.merge(defaults.axis, helpers.object.merge(this.yAxises[def.y.axis], def.y));
+		this.xAxises[def.x.axis] = helpers.object.merge(defaults.axis, helpers.object.merge(this.xAxises[def.x.axis], def.x));
 
 		// Push dataset to axis
 		this.pushDataset(def);
 
 		// Redraw, but only if the object is fully initiated
-		if (this.done === true) {
-			this.redraw();
-		}
+		this.done && this.redraw();
 
 		// Return the object, so that the user can reference to it while removing
 		// Hence, not chainable :(
@@ -1050,10 +994,10 @@ SOFTWARE.
 			rowHeight = parseInt(legend.font.split(' ')[0])*1.2,
 			additionalSpace = rowHeight,	// Vertical margin for each legend item
 			i, lx, textWidth,
-			lwoy = this.legend.inside ? this.nwoy  : this.settings.margin,
-			lwox = this.legend.inside ? this.wox + 5 : this.settings.margin,
-			lwidth = this.legend.inside ? this.wsw : this.w,
-			lheight = this.legend.inside ? this.wsh : this.h;
+			lwoy = legend.inside ? this.nwoy  : this.settings.margin,
+			lwox = legend.inside ? this.wox + 5 : this.settings.margin,
+			lwidth = legend.inside ? this.wsw : this.w,
+			lheight = legend.inside ? this.wsh : this.h;
 
 		this.ctx.font = legend.font;
 
@@ -1129,66 +1073,67 @@ SOFTWARE.
 		return legendSize;
 	};
 
+	prot.calcAxisSpace = function(axis,ctx,dir) {
+		var mw, i, tw, th;
+		axis._textSize = (axis.font !== undefined) ? parseInt(axis.font.split(' ')[0]) : 0;
+		axis._h = 0;
+		axis._h += (axis.showScale) ? 1 : 0;				// Add one pixel for scale
+		axis._h += (axis.showScale) ? axis.majorTickHeight : 0;	// Add n pixels for major ticks
+		axis._h += (axis.name) ? axis._textSize : 0; // Add n pixels for name
+		if (axis.showLabels) {
+			mw = 0;
+			for (i=axis._minVal; i<=axis._maxVal; i+=axis._step) {
+
+				if (axis._labels && axis._labels[i] !== undefined) {
+					tw = ctx.measureText(axis.labelFormat(axis._labels[i])).width;
+				} else {
+					tw = ctx.measureText(axis.labelFormat(i)).width;
+				}
+				th = axis._textSize;
+
+				// Rot 0 is different in x and y
+
+				tw = helpers.math.bboxrot(tw,th,axis.labelRotation+((dir==='x')?90:0)).width;
+
+				if(tw > mw) { mw = tw; }
+			}
+			axis._h += mw;
+		}
+		// To get the label width, we need to loop through them all
+		return axis;
+	};
+
 	prot.redraw = function() {
 
-		var a, c,
-			d, ds, mw, i, tw, th,
-			lh,
-			calcAxis = function(axis,ctx,dir) {
-				axis._textSize = (axis.font !== undefined) ? parseInt(axis.font.split(' ')[0]) : 0;
-				axis._h = 0;
-				axis._h += (axis.showScale) ? 1 : 0;				// Add one pixel for scale
-				axis._h += (axis.showScale) ? axis.majorTickHeight : 0;	// Add n pixels for major ticks
-				axis._h += (axis.name) ? axis._textSize : 0; // Add n pixels for name
-				if (axis.showLabels) {
-					mw = 0;
-					for (i=axis._minVal; i<=axis._maxVal; i+=axis._step) {
-
-						if (axis._labels && axis._labels[i] !== undefined) {
-							tw = ctx.measureText(axis.labelFormat(axis._labels[i])).width;
-						} else {
-							tw = ctx.measureText(axis.labelFormat(i)).width;
-						}
-						th = axis._textSize;
-
-						// Rot 0 is different in x and y
-						tw = helpers.math.bboxrot(tw,th,axis.labelRotation+((dir==='x')?90:0)).width;
-
-						if(tw > mw) { mw = tw; }
-					}
-					axis._h += mw;
-				}
-				// To get the label width, we need to loop through them all
-				return axis;
-			};
+		var a, d, ds, lh, c;
 
 		// Reset workspace width, height and offset
 		this.wsw = this.w-this.settings.margin*2; this.wsh = this.h-this.settings.margin*2;
 		this.wox = this.settings.margin; this.woy = this.settings.margin;
 		this.nwox = this.settings.margin; this.nwoy = this.settings.margin;
 
-		// 2. Calculate legend space requirement
-		if (this.settings.showLegend && !this.legend.inside) {
-			lh = this.drawLegend(this.legend, true) + this.settings.margin;
-			if (this.legend.position === 'bottom') {
+		// Calculate legend space requirement
+		if (this.settings.showLegend && !this.settings.legend.inside) {
+			lh = this.drawLegend(this.settings.legend, true) + this.settings.margin;
+			if (this.settings.legend.position === 'bottom') {
 				this.woy += lh;
 				this.wsh -= lh;
-			} else if (this.legend.position === 'top') {
+			} else if (this.settings.legend.position === 'top') {
 				this.nwoy += lh;
 				this.wsh -= lh;
-			} else if (this.legend.position === 'left') {
+			} else if (this.settings.legend.position === 'left') {
 				this.wox += lh;
 				this.wsw -= lh;
-			} else if (this.legend.position === 'right') {
+			} else if (this.settings.legend.position === 'right') {
 				this.nwox += lh;
 				this.wsw -= lh;
 			}
 		}
 
-		// 3. Calculate axis 'heights', workpace width, and workspace offset
+		// Calculate axis dimensions, workpace width, and workspace offset
 		for (a in this.yAxises) {
 			if (this.yAxises.hasOwnProperty(a)) {
-				this.yAxises[a] = calcAxis(this.yAxises[a],this.ctx,'y');
+				this.yAxises[a] = this.calcAxisSpace(this.yAxises[a],this.ctx,'y');
 
 				// Reduce workspace width by axis height
 				this.wsw -= this.yAxises[a]._h;
@@ -1201,7 +1146,7 @@ SOFTWARE.
 		}
 		for (a in this.xAxises) {
 			if (this.xAxises.hasOwnProperty(a)) {
-				this.xAxises[a] = calcAxis(this.xAxises[a],this.ctx,'x');
+				this.xAxises[a] = this.calcAxisSpace(this.xAxises[a],this.ctx,'x');
 
 				this.wsh -= this.xAxises[a]._h;
 
@@ -1210,21 +1155,20 @@ SOFTWARE.
 				else 		{ this.nwoy += this.xAxises[a]._h;  }
 			}
 		}
-		
-		// 1. Setup matrix
+
+		// Setup matrix
 		c = this.ctx;
 		c.clearRect(0, 0, this.w, this.h);	// Clear workspace
-
-		c.save();							// Save matrix
-		c.translate(0.5,0.5);				// Translate 0.5 px i X and Y to get crisp lines
+		c.save();							
+		c.translate(0.5,0.5);				// Translate 0.5 px i X and Y to get crisp lines while using integers as x/y positions
 		c.scale(1,-1);						// Flip matrix to make lower left corner 0,0
 		c.translate(0,-this.h);				// Move pointer from old 0,0 (upper left corner) to new 0,0 (lower left corner)
 
-		// 4. Draw axises
+		// Draw axises
 		for(a in this.yAxises) { if (this.yAxises.hasOwnProperty(a)) { this.drawAxis(c,this.yAxises[a],'x',(a % 2)); }}
 		for(a in this.xAxises) { if (this.xAxises.hasOwnProperty(a)) { this.drawAxis(c,this.xAxises[a],'y',(a % 2)); }}
 
-		// 5. Draw datasets (in reverse from added order, to get stacked stuff right)
+		// Draw datasets (in reverse from added order, to get stacked stuff right)
 		for(d=this.datasets.length-1; d>=0; d--) {
 			ds = this.datasets[d];
 			if (helpers.renderers[ds.type]!==undefined || ds.type === 'area') {
@@ -1243,12 +1187,11 @@ SOFTWARE.
 			}
 		}
 
-		// 6. Restore matrix
+		// Restore matrix
 		c.restore();
 
-		if (this.settings.showLegend) {
-			this.drawLegend(this.legend, false);
-		}
+		// Show legend, if requested
+		this.settings.showLegend && this.drawLegend(this.settings.legend, false);
 	};
 
 	// Handle resize event

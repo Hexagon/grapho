@@ -48,6 +48,7 @@
         <script src="grapho.js"></script>
 
     </head>
+
     <body>
         <div id="header">
             <span class="header primary">grapho</span>
@@ -78,14 +79,14 @@
                             graphoObj11.addDataset({
                                 type:'line',
                                 strokeStyle: '#F0F066',
+                                y: { scaleStyle: '#F0F066', showGridLines: true, name: "Yellow axis", showLabels: true },
+                                x: { showLabels: true },
                                 data: [7, 6, 5, 4, 2.5, 4, 4, 10, 0, 12,14]
                             });
 
                             graphoObj11.addDataset({
                                 type:'bar',
                                 strokeStyle: '#F0F066',
-                                y: { scaleStyle: '#F0F066', showGridLines: true, name: "Yellow axis", showLabels: true },
-                                x: { showLabels: true},
                                 data: [7, 6, 5, 4, 2.5, 4, 4, 10, 0, 12, 14]
                             });
 
@@ -108,9 +109,10 @@ graphoObj11.addDataset({
 graphoObj11.addDataset({
     type:'bar',
     strokeStyle: '#F0F066',
-    y: { scaleStyle: '#F0F066', showGridLines: true, name: "Yellow axis", showLabels: true },
-    x: { showLabels: true},
-    data: [7, 6, 5, 4, 2.5, 4, 4, 10, 0, 12, 14]
+    y: {    scaleStyle: '#F0F066', showGridLines: true, 
+            name: "Yellow axis", showLabels: true },
+    x: {    showLabels: true},
+    data:   [7, 6, 5, 4, 2.5, 4, 4, 10, 0, 12, 14]
 });</code></pre>
             </article>
         </section>
@@ -179,16 +181,19 @@ graphoObj11.addDataset({
 graphoObj10.addDataset({
     lineSmooth: false,
     strokeStyle: '#F0F066',
-    y: {  showScale: true, scaleStyle: '#F0F066', showGridLines: true, name: "Yellow axis", showLabels: true, showCenter: true },
-    x: {  showGridLines: true, showLabels: true},
-    data: [7, 6, 5, 4, 2.5, 4, 4, 10, -7, 57, 0, 0, -41, 25, 3, 4, 5, 6, 7, 7, 2, 8, 5, 5, 4, 2]
+    y: {    showScale: true, scaleStyle: '#F0F066', showGridLines: true, 
+            name: "Yellow axis", showLabels: true, showCenter: true },
+    x: {    showGridLines: true, showLabels: true},
+    data: [ 7, 6, 5, 4, 2.5, 4, 4, 10, -7, 57, 0, 0,
+            -41, 25, 3, 4, 5, 6, 7, 7, 2, 8, 5, 5, 4, 2]
 });
 
 // Dots
 graphoObj10.addDataset({
     type: 'scatter',
     fillStyle: '#F0F066',
-    data: [7, 6, 5, 4, 2.5, 4, 4, 10, -7, 57, 0, 0, -41, 25, 3, 4, 5, 6, 7, 7, 2, 8, 5, 5, 4, 2]
+    data: [ 7, 6, 5, 4, 2.5, 4, 4, 10, -7, 57, 0, 0, 
+            -41, 25, 3, 4, 5, 6, 7, 7, 2, 8, 5, 5, 4, 2]
 });
 
 // Line
@@ -196,16 +201,19 @@ graphoObj10.addDataset({
     type: 'line',
     lineSmooth: false,
     strokeStyle: '#6666F0',
-    y: { axis: 2,  scaleStyle: '#6666F0', name: "Blue axis", showCenter: true, showScale: true},
-    data: [6, 1, 3, 6, 2, 6, 3, 2, -7, 9, 2, 0, 0, 5, 3, 2, 2, 6, 6, 15, 17, 17, 15, 14, 13, 2]
+    y: {    axis: 2,  scaleStyle: '#6666F0', 
+            name: "Blue axis", showCenter: true, showScale: true},
+    data: [ 6, 1, 3, 6, 2, 6, 3, 2, -7, 9, 2, 0, 0, 
+            5, 3, 2, 2, 6, 6, 15, 17, 17, 15, 14, 13, 2]
 });
 
 // Dots
 graphoObj10.addDataset({
     type: 'scatter',
     fillStyle: '#6666F0',
-    y: { axis: 2},
-    data: [6, 1, 3, 6, 2, 6, 3, 2, -7, 9, 2, 0, 0, 5, 3, 2, 2, 6, 6, 15, 17, 17, 15, 14, 13, 2]
+    y: {    axis: 2},
+    data: [ 6, 1, 3, 6, 2, 6, 3, 2, -7, 9, 2, 0, 0, 
+            5, 3, 2, 2, 6, 6, 15, 17, 17, 15, 14, 13, 2]
 });</code></pre>
             </article>
         </section>
@@ -326,7 +334,7 @@ graphoObj12.addDataset({
                                 },
                                 x: { 
                                     showLabels: true,
-                                    labelRotation: -45,
+                                    labelRotation: 45,
                                     labelFormat: Grapho.formats.time
                                 },
                                 data: [[1420188000,1],[1420248000,2],[1420308000,3],[1420368000,4]]
@@ -364,7 +372,6 @@ graphoObj13.addDataset({
 });</code></pre>
             </article>
         </section>
-
 
         <section>
             <article>
@@ -1005,7 +1012,7 @@ graphoObj12.addDataset({
                         <!-- example-13 javascript -->
                         <script>
 
-                            var graphoObj13 = new Grapho( { place: 'example-13', showLegend: true, legend: { inside: true, position:'top', font: '10px Droid Sans' } } );
+                            var graphoObj13 = new Grapho( { place: 'example-13', showLegend: true, legend: { inside: true, position:'top' } } );
 
                             graphoObj13.addDataset({
                                 type:'error',
