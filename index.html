@@ -1051,7 +1051,7 @@ graphoObj12.addDataset({
                         </script>
 
                     </div>
-                    <!-- Example 12 - End -->
+                    <!-- Example 13 - End -->
                 </div>
             </article>
             <article>
@@ -1089,6 +1089,227 @@ graphoObj13.addDataset({
     y: { scaleStyle: '#F0F066', showGridLines: true, showLabels: true },
     x: { showLabels: true},
     data: [7, 6, 5, 4, 2.5, 4, 4, 10, 0, 12,14]
+});</code></pre>
+            </article>
+        </section>
+
+        <section>
+            <article>
+                <h3>
+                    <span class="secondary">Example 14 - </span>
+                    <span class="tertiary">Box plot </span>
+                </h3>
+                <div class="container w-100 h-1">
+
+                    <!-- Example 14 - Start -->
+                    <div id="example-14" class="box bw-100 h-100">
+
+                        <!-- example-14 javascript -->
+                        <script>
+
+                            var graphoObj14 = new Grapho( { place: 'example-14' } );
+
+                            graphoObj14.addDataset({
+                                type:'box',
+                                strokeStyle: '#FFFFFF',
+                                fillStyle: '#333333',
+                                lineWidth: 1,
+                                widthPrc: 50,
+                                y: {  showScale: true, scaleStyle: '#8888FF', showGridLines: false, showLabels: true, showCenter: true },
+                                x: {  showGridLines: false, showLabels: true, showScale: true },
+                                data: [
+                                    // Order is max min high low median
+                                    [0,[5,1,4,2,3]],
+                                    [1,[6,2,5,3,4]],
+                                    [2,[5,0,4,2,3]],
+                                    [3,[7,1,4,2,3]],
+                                    [4,[8,1,5,2,3]],
+                                    [5,[7,1,6,3,4]],
+                                    [6,[6,2,5,3,4]],
+                                    [7,[6,2,5,3,4]],
+                                    [8,[6,2,5,3,4]]
+                                ]
+                            });
+
+
+                        </script>
+
+                    </div>
+                    <!-- Example 14 - End -->
+                </div>
+            </article>
+            <article>
+                <h3><span class="tertiary">Source code</span></h3>
+                <pre><code data-language="javascript">var graphoObj14 = new Grapho( { place: 'example-14' } );
+
+graphoObj14.addDataset({
+    type:'box',
+    strokeStyle: '#FFFFFF',
+    fillStyle: '#333333',
+    lineWidth: 1,
+    widthPrc: 50,
+    y: {  showScale: true, scaleStyle: '#8888FF', showGridLines: false, showLabels: true, showCenter: true },
+    x: {  showGridLines: false, showLabels: true, showScale: true },
+    data: [
+        // Order is max min high low median
+        [0,[5,1,4,2,3]],
+        [1,[6,2,5,3,4]],
+        [2,[5,0,4,2,3]],
+        [3,[7,1,4,2,3]],
+        [4,[8,1,5,2,3]],
+        [5,[7,1,6,3,4]],
+        [6,[6,2,5,3,4]],
+        [7,[6,2,5,3,4]],
+        [8,[6,2,5,3,4]]
+    ]
+});</code></pre>
+            </article>
+        </section>
+
+
+        <section>
+            <article>
+                <h3>
+                    <span class="secondary">Example 15 - </span>
+                    <span class="tertiary">OHLC </span>
+                </h3>
+                <div class="container w-100 h-1">
+
+                    <!-- Example 15 - Start -->
+                    <div id="example-15" class="box bw-100 h-100">
+
+                        <!-- example-15 javascript -->
+                        <script>
+
+                            var graphoObj15 = new Grapho( { place: 'example-15' } );
+
+                            graphoObj15.addDataset({
+                                type:'ohlc',
+                                strokeStyle: '#FFFFFF',
+                                fillStyle: '#333333',
+                                lineWidth: 1,
+                                widthPrc: 50,
+                                y: {  showScale: true, scaleStyle: '#8888FF', showGridLines: false, showLabels: true, showCenter: true },
+                                x: {  showGridLines: false, showLabels: true, showScale: true },
+                                data: [
+                                    // NOTE! Order is HLOC
+                                    [0,[5,1,4,2]],
+                                    [1,[6,2,5,3]],
+                                    [2,[5,0,4,2]],
+                                    [3,[7,1,4,2]],
+                                    [4,[8,1,5,2]],
+                                    [5,[7,1,6,3]],
+                                    [6,[6,2,5,3]],
+                                    [7,[6,2,5,3]],
+                                    [8,[6,2,5,3]]
+                                ]
+                            });
+
+
+                        </script>
+
+                    </div>
+                    <!-- Example 15 - End -->
+                </div>
+            </article>
+            <article>
+                <h3><span class="tertiary">Source code</span></h3>
+                <pre><code data-language="javascript">var graphoObj15 = new Grapho( { place: 'example-15' } );
+
+graphoObj15.addDataset({
+    type:'ohlc',
+    strokeStyle: '#FFFFFF',
+    fillStyle: '#333333',
+    lineWidth: 1,
+    widthPrc: 50,
+    y: {  showScale: true, scaleStyle: '#8888FF', showGridLines: false, showLabels: true, showCenter: true },
+    x: {  showGridLines: false, showLabels: true, showScale: true },
+    data: [
+        // NOTE! Order is HLOC
+        [0,[5,1,4,2]],
+        [1,[6,2,5,3]],
+        [2,[5,0,4,2]],
+        [3,[7,1,4,2]],
+        [4,[8,1,5,2]],
+        [5,[7,1,6,3]],
+        [6,[6,2,5,3]],
+        [7,[6,2,5,3]],
+        [8,[6,2,5,3]]
+    ]
+});</code></pre>
+            </article>
+        </section>
+
+
+        <section>
+            <article>
+                <h3>
+                    <span class="secondary">Example 16 - </span>
+                    <span class="tertiary">Candles </span>
+                </h3>
+                <div class="container w-100 h-1">
+
+                    <!-- Example 16 - Start -->
+                    <div id="example-16" class="box bw-100 h-100">
+
+                        <!-- example-16 javascript -->
+                        <script>
+
+                            var graphoObj16 = new Grapho( { place: 'example-16' } );
+
+                            graphoObj16.addDataset({
+                                type:'candle',
+                                strokeStyle: '#FFFFFF',
+                                fillStyle: '#333333',
+                                lineWidth: 1,
+                                widthPrc: 50,
+                                y: {  showScale: true, scaleStyle: '#8888FF', showGridLines: false, showLabels: true, showCenter: true },
+                                x: {  showGridLines: false, showLabels: true, showScale: true },
+                                data: [
+                                    // NOTE! Order is HLOC
+                                    [0,[5,1,4,2]],
+                                    [1,[6,2,5,3]],
+                                    [2,[5,0,4,2]],
+                                    [3,[7,1,4,2]],
+                                    [4,[8,1,5,2]],
+                                    [5,[7,1,6,3]],
+                                    [6,[6,2,5,3]],
+                                    [7,[6,2,5,3]],
+                                    [8,[6,2,5,3]]
+                                ]
+                            });
+
+
+                        </script>
+
+                    </div>
+                    <!-- Example 16 - End -->
+                </div>
+            </article>
+            <article>
+                <h3><span class="tertiary">Source code</span></h3>
+                <pre><code data-language="javascript">var graphoObj16 = new Grapho( { place: 'example-16' } );
+
+graphoObj16.addDataset({
+    type:'candle',
+    strokeStyle: '#FFFFFF',
+    fillStyle: '#333333',
+    lineWidth: 1,
+    widthPrc: 50,
+    y: {  showScale: true, scaleStyle: '#8888FF', showGridLines: false, showLabels: true, showCenter: true },
+    x: {  showGridLines: false, showLabels: true, showScale: true },
+    data: [
+        // NOTE! Order is HLOC
+        [0,[5,1,4,2]],
+        [1,[6,2,5,3]],
+        [2,[5,0,4,2]],
+        [3,[7,1,4,2]],
+        [4,[8,1,5,2]],
+        [5,[7,1,6,3]],
+        [6,[6,2,5,3]],
+        [7,[6,2,5,3]],
+        [8,[6,2,5,3]]
+    ]
 });</code></pre>
             </article>
         </section>
