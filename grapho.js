@@ -102,7 +102,7 @@ SOFTWARE.
 				dotWidth: 4,		// type: scatter
 
 				// type: 'bar'
-				barWidthPrc: 90,
+				widthPrc: 90,
 
 				// Internal stuff
 				_labels: [],
