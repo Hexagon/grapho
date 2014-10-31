@@ -36,7 +36,6 @@ SOFTWARE.
 }(this, function () { 
 	'use strict';
 
-
 	var 
 		// A collection of all instantiated Grapho's
 		graphos = [],
@@ -217,6 +216,11 @@ SOFTWARE.
 
 			// Renderers
 			renderers: {
+				// Aliases
+				area: function(grapho, context, dataset, xAxis, yAxis) { helpers.renderers.line(grapho, context, dataset, xAxis, yAxis); },
+				box: function(grapho, context, dataset, xAxis, yAxis) { helpers.renderers.error(grapho, context, dataset, xAxis, yAxis); },
+				ohlc: function(grapho, context, dataset, xAxis, yAxis) { helpers.renderers.error(grapho, context, dataset, xAxis, yAxis); },
+				candle: function(grapho, context, dataset, xAxis, yAxis) { helpers.renderers.error(grapho, context, dataset, xAxis, yAxis); },
 				line: function(grapho, context, dataset, xAxis, yAxis) {
 					var point, i,
 						next, npxp, mpxpdiff, pad, innerWidth,
@@ -329,10 +333,13 @@ SOFTWARE.
 				},
 				error: function(grapho, context, dataset, xAxis, yAxis) {
 					var point, i,
-						mpxpdiff, pad, innerWidth, barWidth, barSpacing, center, ct,
+						mpxpdiff, pad, innerWidth, barWidth, barSpacing, 
 						px, // Current X-pixel
 						pyh, // Current Y-pixel high
-						pyl; // Current Y-pixel low;
+						pyl,  // Current Y-pixel low;
+						pyo,  // Current Y-pixel open;
+						pyc,  // Current Y-pixel close;
+						pym;  // Current Y-pixel median;
 
 					mpxpdiff = xAxis._minStepPrc;
 					mpxpdiff = mpxpdiff * (grapho.wsw-(mpxpdiff*grapho.wsw*((xAxis._padded)?1:0)));
@@ -342,27 +349,59 @@ SOFTWARE.
 					barSpacing 	= mpxpdiff*(100-dataset.widthPrc)/100;
 					barWidth 	= mpxpdiff-barSpacing;
 
+					context.lineWidth = dataset.lineWidth;
 					context.strokeStyle = dataset.strokeStyle;
+					context.fillStyle = dataset.fillStyle;
 
 					for ( i = 0; i < dataset.data.length; i++) {
 						if ((point = dataset.data[i])) {
 							
 							px = Math.round(grapho.wox - mpxpdiff/2 + pad + barSpacing/2 + ((point[0] - xAxis._minVal) / (xAxis._range) * innerWidth));
-							pyh = Math.round(grapho.woy + (point[1][0] - yAxis._minVal) / (yAxis._range) * grapho.wsh);
-							pyl = Math.round(grapho.woy + (point[1][1] - yAxis._minVal) / (yAxis._range) * grapho.wsh);
+							pyh = Math.round(grapho.woy + (point[1][0] - yAxis._minVal) / (yAxis._range) * grapho.wsh);	// high
+							pyl = Math.round(grapho.woy + (point[1][1] - yAxis._minVal) / (yAxis._range) * grapho.wsh); // low
+							pyo = Math.round(grapho.woy + (point[1][2] - yAxis._minVal) / (yAxis._range) * grapho.wsh); // open
+							pyc = Math.round(grapho.woy + (point[1][3] - yAxis._minVal) / (yAxis._range) * grapho.wsh); // close
+							pym = Math.round(grapho.woy + (point[1][4] - yAxis._minVal) / (yAxis._range) * grapho.wsh); // median
 
-							// High line
 							context.beginPath();
-							context.moveTo(px,pyh);
-							context.lineTo(px+barWidth,pyh);
-
-							// Connector line
+							// High line
+							if (dataset.type==='error' || dataset.type==='box' ) {
+								context.moveTo(px,pyh);
+								context.lineTo(px+barWidth,pyh);	
+							}
+							
+							// Connector line, full range
 							context.moveTo(Math.round(px+barWidth/2),pyh);
 							context.lineTo(Math.round(px+barWidth/2),pyl);
 
+							// Open/Close lines
+							if (dataset.type==='ohlc') {
+								context.moveTo(px,pyo);
+								context.lineTo(px+barWidth/2,pyo);
+								context.moveTo(px+barWidth/2,pyc);
+								context.lineTo(px+barWidth,pyc);
+							}
+
+							context.stroke();
+							context.beginPath();
+
+							// Box
+							if (dataset.type==='candle' || dataset.type==='box') {
+								context.fillRect(px, pyo, barWidth, pyc-pyo);
+								context.strokeRect(px, pyo, barWidth, pyc-pyo);
+							}
+
+							// Median line
+							if (dataset.type==='box') {
+								context.moveTo(px,pym);
+								context.lineTo(px+barWidth,pym);
+							}
+
 							// Low line
-							context.moveTo(px,pyl);
-							context.lineTo(px+barWidth,pyl);
+							if (dataset.type==='error' || dataset.type==='box') {
+								context.moveTo(px,pyl);
+								context.lineTo(px+barWidth,pyl);
+							}
 
 							context.stroke();
 						}
@@ -376,8 +415,7 @@ SOFTWARE.
 						py,
 						bh,
 						heightflag,
-						innerWidth,
-						center = yAxis.center;
+						innerWidth;
 					
 
 					mpxpdiff = xAxis._minStepPrc;
@@ -732,7 +770,7 @@ SOFTWARE.
 		yAxis = this.calcAxisSteps(yAxis);
 
 		// If type == 'bar', force extra steps on x axis
-		if (dataset.type==='bar') {
+		if (dataset.type==='bar' || dataset.type==='error' || dataset.type==='ohlc' || dataset.type==='candle' || dataset.type==='box') {
 			xAxis._padded = true;
 		}
 
@@ -787,7 +825,7 @@ SOFTWARE.
 		else if (msd > 1) {	msd = 2; }
 		
 		newStepSize 	= msd * power;
-		if(newStepSize < oldStep) { newStepSize = oldStep; }
+		//if(newStepSize < oldStep) { newStepSize = oldStep; }
 		axis._startMinVal = axis._minVal - (axis._minVal % newStepSize);
 
 		newSteps 		= Math.round(Math.ceil((axis._range) / newStepSize)) ;
@@ -1174,12 +1212,7 @@ SOFTWARE.
 			if (helpers.renderers[ds.type]!==undefined || ds.type === 'area') {
 
 				// Call renderer, first a special case for line and area
-				if (ds.type === 'line' || ds.type === 'area') {
-					helpers.renderers.line(this, c, ds, this.xAxises[ds.x.axis], this.yAxises[ds.y.axis]);
-				// ... then the general fallback
-				} else {
-					helpers.renderers[ds.type](this, c, ds, this.xAxises[ds.x.axis], this.yAxises[ds.y.axis]);
-				}
+				helpers.renderers[ds.type](this, c, ds, this.xAxises[ds.x.axis], this.yAxises[ds.y.axis]);
 
 			} else {
 				// Missing renderer
@@ -1215,7 +1248,9 @@ SOFTWARE.
 		while ((graph = graphos[i++])) {
 			graph.resize();
 		}
+
 	});
 
 	return Grapho;
+
 }));
