@@ -97,7 +97,7 @@ SOFTWARE.
 				innerMargin: 3
 			},
 			dataset: {
-				type: 'line', // line || scatter || area || bar
+				type: 'line', // line || scatter || area || bar || pie || box || error || ohlc || candle
 
 				x: { axis: 1 },
 				y: { axis: 1 },
@@ -622,7 +622,7 @@ SOFTWARE.
 
 	};
 
-	prot.addDataset = function (dataset) {
+	prot.addDataSet = function (dataset) {
 		var datasetIsArray = helpers.array.is(dataset);
 
 		// Check that we got some type of valid object as parameter
@@ -940,7 +940,7 @@ SOFTWARE.
 						temp2 = temp;
 					}	
 
-					y = axis._offset+axis._h-labeldim.height/2-(axis.showScale?axis.majorTickHeight+1:0)-2;
+					y = axis._offset+axis._h-labeldim.height*1.2/2-(axis.showScale?axis.majorTickHeight+1:0)-2;
 					if (!primary) {
 						y = h-y;
 					}
@@ -1115,9 +1115,9 @@ SOFTWARE.
 		var mw, i, tw, th;
 		axis._textSize = (axis.font !== undefined) ? parseInt(axis.font.split(' ')[0]) : 0;
 		axis._h = 0;
-		axis._h += (axis.showScale) ? 1 : 0;				// Add one pixel for scale
+		axis._h += (axis.showScale) ? 1 : 0;					// Add one pixel for scale
 		axis._h += (axis.showScale) ? axis.majorTickHeight : 0;	// Add n pixels for major ticks
-		axis._h += (axis.name) ? axis._textSize : 0; // Add n pixels for name
+		axis._h += (axis.name) ? axis._textSize * 1.4 : 0; 		// Add font size + 30% pixels for name
 		if (axis.showLabels) {
 			mw = 0;
 			for (i=axis._minVal; i<=axis._maxVal; i+=axis._step) {
@@ -1131,7 +1131,7 @@ SOFTWARE.
 
 				// Rot 0 is different in x and y
 
-				tw = helpers.math.bboxrot(tw,th,axis.labelRotation+((dir==='x')?90:0)).width;
+				tw = helpers.math.bboxrot(tw,th,axis.labelRotation+((dir==='x')?90:0)).width*1.2,1;
 
 				if(tw > mw) { mw = tw; }
 			}
