@@ -825,7 +825,7 @@ SOFTWARE.
 		else if (msd > 1) {	msd = 2; }
 		
 		newStepSize 	= msd * power;
-		//if(newStepSize < oldStep) { newStepSize = oldStep; }
+		if(newStepSize < oldStep) { newStepSize = oldStep; }
 		axis._startMinVal = axis._minVal - (axis._minVal % newStepSize);
 
 		newSteps 		= Math.round(Math.ceil((axis._range) / newStepSize)) ;
@@ -1117,7 +1117,8 @@ SOFTWARE.
 		axis._h = 0;
 		axis._h += (axis.showScale) ? 1 : 0;					// Add one pixel for scale
 		axis._h += (axis.showScale) ? axis.majorTickHeight : 0;	// Add n pixels for major ticks
-		axis._h += (axis.name) ? axis._textSize * 1.4 : 0; 		// Add font size + 30% pixels for name
+		axis._h += (axis.name) ? axis._textSize * 1.7 : 0; 		// Add font size + 30% pixels for name
+
 		if (axis.showLabels) {
 			mw = 0;
 			for (i=axis._minVal; i<=axis._maxVal; i+=axis._step) {
