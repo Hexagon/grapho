@@ -756,22 +756,27 @@ SOFTWARE.
 				dataset.data[i][0] = dataset.data[i][2];
 			}
 
-			// Find out if this is an existing string
-			tryindex = -1;
-			for (j = 0; j < xAxis._labels.length; j++) {
-				if (xAxis._labels[j] === dataset.data[i][0]) {
-					tryindex = j;
+			if (!helpers.math.isNumber(dataset.data[i][0])) {
+				// Find out if this is an existing string
+				tryindex = -1;
+				for (j = 0; j < xAxis._labels.length; j++) {
+					if (xAxis._labels[j] === dataset.data[i][0]) {
+						tryindex = j;
+					}
 				}
-			}
 
-			dataset.data[i][2] = dataset.data[i][0];
-			if(tryindex > -1) {
-				dataset.data[i][0] = cleanDataX[i] = tryindex;
+				dataset.data[i][2] = dataset.data[i][0];
+				if(tryindex > -1) {
+					dataset.data[i][0] = cleanDataX[i] = tryindex;
+				} else {
+					tryindex = xAxis._labels.push(dataset.data[i][0])-1;
+					dataset.data[i][0] = cleanDataX[i] = tryindex;	
+				}	
 			} else {
-				tryindex = xAxis._labels.push(dataset.data[i][0])-1;
-				dataset.data[i][0] = cleanDataX[i] = tryindex;	
+				tryindex = i;
+				cleanDataX[i] = xAxis._labels[i] = dataset.data[i][0];
 			}
-
+			
 			if(!helpers.array.is(dataset.data[i][1])) {
 				cleanDataY[i] = dataset.data[i][1];
 			} else {
