@@ -774,7 +774,7 @@ SOFTWARE.
 				}	
 			} else {
 				tryindex = i;
-				cleanDataX[i] = xAxis._labels[i] = dataset.data[i][0];
+				cleanDataX[i] = dataset.data[i][2] = xAxis._labels[i] = dataset.data[i][0];
 			}
 			
 			if(!helpers.array.is(dataset.data[i][1])) {
@@ -896,6 +896,7 @@ SOFTWARE.
 		newStepSize 	= msd * power;
 		if(newStepSize < oldStep) { newStepSize = oldStep; }
 		axis._startMinVal = axis._minVal - (axis._minVal % newStepSize);
+		if(axis._startMinVal < axis._minVal) { axis._startMinVal = axis._minVal; }
 
 		newSteps 		= Math.round(Math.ceil((axis._range) / newStepSize)) ;
 		newRange 		= newStepSize * newSteps;
