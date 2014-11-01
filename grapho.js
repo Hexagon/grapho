@@ -45,7 +45,7 @@ SOFTWARE.
             default: function (l) {
             		// Protect agains javascript decimal place wierdness
                     if (helpers.math.isNumber(l)) {
-                            return Math.round(l*100000)/100000;
+                            return Math.round(l*10000)/10000;
                     } else {
                             return l;
                     }

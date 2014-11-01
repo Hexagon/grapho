@@ -82,10 +82,6 @@
                                 y: { 
                                     scaleStyle: '#F0F066',
                                     showGridLines: true,
-                                    name: "Yellow axis",
-                                    labelFont: '11px Droid Sans',
-                                    nameFont: '20px Droid Sans',
-                                    labelStyle: '#FF0000',
                                     labels: true
                                 },
                                 x: { 
@@ -116,10 +112,6 @@ graphoObj11.addDataSet({
     y: { 
         scaleStyle: '#F0F066',
         showGridLines: true,
-        name: "Yellow axis",
-        labelFont: '11px Droid Sans',
-        nameFont: '20px Droid Sans',
-        labelStyle: '#FF0000',
         labels: true
     },
     x: { 
@@ -200,6 +192,8 @@ graphoObj11.addDataSet({
                 <h3><span class="tertiary">Source code</span></h3>
                 <pre><code data-language="javascript">var graphoObj10 = new Grapho( { place: 'example-2' } );
 
+var graphoObj10 = new Grapho( { place: 'example-2' } );
+
 // Line
 graphoObj10.addDataSet({
     lineSmooth: false,
@@ -264,11 +258,14 @@ graphoObj10.addDataSet({
                                 lineWidth: 1,
                                 y: { 
                                     name: 'Big font axis',
+                                    nameFont: '20px Droid Sans',
+
+                                    labels: true,
+                                    labelFont: '13px Droid Sans',
+
                                     scaleStyle: '#F0F066', 
                                     showGridLines: true, 
-                                    labels: true,
                                     showCenter: true,
-                                    font: '20px Droid Sans'
                                 },
                                 x: { 
                                     labels: true,
@@ -304,11 +301,14 @@ graphoObj12.addDataSet({
     lineWidth: 1,
     y: { 
         name: 'Big font axis',
+        nameFont: '20px Droid Sans',
+
+        labels: true,
+        labelFont: '13px Droid Sans',
+
         scaleStyle: '#F0F066', 
         showGridLines: true, 
-        labels: true,
         showCenter: true,
-        font: '20px Droid Sans'
     },
     x: { 
         labels: true,
@@ -332,7 +332,7 @@ graphoObj12.addDataSet({
             <article>
                 <h3>
                     <span class="secondary">Example 4 - </span>
-                    <span class="tertiary">Date axis</span>
+                    <span class="tertiary">Time axis</span>
                 </h3>
                 <div class="container w-100 h-1">
 
@@ -395,114 +395,6 @@ graphoObj13.addDataSet({
         labelFormat: Grapho.formats.time
     },
     data: [[1420188000,1],[1420248000,2],[1420308000,3],[1420368000,4]]
-});</code></pre>
-            </article>
-        </section>
-
-        <section>
-            <article>
-                <h3>
-                    <span class="secondary">Example 5 - </span>
-                    <span class="tertiary">Line plot smiley</span>
-                </h3>
-                <div class="container w-100 h-1">
-
-                    <!-- Example 5 Start -->
-                    <div id="example-5" class="box bw-100 h-100">
-
-                        <!-- example-5 javascript -->
-                        <script>
-
-                            // Create grapho object, pass a parameter pointing to the destination element
-                            var graphoObj5 = new Grapho( { place: 'example-5' } );
-
-                            graphoObj5.addDataSet({
-                                type:'line',
-                                strokeStyle: '#F0F066',
-                                lineSmooth: true,
-                                lineWidth: 5,
-                                x: { 
-                                    min: -0.5,
-                                    max: 4.5
-                                },
-                               data: [[0.5,0],[1,-1],[2,-1.5],[3,-1],[3.5,0]]
-                            });
-
-                            graphoObj5.addDataSet({
-                                type:'line',
-                                strokeStyle: '#F0F066',
-                                lineWidth: 5,
-                                data: [[1,3],[1,1]]
-                            });
-
-                            graphoObj5.addDataSet({
-                                type:'line',
-                                strokeStyle: '#F0F066',
-                                lineWidth: 5,
-                                data: [[3,3],[3,1]]
-                            });
-
-                            graphoObj5.addDataSet({
-                                type:'scatter',
-                                fillStyle: 'rgba(96,96,196,1.0)',
-                                dotWidth: 15,
-                                data: [[1,2],[3,2]]
-                            });
-
-                            graphoObj5.addDataSet({
-                                type:'scatter',
-                                fillStyle: 'rgba(255,96,96,1.0)',
-                                dotWidth: 26,
-                                data: [[0.5,1],[3.5,1]]
-                            });
-                        </script>
-
-                    </div>
-                    <!-- Example 5 - End -->
-                </div>
-            </article>
-            <article>
-                <h3><span class="tertiary">Source code</span></h3>
-                <pre><code data-language="javascript">var graphoObj5 = new Grapho( { place: 'example-5' } );
-
-graphoObj5.addDataSet({
-    type:'line',
-    strokeStyle: '#F0F066',
-    lineSmooth: true,
-    lineWidth: 5,
-    x: { 
-        min: -0.5,
-        max: 4.5
-    },
-   data: [[0.5,0],[1,-1],[2,-1.5],[3,-1],[3.5,0]]
-});
-
-graphoObj5.addDataSet({
-    type:'line',
-    strokeStyle: '#F0F066',
-    lineWidth: 5,
-    data: [[1,3],[1,1]]
-});
-
-graphoObj5.addDataSet({
-    type:'line',
-    strokeStyle: '#F0F066',
-    lineWidth: 5,
-    data: [[3,3],[3,1]]
-});
-
-graphoObj5.addDataSet({
-    type:'scatter',
-    fillStyle: 'rgba(96,96,196,1.0)',
-    dotWidth: 15,
-    data: [[1,2],[3,2]]
-});
-
-graphoObj5.addDataSet({
-    type:'scatter',
-    fillStyle: 'rgba(255,96,96,1.0)',
-    dotWidth: 26,
-    data: [[0.5,1],[3.5,1]]
 });</code></pre>
             </article>
         </section>
@@ -652,22 +544,20 @@ randomData();</code></pre>
                             graphoObj7.addDataSet({
                                 strokeStyle: '#F0F066',
                                 lineSmooth: false,
-                                fillStyle: '#F0F066',
-                                y: {  showScale: true, scaleStyle: '#F0F066', showGridLines: true, name: "Yellow axis", labels: true, showCenter: true, stacked: true },
+                                y: {  showScale: true, scaleStyle: '#F0F066', showGridLines: true, 
+                                      labels: true, showCenter: true, stacked: true },
                                 x: {  showGridLines: true, labels: true},
                                 data: [7, 6, 5, 4, 5, 5, 4, 5, 5, 5, 4, 7, 3, 4, 5, 6, 7,  5, 5, 4]
                             });
 
                             graphoObj7.addDataSet({
                                 strokeStyle: '#6666F0',
-                                fillStyle: '#6666F0',
                                 lineSmooth: false,
                                 data: [6, 1,  6, 3, 2, 4, 10, 2, 5, 5, 5, 3, 2, 2, 6, 6, 15, 17, 13, 2]
                             });
 
                             graphoObj7.addDataSet({
                                 strokeStyle: '#F06666',
-                                fillStyle: '#F06666',
                                 lineSmooth: false,
                                 data: [6, 2, 6, 3, 2, 4, 5, 2, 10, 0, 5, 3, 2, 2, 6, 6, 3, 3, 3, 3]
                             });
@@ -682,25 +572,24 @@ randomData();</code></pre>
                 <h3><span class="tertiary">Source code</span></h3>
                 <pre><code data-language="javascript">var graphoObj8 = new Grapho( { place: 'example-8' } );
 
-graphoObj8.addDataSet({
+
+graphoObj7.addDataSet({
     strokeStyle: '#F0F066',
     lineSmooth: false,
-    fillStyle: '#F0F066',
-    y: {  showScale: true, scaleStyle: '#F0F066', showGridLines: true, name: "Yellow axis", labels: true, showCenter: true, stacked: true },
+    y: {  showScale: true, scaleStyle: '#F0F066', showGridLines: true, 
+          labels: true, showCenter: true, stacked: true },
     x: {  showGridLines: true, labels: true},
-    data: [7, 6, 5, 4, 5, 5, 4, 5, 5, 5, 4, 10, 3, 4, 5, 6, 7,  5, 5, 4]
+    data: [7, 6, 5, 4, 5, 5, 4, 5, 5, 5, 4, 7, 3, 4, 5, 6, 7,  5, 5, 4]
 });
 
-graphoObj8.addDataSet({
+graphoObj7.addDataSet({
     strokeStyle: '#6666F0',
-    fillStyle: '#6666F0',
     lineSmooth: false,
     data: [6, 1,  6, 3, 2, 4, 10, 2, 5, 5, 5, 3, 2, 2, 6, 6, 15, 17, 13, 2]
 });
 
-graphoObj8.addDataSet({
+graphoObj7.addDataSet({
     strokeStyle: '#F06666',
-    fillStyle: '#F06666',
     lineSmooth: false,
     data: [6, 2, 6, 3, 2, 4, 5, 2, 10, 0, 5, 3, 2, 2, 6, 6, 3, 3, 3, 3]
 });</code></pre>
@@ -728,23 +617,27 @@ graphoObj8.addDataSet({
                                 type: 'bar',
                                 strokeStyle: '#F0F066',
                                 fillStyle: '#F0F066',
-                                y: {  showScale: true, scaleStyle: '#F0F066', showGridLines: true, name: "Yellow axis", labels: true, showCenter: true, stacked: true },
+                                y: {  showScale: true, scaleStyle: '#F0F066', showGridLines: true, 
+                                      labels: true, showCenter: true, stacked: true },
                                 x: {  showGridLines: true, labels: true},
-                                data: [7, 6, 5, 4, -2.5, -4, -4, 10, 4, 32, 0, 0, 4, 25, 3, 4, 5, 6, 7, -7, -2, -8, 5, 5, 4, 2]
+                                data: [ 7, 6, 5, 4, -2.5, -4, -4, 10, 4, 32, 0, 0, 
+                                        4, 25, 3, 4, 5, 6, 7, -7, -2, -8, 5, 5, 4, 2]
                             });
 
                             graphoObj8.addDataSet({
                                 type:'bar',
                                 strokeStyle: '#6666F0',
                                 fillStyle: '#6666F0',
-                                data: [6, 1, -3, -6, -2, 6, 3, 2, 4, 10, 2, 0, 0, 5, 3, 2, 2, 6, 6, 15, 17, -17, -15, -14, 13, 2]
+                                data: [ 6, 1, -3, -6, -2, 6, 3, 2, 4, 10, 2, 0, 0, 5, 
+                                        3, 2, 2, 6, 6, 15, 17, -17, -15, -14, 13, 2]
                             });
 
                             graphoObj8.addDataSet({
                                 type:'bar',
                                 strokeStyle: '#F06666',
                                 fillStyle: '#F06666',
-                                data: [-6, -1, -3, 6, 2, 6, 3, 2, 4, 5, 2, 17, 0, 5, 3, 2, 2, 6, 6, 3, 3, 3, 3, -14, -13, -1]
+                                data: [-6, -1, -3, 6, 2, 6, 3, 2, 4, 5, 2, 17, 0, 
+                                        5, 3, 2, 2, 6, 6, 3, 3, 3, 3, -14, -13, -1]
                             });
 
                         </script>
@@ -761,23 +654,27 @@ graphoObj8.addDataSet({
     type: 'bar',
     strokeStyle: '#F0F066',
     fillStyle: '#F0F066',
-    y: {  showScale: true, scaleStyle: '#F0F066', showGridLines: true, name: "Yellow axis", labels: true, showCenter: true, stacked: true },
+    y: {  showScale: true, scaleStyle: '#F0F066', showGridLines: true, 
+          labels: true, showCenter: true, stacked: true },
     x: {  showGridLines: true, labels: true},
-    data: [7, 6, 5, 4, -2.5, -4, -4, 10, 4, 32, 0, 0, 4, 25, 3, 4, 5, 6, 7, -7, -2, -8, 5, 5, 4, 2]
+    data: [ 7, 6, 5, 4, -2.5, -4, -4, 10, 4, 32, 0, 0, 
+            4, 25, 3, 4, 5, 6, 7, -7, -2, -8, 5, 5, 4, 2]
 });
 
 graphoObj8.addDataSet({
     type:'bar',
     strokeStyle: '#6666F0',
     fillStyle: '#6666F0',
-    data: [6, 1, -3, -6, -2, 6, 3, 2, 4, 10, 2, 0, 0, 5, 3, 2, 2, 6, 6, 15, 17, -17, -15, -14, 13, 2]
+    data: [ 6, 1, -3, -6, -2, 6, 3, 2, 4, 10, 2, 0, 0, 5, 
+            3, 2, 2, 6, 6, 15, 17, -17, -15, -14, 13, 2]
 });
 
 graphoObj8.addDataSet({
     type:'bar',
     strokeStyle: '#F06666',
     fillStyle: '#F06666',
-    data: [-6, -1, -3, 6, 2, 6, 3, 2, 4, 5, 2, 17, 0, 5, 3, 2, 2, 6, 6, 3, 3, 3, 3, -14, -13, -1]
+    data: [-6, -1, -3, 6, 2, 6, 3, 2, 4, 5, 2, 17, 0, 
+            5, 3, 2, 2, 6, 6, 3, 3, 3, 3, -14, -13, -1]
 });</code></pre>
             </article>
         </section>
