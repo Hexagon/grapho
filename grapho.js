@@ -802,8 +802,8 @@ SOFTWARE.
 
 		// Update axis min/max of axis, last dataset of axis has the control
 		if (yAxis.stacked) {
-			yAxis._maxVal = yAxis.max !== 'auto' ? yAxis.max : Math.max(Math.max.apply(null, yAxis._usedPos + yAxis.extra), yAxis._maxVal);
-			yAxis._minVal = yAxis.min !== 'auto' ? yAxis.min : Math.min(Math.min.apply(null, yAxis._usedNeg - yAxis.extra), yAxis._minVal);
+			yAxis._maxVal = yAxis.max !== 'auto' ? yAxis.max : Math.max(Math.max.apply(null, yAxis._usedPos) + yAxis.extra, yAxis._maxVal);
+			yAxis._minVal = yAxis.min !== 'auto' ? yAxis.min : Math.min(Math.min.apply(null, yAxis._usedNeg) - yAxis.extra, yAxis._minVal);
 		} else {
 			yAxis._maxVal = yAxis.max !== 'auto' ? yAxis.max : Math.max(Math.max.apply(null, cleanDataY) + yAxis.extra, yAxis._maxVal);
 			yAxis._minVal = yAxis.min !== 'auto' ? yAxis.min : Math.min(Math.min.apply(null, cleanDataY) - yAxis.extra, yAxis._minVal);
