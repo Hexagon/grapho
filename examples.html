@@ -132,7 +132,7 @@ graphoObj11.addDataSet({
             <article>
                 <h3>
                     <span class="secondary">Example 2 - </span>
-                    <span class="tertiary">Linechart with matched series and axis colors </span>
+                    <span class="tertiary">Linechart with matched series and axis colors, and extra space on y </span>
                 </h3>
                 <div class="container w-100 h-1">
 
@@ -149,7 +149,8 @@ graphoObj11.addDataSet({
                             graphoObj10.addDataSet({
                                 lineSmooth: false,
                                 strokeStyle: '#F0F066',
-                                y: {  showScale: true, scaleStyle: '#F0F066', showGridLines: true, name: "Yellow axis", labels: true, showCenter: true },
+                                y: {    showScale: true, scaleStyle: '#F0F066', showGridLines: true, 
+                                        name: "Yellow axis", labels: true, showCenter: true, extra: 2 },
                                 x: {  showGridLines: true, labels: true},
                                 data: [ 7, 6, 5, 4, 2.5, 4, 4, 10, -7, 57, 0, 0, 
                                         -41, 25, 3, 4, 5, 6, 7, 7, 2, 8, 5, 5, 4, 2]
@@ -168,7 +169,8 @@ graphoObj11.addDataSet({
                                 type: 'line',
                                 lineSmooth: false,
                                 strokeStyle: '#6666F0',
-                                y: { axis: 2,  scaleStyle: '#6666F0', name: "Blue axis", showCenter: true, showScale: true},
+                                y: {    axis: 2,  scaleStyle: '#6666F0', name: "Blue axis", 
+                                        showCenter: true, showScale: true, extra: 2},
                                 data: [ 6, 1, 3, 6, 2, 6, 3, 2, -7, 9, 2, 0, 0, 
                                         5, 3, 2, 2, 6, 6, 15, 17, 17, 15, 14, 13, 2]
                             });
@@ -198,7 +200,8 @@ var graphoObj10 = new Grapho( { place: 'example-2' } );
 graphoObj10.addDataSet({
     lineSmooth: false,
     strokeStyle: '#F0F066',
-    y: {  showScale: true, scaleStyle: '#F0F066', showGridLines: true, name: "Yellow axis", labels: true, showCenter: true },
+    y: {    showScale: true, scaleStyle: '#F0F066', showGridLines: true, 
+            name: "Yellow axis", labels: true, showCenter: true, extra: 2 },
     x: {  showGridLines: true, labels: true},
     data: [ 7, 6, 5, 4, 2.5, 4, 4, 10, -7, 57, 0, 0, 
             -41, 25, 3, 4, 5, 6, 7, 7, 2, 8, 5, 5, 4, 2]
@@ -217,7 +220,8 @@ graphoObj10.addDataSet({
     type: 'line',
     lineSmooth: false,
     strokeStyle: '#6666F0',
-    y: { axis: 2,  scaleStyle: '#6666F0', name: "Blue axis", showCenter: true, showScale: true},
+    y: {    axis: 2,  scaleStyle: '#6666F0', name: "Blue axis", 
+            showCenter: true, showScale: true, extra: 2},
     data: [ 6, 1, 3, 6, 2, 6, 3, 2, -7, 9, 2, 0, 0, 
             5, 3, 2, 2, 6, 6, 15, 17, 17, 15, 14, 13, 2]
 });
