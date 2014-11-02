@@ -655,6 +655,7 @@ SOFTWARE.
 	prot = Grapho.prototype;
 	
 	Grapho.formats = prot.formats = formats;
+	Grapho.helpers = prot.helpers = helpers;
 
 	// Place the grapho
 	prot.place = function (newDestination) { 
