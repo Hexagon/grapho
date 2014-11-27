@@ -850,9 +850,16 @@ SOFTWARE.
 		this.xAxises[dataset.x.axis]._values = [];
 		this.yAxises[dataset.y.axis]._values = [];
 		this.xAxises[dataset.x.axis]._labels = [];
+		this.xAxises[dataset.x.axis]._minVal = Infinity;
+		this.xAxises[dataset.x.axis]._maxVal = -Infinity;
+		this.xAxises[dataset.x.axis]._minVal = Infinity;
+		this.xAxises[dataset.x.axis]._maxVal = -Infinity;
+		
 		this.yAxises[dataset.y.axis]._labels = [];
 		this.yAxises[dataset.y.axis]._usedPos = [];
 		this.yAxises[dataset.y.axis]._usedNeg = [];
+		this.yAxises[dataset.y.axis]._minVal = Infinity;
+		this.yAxises[dataset.y.axis]._maxVal = -Infinity;
 
 		// Loop through each dataset that uses these axises, and update the axises
 		for( d=0; d<this.datasets.length; d++)  {

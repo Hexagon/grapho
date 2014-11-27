@@ -443,7 +443,7 @@ graphoObj13.addDataSet({
                                     type: 'area',
                                     strokeStyle: '#F06666',
                                     fillStyle: 'rgba(192,64,64,0.3)',
-                                    y: {  showScale: true, scaleStyle: '#F0F066', showGridLines: true, name: "Primary axis", labels: true },
+                                    y: {  showScale: true, scaleStyle: '#F0F066', showGridLines: true, name: "Primary axis", labels: true, min: 0, max: 30 },
                                     x: {  showGridLines: true, labels: true},
                                     data: randomArray1
                                 });
@@ -452,7 +452,7 @@ graphoObj13.addDataSet({
                                     type: 'area',
                                     strokeStyle: '#66F066',
                                     fillStyle: 'rgba(64,192,64,0.3)',
-                                    y: {  axis:2, showScale: true, scaleStyle: '#F0F066', labels: true },
+                                    y: {  axis:2, showScale: true, scaleStyle: '#F0F066', labels: true , min: -30, max: 0},
                                     data: randomArray2
                                 });
                                 // Push a new dataset
@@ -460,6 +460,7 @@ graphoObj13.addDataSet({
                                     type: 'area',
                                     strokeStyle: '#6666F0',
                                     fillStyle: 'rgba(64,64,196,0.3)',
+                                    y: { min: 0, max: 30 },
                                     data: randomArray3
                                 });
                                 // Iterate
@@ -1457,9 +1458,14 @@ graphoObj18.addDataSet({
                                 // Generate random data
                                 var randomArray1 = [];
                                 for (var i = 0, l = 40; i < l; i++) {
-                                    randomArray1.push([iteratorSin,Math.round(((Math.sin(iteratorSin/10+i/10) * 15)+15)*100)/100]);
+                                    randomArray1.push([iteratorSin+i,Math.round(((Math.sin(iteratorSin/10+i/10) * 15)+15)*100)/100]);
                                 }
+
                                 iteratorSin+=0.7;
+
+                                // Prevent overflow
+                                if(iteratorSin>10000) iteratorSin=0;
+
                                 // Remove last dataset, if there is one
                                 if (currentDS!==undefined) {
                                     graphoObjtest.removeDataset(currentDS);
@@ -1469,12 +1475,13 @@ graphoObj18.addDataSet({
                                     type: 'area',
                                     strokeStyle: '#F06666',
                                     fillStyle: 'rgba(192,64,64,0.3)',
-                                    y: {  showScale: true, scaleStyle: '#F0F066', showGridLines: true, name: "Primary axis", labels: true },
+                                    y: {  showScale: true, scaleStyle: '#F0F066', showGridLines: true, name: "Primary axis", labels: true, min: 0, max:30 },
                                     x: {  showGridLines: true, labels: true},
                                     data: randomArray1
                                 });
                                 // Iterate
                                 requestAnimationFrame(randomDataTest);
+
                             }
                             // Start the loop
                             randomDataTest();
@@ -1497,9 +1504,13 @@ function randomDataTest() {
     // Generate random data
     var randomArray1 = [];
     for (var i = 0, l = 40; i < l; i++) {
-        randomArray1.push([iteratorSin,Math.round(((Math.sin(iteratorSin/10+i/10) * 15)+15)*100)/100]);
+        randomArray1.push([iteratorSin+i,Math.round(((Math.sin(iteratorSin/10+i/10) * 15)+15)*100)/100]);
     }
+
     iteratorSin+=0.7;
+    // Prevent overflow
+    if(interatorSin>10000) iteratorSin=0;
+
     // Remove last dataset, if there is one
     if (currentDS!==undefined) {
         graphoObjtest.removeDataset(currentDS);
@@ -1509,12 +1520,13 @@ function randomDataTest() {
         type: 'area',
         strokeStyle: '#F06666',
         fillStyle: 'rgba(192,64,64,0.3)',
-        y: {  showScale: true, scaleStyle: '#F0F066', showGridLines: true, name: "Primary axis", labels: true },
+        y: {  showScale: true, scaleStyle: '#F0F066', showGridLines: true, name: "Primary axis", labels: true, min: 0, max:30 },
         x: {  showGridLines: true, labels: true},
         data: randomArray1
     });
     // Iterate
     requestAnimationFrame(randomDataTest);
+
 }
 // Start the loop
 randomDataTest();</code></pre>
