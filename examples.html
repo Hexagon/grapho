@@ -1433,6 +1433,94 @@ graphoObj18.addDataSet({
             </article>
         </section>
 
+        <section>
+            <article>
+                <h3>
+                    <span class="secondary">Random Test Case - </span>
+                    <span class="tertiary">Add/Remove dataset with rolling x axis </span>
+                </h3>
+                <div class="container w-100 h-1">
+
+                    <!-- Example test  - Start -->
+                    <div id="example-test" class="box bw-100 h-100">
+
+                        <!-- example-test javascript -->
+                        <script>
+
+                            // Create grapho object, pass a parameter pointing to the destination element
+                            var graphoObjtest = new Grapho( { place: 'example-test' } ),
+                                currentDS,
+                                iteratorSin=0;
+
+                            function randomDataTest() {
+
+                                // Generate random data
+                                var randomArray1 = [];
+                                for (var i = 0, l = 40; i < l; i++) {
+                                    randomArray1.push([iteratorSin,Math.round(((Math.sin(iteratorSin/10+i/10) * 15)+15)*100)/100]);
+                                }
+                                iteratorSin+=0.7;
+                                // Remove last dataset, if there is one
+                                if (currentDS!==undefined) {
+                                    graphoObjtest.removeDataset(currentDS);
+                                }
+                                // Push a new dataset
+                                currentDS = graphoObjtest.addDataSet({
+                                    type: 'area',
+                                    strokeStyle: '#F06666',
+                                    fillStyle: 'rgba(192,64,64,0.3)',
+                                    y: {  showScale: true, scaleStyle: '#F0F066', showGridLines: true, name: "Primary axis", labels: true },
+                                    x: {  showGridLines: true, labels: true},
+                                    data: randomArray1
+                                });
+                                // Iterate
+                                requestAnimationFrame(randomDataTest);
+                            }
+                            // Start the loop
+                            randomDataTest();
+
+                        </script>
+
+                    </div>
+                    <!-- Example 6 - End -->
+                </div>
+            </article>
+            <article>
+                <h3><span class="tertiary">Source code</span></h3>
+                <pre><code data-language="javascript">// Create grapho object, pass a parameter pointing to the destination element
+var graphoObjtest = new Grapho( { place: 'example-test' } ),
+    currentDS,
+    iteratorSin=0;
+
+function randomDataTest() {
+
+    // Generate random data
+    var randomArray1 = [];
+    for (var i = 0, l = 40; i < l; i++) {
+        randomArray1.push([iteratorSin,Math.round(((Math.sin(iteratorSin/10+i/10) * 15)+15)*100)/100]);
+    }
+    iteratorSin+=0.7;
+    // Remove last dataset, if there is one
+    if (currentDS!==undefined) {
+        graphoObjtest.removeDataset(currentDS);
+    }
+    // Push a new dataset
+    currentDS = graphoObjtest.addDataSet({
+        type: 'area',
+        strokeStyle: '#F06666',
+        fillStyle: 'rgba(192,64,64,0.3)',
+        y: {  showScale: true, scaleStyle: '#F0F066', showGridLines: true, name: "Primary axis", labels: true },
+        x: {  showGridLines: true, labels: true},
+        data: randomArray1
+    });
+    // Iterate
+    requestAnimationFrame(randomDataTest);
+}
+// Start the loop
+randomDataTest();</code></pre>
+            </article>
+        </section>
+
         <div class="clear"><!-- --></div>
     </body>
 </html>
